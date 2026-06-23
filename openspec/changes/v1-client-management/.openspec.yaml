@@ -1,4 +1,4 @@
-schema: "v1"
+schema: "spec-driven"
 name: "v1-client-management"
 title: "v1-client-management"
 created_by: "opsx-orchestrator"
