@@ -25,9 +25,39 @@
    - Acceptance: pytest passes for client unit and integration tests
    - Verify: pytest tests/unit tests/integration -q
 
-7. Docker + docker-compose for dev
-   - Acceptance: docker-compose.yml with services: app, mysql, alembic (optional)
-   - Verify: docker compose up --build; alembic upgrade head
+7. Dev local (sin Docker)
+   - Acceptance: instrucciones claras para ejecutar la aplicación y las pruebas en un entorno virtual local sin Docker
+   - Verify: seguir pasos locales descritos abajo y comprobar que pytest pasa y que uvicorn arranca
+
+   Pasos locales recomendados:
+
+   a) Crear y activar virtualenv
+      - python -m venv .venv
+      - Windows: .\.venv\Scripts\Activate.ps1  (o .\.venv\Scripts\activate)
+      - Unix: source .venv/bin/activate
+
+   b) Instalar dependencias
+      - python -m pip install --upgrade pip
+      - python -m pip install -r requirements.txt
+
+   c) Configurar DB para desarrollo rápido (SQLite en memoria para pruebas)
+      - Para pruebas unitarias y de integración rápidas usamos SQLite in-memory (ya configurado en los tests)
+      - Para ejecutar la app con una DB local persistente opcionalmente configurar DATABASE_URL en el entorno, por ejemplo:
+        set DATABASE_URL="sqlite:///./dev.db"  (Windows PowerShell)
+        export DATABASE_URL="sqlite:///./dev.db" (Unix)
+
+   d) Ejecutar migraciones (opcional para SQLite file)
+      - alembic upgrade head
+
+   e) Levantar la app localmente
+      - uvicorn src.main:app --reload --port 8000
+
+   f) Ejecutar tests
+      - pytest -q
+
+   Notas:
+   - Las migraciones Alembic y la carpeta docker-compose.dev.yml se mantienen en el repo para uso futuro con Docker/MySQL.
+   - Si preferís que la app use MySQL localmente más adelante, setear DATABASE_URL a mysql+pymysql://user:pass@host:3306/dbname
 
 8. Documentation: update OpenAPI examples using Docs/openapi/* files
    - Acceptance: specs/client/spec.md includes request/response examples drawn from Docs/openapi
