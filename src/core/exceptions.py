@@ -1,15 +1,15 @@
 from fastapi import HTTPException
 
 
-# Application-specific exceptions and helpers to convert them to HTTP responses.
+# Excepciones específicas de la aplicación y ayudantes para convertirlas a respuestas HTTP.
 
 class EmailAlreadyExists(Exception):
-    """Raised when an attempt is made to create or update a client with an email that already exists."""
+    """Se lanza cuando se intenta crear o actualizar un cliente con un email que ya existe."""
 
 
 def to_http_exception(exc: Exception) -> HTTPException:
-    """Map domain exceptions to HTTPException for FastAPI error handling."""
+    """Mapear excepciones del dominio a HTTPException para el manejo en FastAPI."""
     if isinstance(exc, EmailAlreadyExists):
-        return HTTPException(status_code=400, detail=str(exc) or "Email already exists")
-    # Fallback
-    return HTTPException(status_code=500, detail="Internal server error")
+        return HTTPException(status_code=400, detail=str(exc) or "El email ya existe")
+    # Caso por defecto
+    return HTTPException(status_code=500, detail="Error interno del servidor")

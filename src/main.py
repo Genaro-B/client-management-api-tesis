@@ -1,20 +1,20 @@
 from fastapi import FastAPI
 
-# Main application factory and entrypoint
-# This file wires together routers and middleware according to Docs/architecture.md
+# Fábrica de la aplicación y punto de entrada principal
+# Este archivo conecta routers y middleware según Docs/architecture.md
 def create_app() -> FastAPI:
-    """Create and configure the FastAPI application.
+    """Crear y configurar la aplicación FastAPI.
 
-    The function centralizes application construction so tests can import
-    `create_app` and instantiate an app without side effects.
+    La función centraliza la construcción de la aplicación para que los tests
+    puedan importar `create_app` e instanciar una app sin efectos secundarios.
     """
     app = FastAPI(title="Client Management API")
 
-    # Import and include routers. Routers are defined under src.api.routes
-    # to follow the project structure mandated in Docs/architecture.md.
+    # Importar e incluir routers. Los routers están definidos en src.api.routes
+    # para seguir la estructura de proyecto establecida en Docs/architecture.md.
     from src.api.routes import clients as clients_router_module
 
-    # Mount the clients router under the API v1 prefix
+    # Montar el router de clientes bajo el prefijo de API v1
     app.include_router(clients_router_module.router, prefix="/api/v1/clients", tags=["clients"])
 
     return app
@@ -22,5 +22,5 @@ def create_app() -> FastAPI:
 
 app = create_app()
 
-# If run directly, uvicorn can import `app` from this module:
+# Si se ejecuta directamente, uvicorn puede importar `app` desde este módulo:
 # uvicorn src.main:app --reload

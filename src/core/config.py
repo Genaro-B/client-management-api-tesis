@@ -1,8 +1,8 @@
 import os
 
-# Centralized configuration for the application.
-# Reads environment variables and provides defaults for local development.
+# Configuración centralizada de la aplicación.
+# Lee variables de entorno y provee valores por defecto para desarrollo local.
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./dev.db")
 
-# Other configuration variables (e.g. secret keys, allowed hosts) can be added here
+# Otras variables de configuración (p.ej. claves secretas, hosts permitidos) pueden añadirse aquí
