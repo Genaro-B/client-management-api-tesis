@@ -2,6 +2,7 @@
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 from src.database.base import Base
 from src.services.client_service import ClientService, EmailAlreadyExists
 
@@ -9,7 +10,7 @@ from src.services.client_service import ClientService, EmailAlreadyExists
 @pytest.fixture
 def session():
     """Crea una sesión SQLite en memoria para cada test."""
-    engine = create_engine("sqlite:///:memory:")
+    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False}, poolclass=StaticPool)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     s = Session()

@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 from fastapi import FastAPI
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 from src.database.base import Base
 from src.database.session import get_db
 from src.api.routes.clients import router
@@ -16,7 +17,7 @@ app.include_router(router, prefix="/api/v1/clients")
 @pytest.fixture
 def client():
     """Crea app de prueba con BD SQLite en memoria y retorna TestClient."""
-    engine = create_engine("sqlite:///:memory:")
+    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False}, poolclass=StaticPool)
     Base.metadata.create_all(engine)
     TestSessionLocal = sessionmaker(bind=engine)
 
