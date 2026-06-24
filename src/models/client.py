@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, func, Index
-from src.db import Base
+from src.database.base import Base
 
 
 class Client(Base):

@@ -4,6 +4,7 @@ from datetime import datetime
 
 
 class CreateClient(BaseModel):
+    """Schema for incoming client creation requests."""
     nombre: str = Field(...)
     apellido: str = Field(...)
     telefono: Optional[str] = None
@@ -11,6 +12,7 @@ class CreateClient(BaseModel):
 
 
 class UpdateClient(BaseModel):
+    """Schema for partial updates to a client record."""
     nombre: Optional[str] = None
     apellido: Optional[str] = None
     telefono: Optional[str] = None
@@ -18,6 +20,7 @@ class UpdateClient(BaseModel):
 
 
 class ClientResponse(BaseModel):
+    """Response schema returned by API endpoints representing a client."""
     id: int
     nombre: str
     apellido: str

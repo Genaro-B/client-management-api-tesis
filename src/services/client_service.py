@@ -4,15 +4,26 @@ from sqlalchemy.orm import Session
 
 
 class EmailAlreadyExists(Exception):
+    """Domain exception signifying an email uniqueness violation."""
     pass
 
 
 class ClientService:
+    """Service layer implementing business rules for Client operations.
+
+    Responsibilities:
+    - enforce uniqueness of email
+    - coordinate repository operations
+    - perform higher-level validations
+    """
+
     def __init__(self, db: Session):
+        # The service composes a repository instance to perform persistence operations.
         self.repo = ClientRepository(db)
         self.db = db
 
     def create(self, *, nombre, apellido, telefono, email) -> Client:
+        # Business rule: unique email
         existing = self.repo.get_by_email(email)
         if existing:
             raise EmailAlreadyExists("email already exists")
