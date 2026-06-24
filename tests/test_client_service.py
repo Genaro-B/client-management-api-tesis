@@ -1,13 +1,14 @@
+"""Tests unitarios para ClientService (reglas de negocio)."""
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from src.db import Base
+from src.database.base import Base
 from src.services.client_service import ClientService, EmailAlreadyExists
-from src.models.client import Client
 
 
 @pytest.fixture
 def session():
+    """Crea una sesión SQLite en memoria para cada test."""
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
