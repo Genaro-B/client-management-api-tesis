@@ -1,22 +1,58 @@
 # Design: v1-client-management
 
-Full content from the earlier generated design (inserted here).
+## Domain Model (Client)
 
-## Architecture
+- id: integer, primary key, autogen
+- nombre: string, required
+- apellido: string, required
+- telefono: string, optional
+- email: string, required, unique
+- fechaRegistro: datetime, server-set on insert
+- activo: boolean, default true
 
-- Service layer: clients/service.py (or equivalent)
-- Repository layer: clients/repository.py
-- API: /api/v1/clients
+## Pydantic DTOs
 
-## Data Model
+- CreateClient
+  - nombre: str
+  - apellido: str
+  - telefono: Optional[str]
+  - email: EmailStr (required)
 
-- Client: id, name, email, phone, metadata
+- UpdateClient
+  - nombre: Optional[str]
+  - apellido: Optional[str]
+  - telefono: Optional[str]
+  - email: Optional[EmailStr]
+  - activo: Optional[bool]
 
-## Error handling
+- ClientResponse
+  - id: int
+  - nombre, apellido, telefono, email, fechaRegistro (ISO8601), activo
 
-- Use consistent error responses, validation at service boundary
+## Persistence
 
-## Testing
+- SQLAlchemy declarative model matching fields above
+- Unique index on email
 
-- Unit tests for service and repository
-- Integration tests for API endpoints
+## API Endpoints
+
+- POST /api/v1/clients — CreateClient -> ClientResponse (201)
+- GET /api/v1/clients/{id} — ClientResponse (200)
+- GET /api/v1/clients — list with optional filters (email, activo)
+- PATCH /api/v1/clients/{id} — UpdateClient -> ClientResponse (200)
+- DELETE /api/v1/clients/{id} — 204
+
+OpenAPI examples must be included using Docs/openapi/request-examples.md and response-examples.md
+
+## Validation rules
+
+- email required on create and must be unique
+- telefono optional but if present must match simple pattern (digits, spaces, +, -)
+
+## Migration
+
+- Alembic migration to create clients table with unique index on email and created_at default CURRENT_TIMESTAMP
+
+## Notes
+
+- Do NOT implement interactions storage here; reference POST /api/v1/interactions as a dependency for event emission.
