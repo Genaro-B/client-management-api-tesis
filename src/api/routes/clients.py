@@ -13,7 +13,7 @@ router = APIRouter()
 @router.post("/", response_model=ClientResponse, status_code=201)
 def create_client(payload: CreateClient, db: Session = Depends(get_db)):
     """Crear un nuevo cliente. Las reglas de negocio se validan en la capa de servicio."""
-    service = ClientService(ClientRepository(db))
+    service = ClientService(db)
     try:
         # Nota: ClientService espera parámetros primitivos. Desempaquetamos el payload.
         client = service.create(
@@ -46,7 +46,7 @@ def list_clients(q: str = None, limit: int = 50, offset: int = 0, db: Session = 
 
 @router.patch("/{client_id}", response_model=ClientResponse)
 def update_client(client_id: int, payload: UpdateClient, db: Session = Depends(get_db)):
-    service = ClientService(ClientRepository(db))
+    service = ClientService(db)
     try:
         return service.update(client_id, **payload.dict(exclude_unset=True))
     except EmailAlreadyExists as e:
