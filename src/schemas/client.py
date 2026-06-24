@@ -29,5 +29,4 @@ class ClientResponse(BaseModel):
     fecha_registro: datetime
     activo: bool
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
