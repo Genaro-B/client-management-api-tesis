@@ -2,6 +2,7 @@
   <img src="https://img.shields.io/badge/Python-3.14-3776AB?style=flat&logo=python&logoColor=white" />
   <img src="https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white" />
   <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react&logoColor=white" />
+  <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white" />
   <img src="https://img.shields.io/badge/n8n-5A2B8C?style=flat&logo=n8n&logoColor=white" />
   <img src="https://img.shields.io/badge/Telegram-26A5E4?style=flat&logo=telegram&logoColor=white" />
   <img src="https://img.shields.io/badge/status-desarrollo-yellow" />
@@ -40,6 +41,7 @@ Sistema modular de gestión de clientes que integra:
 
 - **API REST** construida con **FastAPI** como núcleo de la lógica de negocio
 - **Panel web** desarrollado en **React + Vite + Tailwind CSS**
+- **Dashboard interno** con **Streamlit** para consulta directa a base de datos
 - **Automatización** de flujos conversacionales mediante **n8n**
 - **Canal de atención** vía **Telegram** con respuestas inteligentes
 
@@ -57,6 +59,7 @@ Sistema modular de gestión de clientes que integra:
 | **Base de datos** | ![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat&logo=sqlite&logoColor=white) / ![MySQL](https://img.shields.io/badge/MySQL%208-4479A1?style=flat&logo=mysql&logoColor=white) | Persistencia (SQLite en dev, MySQL en prod) |
 | **ORM** | ![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-CC342D?style=flat&logo=python&logoColor=white) | Mapeo objeto-relacional |
 | **Frontend** | ![React](https://img.shields.io/badge/React%2018-61DAFB?style=flat&logo=react&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white) ![Tailwind](https://img.shields.io/badge/Tailwind%204-06B6D4?style=flat&logo=tailwindcss&logoColor=white) | Panel administrativo |
+| **Dashboard** | ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white) ![Plotly](https://img.shields.io/badge/Plotly-3F4F75?style=flat&logo=plotly&logoColor=white) | Dashboard interno con consulta directa a DB |
 | **Automatización** | ![n8n](https://img.shields.io/badge/n8n-5A2B8C?style=flat&logo=n8n&logoColor=white) | Flujos automatizados, integración con APIs |
 | **Mensajería** | ![Telegram](https://img.shields.io/badge/Telegram%20Bot%20API-26A5E4?style=flat&logo=telegram&logoColor=white) | Canal de atención al cliente |
 | **Túnel** | ![ngrok](https://img.shields.io/badge/ngrok-1F1E1E?style=flat&logo=ngrok&logoColor=white) | Exposición local para webhooks en desarrollo |
@@ -156,7 +159,22 @@ npm run dev
 
 > El frontend utiliza el proxy de Vite (`/api → localhost:8000`), no requiere configuración CORS adicional.
 
-### 3. n8n
+### 3. Dashboard Streamlit (interno)
+
+```bash
+cd dashboard
+pip install -r requirements.txt
+python -m streamlit run app.py
+```
+
+✅ `http://localhost:8501` — Dashboard interno  
+📊 **Métricas:** cards de resumen, timeline 30 días, distribución por fuente, top intents  
+👥 **Clientes:** tabla con CRUD completo, búsqueda, interacciones por cliente
+
+> Conecta directo a la base de datos usando SQLAlchemy (reusa los modelos del backend).  
+> No requiere que la API REST esté corriendo.
+
+### 4. n8n
 
 ```bash
 n8n start
@@ -278,6 +296,12 @@ Las fixtures compartidas viven en `tests/conftest.py`:
 │   ├── requirements.txt
 │   └── dev.db                 # Base de datos local (no trackeada)
 │
+├── dashboard/
+│   ├── requirements.txt       # streamlit, plotly, sqlalchemy
+│   ├── app.py                 # Dashboard principal (597 líneas)
+│   ├── db.py                  # Conexión a DB (reusa modelos del backend)
+│   └── queries.py             # Queries de métricas y CRUD
+│
 ├── frontend/
 │   ├── src/
 │   │   ├── components/        # Sidebar, Topbar, tablas, modales
@@ -323,6 +347,7 @@ Las fixtures compartidas viven en `tests/conftest.py`:
 | **Autenticación con password** | ⏳ Pendiente | Sistema de login con email + contraseña (reemplazar email-only actual). |
 | **Migración a MySQL** | ⏳ Pendiente | Base de datos definitiva para producción con migraciones desde SQLite. |
 | **Docker** | ⏳ Pendiente | `Dockerfile` + `docker-compose` para backend, frontend y base de datos. |
+| **Dashboard Streamlit** | ✅ Implementado | Dashboard interno con métricas, CRUD de clientes e interacciones, consulta directa a DB. |
 | **Dashboard de gráficos** | ✅ Implementado | Endpoint `GET /api/v1/metrics/dashboard` + frontend con Recharts. |
 | **Paginación real** | ✅ Implementado | Backend con limit/offset, frontend con controles de paginación. |
 
