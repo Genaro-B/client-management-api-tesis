@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.14"]
+        python-version: ["3.13"]
 
     steps:
       - uses: actions/checkout@v4
@@ -21,44 +21,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install deps
+      - name: Install dependencies
         working-directory: ./backend
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: test_auth_api
+      - name: Run tests
         working-directory: ./backend
-        run: python -m pytest tests/test_auth_api.py -v --tb=long
-
-      - name: test_clients_api
-        working-directory: ./backend
-        run: python -m pytest tests/test_clients_api.py -v --tb=long
-
-      - name: test_client_service
-        working-directory: ./backend
-        run: python -m pytest tests/test_client_service.py -v --tb=long
-
-      - name: test_client_repository
-        working-directory: ./backend
-        run: python -m pytest tests/test_client_repository.py -v --tb=long
-
-      - name: test_interaction_api
-        working-directory: ./backend
-        run: python -m pytest tests/test_interaction_api.py -v --tb=long
-
-      - name: test_interaction_service
-        working-directory: ./backend
-        run: python -m pytest tests/test_interaction_service.py -v --tb=long
-
-      - name: test_interaction_repository
-        working-directory: ./backend
-        run: python -m pytest tests/test_interaction_repository.py -v --tb=long
-
-      - name: test_integration_post
-        working-directory: ./backend
-        run: python -m pytest tests/test_integration_post.py -v --tb=long
-
-      - name: test_metrics_api
-        working-directory: ./backend
-        run: python -m pytest tests/test_metrics_api.py -v --tb=long
+        run: python -m pytest tests/ -v --tb=long
