@@ -27,31 +27,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Python version & packages
-        run: |
-          echo "=== Python version ==="
-          python --version
-          echo "=== pytest location ==="
-          which pytest || echo "pytest not in PATH"
-          python -c "import pytest; print('pytest version:', pytest.__version__)" 2>&1 || echo "FAILED to import pytest"
-          echo "=== pip list ==="
-          pip list 2>/dev/null | head -30
-
-      - name: Minimal pytest test
-        continue-on-error: true
-        run: |
-          set +e
-          cd /tmp
-          mkdir -p test-debug
-          echo 'def test_true(): assert True' > test-debug/test_minimal.py
-          echo "=== run minimal test ==="
-          python -m pytest test-debug/test_minimal.py -v 2>&1
-          echo "exit: $?"
-
       - name: Run tests
         working-directory: ./backend
-        continue-on-error: true
-        run: |
-          set +e
-          python -m pytest tests/ -v --tb=long 2>&1
-          echo "exit: $?"
+        run: python -m pytest tests/ -v --tb=long
