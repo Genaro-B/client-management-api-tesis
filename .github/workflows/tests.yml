@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.13"]
+        python-version: ["3.14"]
 
     steps:
       - uses: actions/checkout@v4
@@ -27,63 +27,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Pytest diagnostics + run
-        continue-on-error: true
-        shell: bash
-        run: |
-          set +e
-          cd backend
-          {
-            echo "========================================="
-            echo "1. PYTHON VERSION"
-            echo "========================================="
-            python --version
-            echo ""
-            echo "========================================="
-            echo "2. PYTEST VERSION"
-            echo "========================================="
-            python -m pytest --version 2>&1
-            echo ""
-            echo "========================================="
-            echo "3. PYTEST TRACE-CONFIG"
-            echo "========================================="
-            python -m pytest --trace-config 2>&1 | head -40
-            echo ""
-            echo "========================================="
-            echo "4. MINIMAL TEST (separate dir)"
-            echo "========================================="
-            mkdir -p /tmp/minimal_test
-            echo 'def test_true(): assert True' > /tmp/minimal_test/test_ok.py
-            python -m pytest /tmp/minimal_test/test_ok.py -v 2>&1
-            echo "exit: $?"
-            echo ""
-            echo "========================================="
-            echo "5. COLLECT SINGLE TEST FILE"
-            echo "========================================="
-            python -m pytest tests/test_auth_api.py --collect-only -q 2>&1
-            echo "exit: $?"
-            echo ""
-            echo "========================================="
-            echo "6. COLLECT ALL TESTS"
-            echo "========================================="
-            python -m pytest tests/ --collect-only -q 2>&1
-            echo "exit: $?"
-            echo ""
-            echo "========================================="
-            echo "7. RUN TESTS"
-            echo "========================================="
-            python -m pytest tests/ -v --tb=long 2>&1
-            echo "exit: $?"
-            echo ""
-            echo "========================================="
-            echo "8. RUN_TESTS.PY"
-            echo "========================================="
-            python run_tests.py 2>&1
-            echo "exit: $?"
-          } > ../pytest_debug.txt 2>&1
-
-      - name: Upload diagnostic output
-        uses: actions/upload-artifact@v4
-        with:
-          name: pytest-debug
-          path: pytest_debug.txt
+      - name: Run tests
+        working-directory: ./backend
+        run: python -m pytest tests/ -v --tb=long
