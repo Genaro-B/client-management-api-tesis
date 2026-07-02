@@ -27,6 +27,22 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Debug pytest
+        working-directory: ./backend
+        continue-on-error: true
+        run: |
+          echo "# Pytest Debug Output" >> "$GITHUB_STEP_SUMMARY"
+          echo '## Python version' >> "$GITHUB_STEP_SUMMARY"
+          python --version >> "$GITHUB_STEP_SUMMARY"
+          echo '## pytest version' >> "$GITHUB_STEP_SUMMARY"
+          python -m pytest --version >> "$GITHUB_STEP_SUMMARY"
+          echo '## pytest trace-config' >> "$GITHUB_STEP_SUMMARY"
+          python -m pytest --trace-config 2>&1 >> "$GITHUB_STEP_SUMMARY"
+          echo '## pytest collect-only single file' >> "$GITHUB_STEP_SUMMARY"
+          python -m pytest tests/test_auth_api.py --collect-only 2>&1 >> "$GITHUB_STEP_SUMMARY"
+          echo '## pytest run' >> "$GITHUB_STEP_SUMMARY"
+          python -m pytest tests/ -v --tb=long 2>&1 >> "$GITHUB_STEP_SUMMARY"
+
       - name: Run tests
         working-directory: ./backend
         run: python -m pytest tests/ -v --tb=long
