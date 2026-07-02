@@ -34,21 +34,9 @@ jobs:
           echo "FILES: $(ls -la)"
           python -c "import openpyxl, httpx, fastapi, sqlalchemy, pydantic; print('OK')"
 
-      - name: Run tests (diagnóstico)
+      - name: Run tests
+        working-directory: ./backend
         run: |
-          cd backend
-          echo "=== PYTHON ==="
-          python --version
-          echo "=== IMPORT CHECK ==="
-          python -c "
-          from src.database.base import Base
-          from src.database.session import get_db
-          from src.main import create_app
-          from src.models.client import Client
-          from src.repositories.client_repo import ClientRepository
-          print('ALL CONFTEST IMPORTS OK')
-          app = create_app()
-          print('CREATE_APP OK')
-          "
-          echo "=== UNITTEST ==="
-          python -m unittest discover -s tests/ -p "test_*.py" -v 2>&1
+          rm -rf .pytest_cache __pycache__ tests/__pycache__
+          python -m pytest --version
+          python -m pytest tests/ -q --tb=short
