@@ -1,11 +1,7 @@
 from src.repositories.client_repo import ClientRepository
 from src.models.client import Client
+from src.core.exceptions import EmailAlreadyExists
 from sqlalchemy.orm import Session
-
-
-class EmailAlreadyExists(Exception):
-    """Domain exception signifying an email uniqueness violation."""
-    pass
 
 
 class ClientService:

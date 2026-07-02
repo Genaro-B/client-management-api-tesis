@@ -197,6 +197,55 @@ n8n configura automáticamente el webhook de Telegram.
 
 ---
 
+## 🧪 Tests
+
+La suite de tests está organizada en **tres capas** que reflejan la arquitectura hexagonal del backend:
+
+| Capa | Archivo | Tests | ¿Qué cubre? |
+|------|---------|-------|-------------|
+| **Repositorio** | `test_client_repository.py` | 7 | CRUD contra SQLAlchemy, paginación, soft-delete, búsqueda |
+| **Repositorio** | `test_interaction_repository.py` | 3 | Persistencia de interacciones, linking con clientes |
+| **Servicio** | `test_client_service.py` | 2 | Reglas de negocio: unicidad de email |
+| **Servicio** | `test_interaction_service.py` | 10 | Validaciones, clientLookup, idempotencia |
+| **API** | `test_clients_api.py` | 22 | CRUD completo clientes vía HTTP, exportación Excel |
+| **API** | `test_auth_api.py` | 5 | Login: exitoso, email no registrado, cuenta inactiva |
+| **API** | `test_interaction_api.py` | 10 | POST con auth/idempotencia + GET listado |
+| **API** | `test_integration_post.py` | 1 | Smoke test de creación de cliente |
+
+**Total: 65 tests · 1.2s de ejecución**
+
+### Cómo correrlos
+
+```bash
+# Desde la raíz del proyecto
+cd backend
+..\.venv\Scripts\python -m pytest tests/ -v
+
+# Ejecutar un archivo específico
+..\.venv\Scripts\python -m pytest tests/test_clients_api.py -v
+
+# Ejecutar por nombre
+..\.venv\Scripts\python -m pytest tests/ -k "login" -v
+```
+
+> ⚠️ **Importante:** Usar siempre el Python del entorno virtual (`.venv\Scripts\python.exe`), no el global. El sistema Python (`C:\Python314`) no tiene `openpyxl` ni las dependencias del proyecto.
+
+### Arquitectura de testing
+
+Todas las pruebas de API usan **SQLite en memoria** con `StaticPool`, lo que significa:
+- ✅ **Aisladas:** cada test arranca con una base de datos vacía
+- ✅ **Rápidas:** ~1.2s para los 65 tests
+- ✅ **Sin efectos secundarios:** no tocan la base de datos real (`dev.db`)
+- ✅ **Sin dependencias externas:** no necesitan n8n, Telegram ni ngrok
+
+Las fixtures compartidas viven en `tests/conftest.py`:
+- `db_session` — sesión SQLite en memoria por test
+- `client` — `TestClient` de FastAPI con la BD overrideada
+- `auth_headers` — headers con `X-Api-Key` para endpoints protegidos
+- `sample_client` / `sample_inactive_client` — clientes precargados
+
+---
+
 ## 📁 Estructura del Proyecto
 
 ```

@@ -126,7 +126,10 @@ def list_clients(q: str = None, limit: int = 50, offset: int = 0, db: Session = 
 def update_client(client_id: int, payload: UpdateClient, db: Session = Depends(get_db)):
     service = ClientService(db)
     try:
-        return service.update(client_id, **payload.dict(exclude_unset=True))
+        result = service.update(client_id, **payload.model_dump(exclude_unset=True))
+        if result is None:
+            raise HTTPException(status_code=404, detail="Cliente no encontrado")
+        return result
     except EmailAlreadyExists as e:
         raise to_http_exception(e)
 

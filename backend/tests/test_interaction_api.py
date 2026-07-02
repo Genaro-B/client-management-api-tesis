@@ -135,3 +135,80 @@ def test_create_interaction_missing_source(client):
         headers={"X-Api-Key": TEST_API_KEY},
     )
     assert resp.status_code == 400
+
+
+# ---------------------------------------------------------------------------
+# GET / — Listar interacciones
+# ---------------------------------------------------------------------------
+
+
+def test_list_interactions_empty(client):
+    resp = client.get("/api/v1/interactions/")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total"] == 0
+    assert data["items"] == []
+
+
+def test_list_interactions_returns_newest_first(client):
+    """Crea dos interacciones y verifica que vienen ordenadas por id descendente."""
+    for i in range(2):
+        client.post(
+            "/api/v1/interactions/",
+            json={
+                "source": "api",
+                "payload": json.dumps({"msg": f"hello-{i}"}),
+            },
+            headers={"X-Api-Key": TEST_API_KEY},
+        )
+
+    resp = client.get("/api/v1/interactions/")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total"] == 2
+    # La más nueva (id mayor) debe aparecer primera
+    assert data["items"][0]["id"] > data["items"][1]["id"]
+
+
+def test_list_interactions_pagination(client):
+    """Crea varias interacciones y verifica limit/offset."""
+    for i in range(10):
+        client.post(
+            "/api/v1/interactions/",
+            json={
+                "source": "api",
+                "payload": json.dumps({"n": i}),
+            },
+            headers={"X-Api-Key": TEST_API_KEY},
+        )
+
+    resp = client.get("/api/v1/interactions/?limit=3&offset=0")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data["items"]) == 3
+    assert data["total"] == 10
+
+
+def test_list_interactions_returns_all_fields(client):
+    """Verifica que cada ítem incluya los campos esperados del listado."""
+    client.post(
+        "/api/v1/interactions/",
+        json={
+            "source": "telegram",
+            "payload": json.dumps({"text": "hola"}),
+            "user": "@testuser",
+            "intent": "saludo",
+            "result": "procesado",
+        },
+        headers={"X-Api-Key": TEST_API_KEY},
+    )
+
+    resp = client.get("/api/v1/interactions/")
+    item = resp.json()["items"][0]
+    assert "id" in item
+    assert "source" in item
+    assert "payload" in item
+    assert "user" in item
+    assert "intent" in item
+    assert "result" in item
+    assert "timestamp" in item
