@@ -1,229 +1,255 @@
-# Sistema de Automatización Inteligente para la Gestión de Clientes
+<div align="center">
+  <img src="https://img.shields.io/badge/Python-3.14-3776AB?style=flat&logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white" />
+  <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react&logoColor=white" />
+  <img src="https://img.shields.io/badge/n8n-5A2B8C?style=flat&logo=n8n&logoColor=white" />
+  <img src="https://img.shields.io/badge/Telegram-26A5E4?style=flat&logo=telegram&logoColor=white" />
+  <img src="https://img.shields.io/badge/status-desarrollo-yellow" />
+</div>
 
-## Descripción General
+<br />
 
-Este proyecto tiene como objetivo el diseño, desarrollo e implementación de una plataforma de automatización orientada a la gestión de clientes mediante la integración de servicios, procesamiento de lenguaje natural e inteligencia artificial.
-
-La solución busca optimizar procesos operativos mediante la automatización de tareas administrativas, permitiendo que los usuarios interactúen con el sistema a través de interfaces conversacionales y flujos automatizados.
-
-Como núcleo de la arquitectura se desarrolla una API REST basada en FastAPI, responsable de centralizar la lógica de negocio, la validación de datos y la persistencia de la información.
-
----
-
-## Contexto Académico
-
-Este proyecto se desarrolla como Trabajo Final Integrador de la Tecnicatura Universitaria en Programación de la Universidad Tecnológica Nacional (UTN).
-
-La investigación se enfoca en el análisis y aplicación de tecnologías de automatización e inteligencia artificial en entornos de bajo costo, evaluando su viabilidad como herramienta para optimizar procesos organizacionales.
-
----
-
-## Objetivos del Proyecto
-
-### Objetivo General
-
-Desarrollar una solución de automatización capaz de gestionar información de clientes mediante la integración de servicios e inteligencia artificial.
-
-### Objetivos Específicos
-
-- Diseñar una arquitectura desacoplada y escalable.
-- Implementar una API REST para la gestión de clientes.
-- Integrar servicios externos mediante flujos automatizados.
-- Incorporar procesamiento de lenguaje natural para la interpretación de solicitudes.
-- Centralizar la información en una base de datos relacional.
-- Evaluar la factibilidad de soluciones de automatización de bajo costo.
+<div align="center">
+  <h1>🏢 Client Management API</h1>
+  <p><strong>Sistema de Automatización Inteligente para la Gestión de Clientes</strong></p>
+  <p>API REST + Panel Web + Integración con Telegram mediante flujos automatizados</p>
+  <br />
+</div>
 
 ---
 
-## Arquitectura de Alto Nivel
+## 📋 Tabla de Contenidos
 
-```text
-┌─────────────┐
-│   Usuario   │
-└──────┬──────┘
-       │
+- [Descripción General](#-descripción-general)
+- [Stack Tecnológico](#-stack-tecnológico)
+- [Arquitectura](#-arquitectura)
+- [Primeros Pasos](#-primeros-pasos)
+- [API REST](#-api-rest)
+- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [Variables de Entorno](#-variables-de-entorno)
+- [Seguridad](#-seguridad)
+- [Autor](#-autor)
+
+---
+
+## 📌 Descripción General
+
+Sistema modular de gestión de clientes que integra:
+
+- **API REST** construida con **FastAPI** como núcleo de la lógica de negocio
+- **Panel web** desarrollado en **React + Vite + Tailwind CSS**
+- **Automatización** de flujos conversacionales mediante **n8n**
+- **Canal de atención** vía **Telegram** con respuestas inteligentes
+
+> Proyecto desarrollado como Trabajo Final Integrador de la **Tecnicatura Universitaria en Programación** — **UTN**.
+
+---
+
+## 🛠 Stack Tecnológico
+
+<div align="center">
+
+| Capa | Tecnología | Propósito |
+|------|-----------|-----------|
+| **Backend** | ![Python](https://img.shields.io/badge/Python%203.14-3776AB?style=flat&logo=python&logoColor=white) ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white) | API REST, lógica de negocio, validación |
+| **Base de datos** | ![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat&logo=sqlite&logoColor=white) / ![MySQL](https://img.shields.io/badge/MySQL%208-4479A1?style=flat&logo=mysql&logoColor=white) | Persistencia (SQLite en dev, MySQL en prod) |
+| **ORM** | ![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-CC342D?style=flat&logo=python&logoColor=white) | Mapeo objeto-relacional |
+| **Frontend** | ![React](https://img.shields.io/badge/React%2018-61DAFB?style=flat&logo=react&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white) ![Tailwind](https://img.shields.io/badge/Tailwind%204-06B6D4?style=flat&logo=tailwindcss&logoColor=white) | Panel administrativo |
+| **Automatización** | ![n8n](https://img.shields.io/badge/n8n-5A2B8C?style=flat&logo=n8n&logoColor=white) | Flujos automatizados, integración con APIs |
+| **Mensajería** | ![Telegram](https://img.shields.io/badge/Telegram%20Bot%20API-26A5E4?style=flat&logo=telegram&logoColor=white) | Canal de atención al cliente |
+| **Túnel** | ![ngrok](https://img.shields.io/badge/ngrok-1F1E1E?style=flat&logo=ngrok&logoColor=white) | Exposición local para webhooks en desarrollo |
+
+</div>
+
+---
+
+## 🏗 Arquitectura
+
+```
+┌──────────────┐
+│   Usuario    │
+│  (Telegram)  │
+└──────┬───────┘
+       │  mensaje de texto
        ▼
-┌─────────────┐
-│  Telegram   │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐
-│     n8n     │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐
-│  FastAPI    │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐
-│   MySQL     │
-└─────────────┘
+┌──────────────┐       ┌────────────┐
+│    ngrok     │──────▶│    n8n     │
+│ (túnel TLS)  │       │  Webhook   │
+└──────────────┘       └─────┬──────┘
+                             │
+                    ┌────────┴────────┐
+                    │                 │
+                    ▼                 ▼
+           ┌──────────────┐  ┌──────────────┐
+           │ Google Sheets│  │   FastAPI    │
+           │   (log)      │  │ /interactions│
+           └──────────────┘  └──────┬───────┘
+                                    │
+                                    ▼
+                           ┌──────────────┐
+                           │   SQLite /   │
+                           │    MySQL     │
+                           └──────────────┘
+
+    ┌────────────────────────────────────────┐
+    │           Frontend React               │
+    │  (Dashboard → clientes, métricas,      │
+    │            interacciones, perfil)       │
+    └────────────────────────────────────────┘
+```
+
+### Flujo de una interacción
+
+1. El usuario envía un mensaje al bot de Telegram
+2. Telegram dispara un webhook hacia n8n (vía ngrok)
+3. n8n extrae el mensaje, usuario y metadatos
+4. **En paralelo:**
+   - 📊 Guarda en Google Sheets (historial)
+   - 📡 POST a `/api/v1/interactions/` (persistencia en BD)
+5. n8n clasifica el mensaje según su contenido:
+   - 🛒 "*comprar*" → respuesta de venta
+   - 💰 "*precio*" → respuesta informativa
+   - 👋 cualquier otro → respuesta general
+
+---
+
+## 🚀 Primeros Pasos
+
+### Prerrequisitos
+
+- Python 3.14+
+- Node.js 20+
+- n8n (`npm install -g n8n`)
+- ngrok (cuenta gratuita)
+- Bot de Telegram (creado con @BotFather)
+
+### 1. Backend
+
+```bash
+# Activar entorno virtual
+cd backend
+.venv\Scripts\activate
+
+# Ejecutar migraciones (si es primera vez)
+alembic upgrade head
+
+# Iniciar servidor
+uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+✅ `http://localhost:8000` — API  
+📖 `http://localhost:8000/docs` — Documentación Swagger  
+📖 `http://localhost:8000/redoc` — Documentación ReDoc
+
+### 2. Frontend
+
+```bash
+cd frontend
+npm install    # solo la primera vez
+npm run dev
+```
+
+✅ `http://localhost:5173` — Panel web  
+🔑 **Admin:** `genarobusto@gmail.com` (sin contraseña — solo email)
+
+> El frontend utiliza el proxy de Vite (`/api → localhost:8000`), no requiere configuración CORS adicional.
+
+### 3. n8n
+
+```bash
+n8n start
+```
+
+✅ `http://localhost:5678`
+
+> **Importante:** Al configurar peticiones HTTP desde n8n hacia el backend local, usar `http://127.0.0.1:8000` en lugar de `localhost` para evitar problemas de resolución IPv6 en Windows.
+
+### 4. ngrok + Telegram
+
+```bash
+ngrok http 5678
+```
+
+Tomar la URL `https://xxxx.ngrok.io` y **activar el workflow** en n8n.  
+n8n configura automáticamente el webhook de Telegram.
+
+---
+
+## 📡 API REST
+
+### Endpoints
+
+| Método | Ruta | Descripción | Auth |
+|--------|------|-------------|------|
+| `GET` | `/api/v1/clients/` | Listar clientes | — |
+| `POST` | `/api/v1/clients/` | Crear cliente | — |
+| `GET` | `/api/v1/clients/{id}` | Obtener cliente | — |
+| `PATCH` | `/api/v1/clients/{id}` | Actualizar cliente | — |
+| `DELETE` | `/api/v1/clients/{id}` | Eliminar cliente (soft-delete) | — |
+| `GET` | `/api/v1/clients/inactive` | Clientes inactivos | Admin |
+| `PATCH` | `/api/v1/clients/{id}/restore` | Restaurar cliente | Admin |
+| `GET` | `/api/v1/clients/export` | Exportar a Excel | — |
+| `POST` | `/api/v1/auth/login` | Iniciar sesión | — |
+| `GET` | `/api/v1/interactions/` | Listar interacciones | — |
+| `POST` | `/api/v1/interactions/` | Crear interacción | `X-Api-Key` |
+
+> Los endpoints protegidos con **`X-Api-Key`** requieren el header con la clave configurada en la variable de entorno `API_KEY`.
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+├── backend/
+│   ├── alembic/               # Migraciones de base de datos
+│   ├── src/
+│   │   ├── api/routes/        # Endpoints (clients, auth, interactions)
+│   │   ├── core/              # Configuración, auth, excepciones
+│   │   ├── database/          # Engine SQLAlchemy, sesión
+│   │   ├── models/            # Modelos ORM
+│   │   ├── repositories/      # Capa de acceso a datos
+│   │   ├── schemas/           # Esquemas Pydantic
+│   │   └── services/          # Lógica de negocio
+│   ├── requirements.txt
+│   └── dev.db                 # Base de datos local (no trackeada)
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/        # Sidebar, Topbar, tablas, modales
+│   │   ├── hooks/             # useAuth, useClients
+│   │   ├── pages/             # Login, Dashboard, Métricas, Interacciones
+│   │   └── services/          # Clientes HTTP (Axios)
+│   └── vite.config.js         # Proxy a backend
+│
+├── openspec/                  # Documentación técnica del proyecto
+├── Docs/                      # Documentación adicional, flujos n8n
+├── .gitignore
+└── README.md
 ```
 
 ---
 
-## Alcance de la Primera Versión
+## 🔧 Variables de Entorno
 
-La versión inicial se encuentra enfocada en la gestión de clientes.
+| Variable | Valor por defecto | Descripción |
+|----------|-------------------|-------------|
+| `DATABASE_URL` | `sqlite:///./dev.db` | Cadena de conexión a la base de datos |
+| `API_KEY` | `dev-api-key-123` | Clave para endpoints protegidos (`X-Api-Key`) |
 
-### Funcionalidades Incluidas
-
-- Registro de clientes.
-- Consulta de clientes.
-- Actualización de información.
-- Eliminación de registros.
-- Listado de clientes.
-- Validación de datos.
-- Documentación automática de API.
-- Integración con flujos automatizados mediante n8n.
-- Recepción de solicitudes desde Telegram.
-
-### Funcionalidades Futuras
-
-- Autenticación y autorización.
-- Gestión de usuarios y roles.
-- Historial de interacciones.
-- Dashboard administrativo.
-- Integración con CRM.
-- Métricas y monitoreo.
-- Automatizaciones avanzadas basadas en IA.
-- Gestión de múltiples entidades de negocio.
+> En producción, cambiar `API_KEY` por un valor seguro y configurar `DATABASE_URL` para usar MySQL.
 
 ---
 
-## Stack Tecnológico
+## 🔐 Seguridad
 
-### Backend
-
-- Python 3.13
-- FastAPI
-- Pydantic
-- SQLAlchemy
-- Alembic
-
-### Persistencia
-
-- MySQL 8
-
-### Automatización
-
-- n8n
-
-### Integraciones
-
-- Telegram Bot API
-- Servicios de Inteligencia Artificial
-
-### Infraestructura
-
-- Docker
-- Docker Compose
-
-### Testing
-
-- Pytest
-
-### Documentación
-
-- OpenAPI
-- Swagger UI
-- ReDoc
+- Los archivos **`.json` exportados de n8n** contienen tokens y credenciales → **ignorados por git**
+- La **`API_KEY`** por defecto es solo para desarrollo → **cambiar en producción**
+- El login es **email-only** (sin contraseña) durante desarrollo
+- La base de datos **SQLite** no debe usarse en producción
 
 ---
 
-## Principios de Diseño
-
-La solución se construye siguiendo buenas prácticas de ingeniería de software:
-
-- Arquitectura en capas.
-- Principios SOLID.
-- Clean Code.
-- Separación de responsabilidades.
-- Desarrollo orientado a APIs.
-- Documentación continua.
-- Escalabilidad y mantenibilidad.
-- Bajo acoplamiento entre componentes.
-- Diseño orientado a integración de servicios.
-
----
-
-## Metodología de Desarrollo
-
-El proyecto se desarrolla mediante un enfoque incremental basado en especificaciones, utilizando documentación técnica como fuente principal para el diseño e implementación del sistema.
-
-La construcción de los componentes se realiza a partir de documentos de arquitectura, requisitos funcionales, reglas de negocio y contratos API previamente definidos.
-
-El desarrollo incorpora herramientas de asistencia basadas en inteligencia artificial para acelerar tareas de diseño e implementación, manteniendo la documentación como fuente de verdad del proyecto.
-
-La validación se efectúa mediante pruebas unitarias, pruebas de integración y pruebas funcionales sobre los flujos automatizados implementados en n8n.
-
----
-
-## Estructura de Documentación
-
-```text
-docs/
-├── vision.md
-├── requirements.md
-├── domain-model.md
-├── api-spec.md
-├── architecture.md
-├── tech-stack.md
-├── non-functional-requirements.md
-├── project-rules.md
-├── master-prompt.md
-│
-├── database/
-│   ├── database-schema.md
-│   └── entity-relationship-diagram.md
-│
-└── openapi/
-    ├── request-examples.md
-    └── response-examples.md
-```
-
----
-
-## Estado del Proyecto
-
-🚧 En desarrollo activo.
-
-Actualmente el proyecto se encuentra en fase de implementación y validación de la arquitectura base.
-
-Las actividades en curso incluyen:
-
-- Desarrollo de la API REST utilizando FastAPI.
-- Diseño e implementación del modelo de datos.
-- Configuración de la persistencia mediante MySQL.
-- Definición y validación de contratos API.
-- Construcción de flujos de automatización en n8n.
-- Integración con Telegram Bot API.
-- Desarrollo y pruebas funcionales de un bot conversacional.
-- Validación de procesos automatizados mediante n8n.
-- Evaluación de la comunicación entre Telegram, n8n y la API.
-- Definición de la estrategia de integración con servicios de inteligencia artificial.
-- Pruebas incrementales de los distintos componentes antes de su integración definitiva.
-
-El desarrollo se realiza de manera iterativa, validando cada componente individualmente para garantizar estabilidad, mantenibilidad y escalabilidad antes de avanzar hacia etapas más complejas del sistema.
-
----
-
-## Líneas Futuras de Investigación y Desarrollo
-
-- Incorporación de modelos de inteligencia artificial para interpretación avanzada de solicitudes.
-- Automatización de procesos empresariales adicionales.
-- Integración con sistemas CRM y ERP.
-- Implementación de autenticación y autorización basada en roles.
-- Desarrollo de interfaces web administrativas.
-- Incorporación de métricas operativas y observabilidad.
-- Evaluación comparativa de distintas herramientas de automatización e IA.
-
----
-
-## Autor
+## 👨‍💻 Autor
 
 **Genaro Busto**  
 Tecnicatura Universitaria en Programación  
@@ -231,6 +257,6 @@ Universidad Tecnológica Nacional (UTN)
 
 ---
 
-## Licencia
-
-Proyecto desarrollado con fines académicos, educativos y de investigación. 
+<div align="center">
+  <sub>Desarrollado con fines académicos, educativos y de investigación.</sub>
+</div>

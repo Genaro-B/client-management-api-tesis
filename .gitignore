@@ -1,23 +1,41 @@
-# Python
+# ─── Python ───
 __pycache__/
 *.py[cod]
 *.egg-info/
 *.egg
 .venv/
 venv/
+*.pyc
 
-# Base de datos local (SQLite)
+# ─── Node ───
+node_modules/
+dist/
+*.log
+
+# ─── Base de datos local ───
 *.db
+*.sqlite
 
-# IDE
+# ─── Variables de entorno ───
+.env
+.env.local
+.env.*.local
+
+# ─── n8n flow exports (contienen tokens/credenciales) ───
+Docs/*.json
+
+# ─── IDE ───
 .vscode/
 .idea/
+*.swp
+*.swo
 
-# SO
+# ─── SO ───
 Thumbs.db
 .DS_Store
+desktop.ini
 
-# Entorno (archivos temporales de shell)
-$env
-cls
-dir
+# ─── Proyecto ───
+backend/*.log
+frontend/*.log
+*.err

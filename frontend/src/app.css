@@ -1,0 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Tipografía */
+  --font-sans: "Inter", "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-mono: "DM Mono", monospace;
+
+  /* Radios */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  /* ── Colores (variables dinámicas) ── */
+  --color-background: var(--color-background, #f8fafc);
+  --color-foreground: var(--color-foreground, #0f172a);
+  --color-card: var(--color-card, #ffffff);
+  --color-primary: var(--color-primary, #2563eb);
+  --color-primary-foreground: var(--color-primary-foreground, #ffffff);
+  --color-secondary: var(--color-secondary, #f1f5f9);
+  --color-muted: var(--color-muted, #f1f5f9);
+  --color-muted-foreground: var(--color-muted-foreground, #64748b);
+  --color-border: var(--color-border, rgba(15, 23, 42, 0.08));
+  --color-destructive: var(--color-destructive, #dc2626);
+  --color-ring: var(--color-ring, #93c5fd);
+
+  --color-sidebar: var(--color-sidebar, #0f172a);
+  --color-sidebar-foreground: var(--color-sidebar-foreground, #f8fafc);
+  --color-sidebar-primary: var(--color-sidebar-primary, #3b82f6);
+  --color-sidebar-accent: var(--color-sidebar-accent, #1e293b);
+  --color-sidebar-border: var(--color-sidebar-border, rgba(255, 255, 255, 0.08));
+}
+
+/* ── Light Theme (default) ── */
+:root {
+  --color-background: #f8fafc;
+  --color-foreground: #0f172a;
+  --color-card: #ffffff;
+  --color-primary: #2563eb;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #f1f5f9;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
+  --color-border: rgba(15, 23, 42, 0.08);
+  --color-destructive: #dc2626;
+  --color-ring: #93c5fd;
+
+  --color-sidebar: #0f172a;
+  --color-sidebar-foreground: #f8fafc;
+  --color-sidebar-primary: #3b82f6;
+  --color-sidebar-accent: #1e293b;
+  --color-sidebar-border: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Dark Theme ── */
+.dark {
+  --color-background: #020617;
+  --color-foreground: #f8fafc;
+  --color-card: #0f172a;
+  --color-primary: #3b82f6;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #1e293b;
+  --color-muted: #1e293b;
+  --color-muted-foreground: #94a3b8;
+  --color-border: rgba(255, 255, 255, 0.10);
+  --color-destructive: #ef4444;
+  --color-ring: #3b82f6;
+
+  --color-sidebar: #020617;
+  --color-sidebar-foreground: #f8fafc;
+  --color-sidebar-primary: #2563eb;
+  --color-sidebar-accent: #1e293b;
+  --color-sidebar-border: rgba(255, 255, 255, 0.08);
+}
+
+/* Scrollbar oculta */
+* {
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* Transición suave en cambios de tema (Spec §14) */
+html {
+  transition: background-color 200ms, color 200ms, border-color 200ms;
+}
