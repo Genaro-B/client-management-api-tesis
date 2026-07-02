@@ -25,6 +25,7 @@
 - [Arquitectura](#-arquitectura)
 - [Primeros Pasos](#-primeros-pasos)
 - [API REST](#-api-rest)
+- [Flujos n8n](#-flujos-n8n)
 - [Estructura del Proyecto](#-estructura-del-proyecto)
 - [Variables de Entorno](#-variables-de-entorno)
 - [Seguridad](#-seguridad)
@@ -194,6 +195,20 @@ n8n configura automáticamente el webhook de Telegram.
 | `POST` | `/api/v1/interactions/` | Crear interacción | `X-Api-Key` |
 
 > Los endpoints protegidos con **`X-Api-Key`** requieren el header con la clave configurada en la variable de entorno `API_KEY`.
+
+---
+
+## 🔄 Flujos n8n
+
+El proyecto incluye dos flujos de automatización en n8n documentados en detalle:
+
+| Flujo | Archivo | Propósito |
+|-------|---------|-----------|
+| **Sistema de Automatización de Prospectos** | `Docs/n8n-flow-documentation.md` | Flujo principal: trigger de Telegram → clasificación por intención → respuestas automáticas |
+| **Telegram → API Interaction** | `Docs/n8n-flow-documentation.md` | Flujo auxiliar: webhook → POST a backend con idempotencia |
+
+> 📖 Ver [`Docs/n8n-flow-documentation.md`](Docs/n8n-flow-documentation.md) para documentación completa de cada nodo,
+> diagramas de conexión, y consideraciones técnicas sobre Google Sheets, Gmail, ngrok y seguridad.
 
 ---
 
