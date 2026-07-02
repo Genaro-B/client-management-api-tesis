@@ -298,6 +298,20 @@ Las fixtures compartidas viven en `tests/conftest.py`:
 
 ---
 
+## 🔮 Próximas Implementaciones
+
+| Feature | Estado | Descripción |
+|---------|--------|-------------|
+| **Ollama / AI** | ⏳ Pendiente | Integración con modelos locales (Llama 3, Mistral, Phi) para respuestas inteligentes en Telegram. Requiere instalar [Ollama](https://ollama.com/download) y descargar un modelo (`ollama pull llama3.2:1b`). |
+| **Tests Frontend** | ⏳ Pendiente | Suite de tests con Vitest + React Testing Library para componentes y páginas. |
+| **Autenticación con password** | ⏳ Pendiente | Sistema de login con email + contraseña (reemplazar email-only actual). |
+| **Migración a MySQL** | ⏳ Pendiente | Base de datos definitiva para producción con migraciones desde SQLite. |
+| **Docker** | ⏳ Pendiente | `Dockerfile` + `docker-compose` para backend, frontend y base de datos. |
+| **Dashboard de gráficos** | ✅ Implementado | Endpoint `GET /api/v1/metrics/dashboard` + frontend con Recharts. |
+| **Paginación real** | ✅ Implementado | Backend con limit/offset, frontend con controles de paginación. |
+
+---
+
 ## 👨‍💻 Autor
 
 **Genaro Busto**  
