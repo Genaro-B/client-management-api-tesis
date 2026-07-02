@@ -34,7 +34,14 @@ jobs:
           echo "FILES: $(ls -la)"
           python -c "import openpyxl, httpx, fastapi, sqlalchemy, pydantic; print('OK')"
 
-      - name: Run tests
+      - name: Run tests (diagnóstico)
         run: |
           cd backend
-          python -m pytest tests/ -v --tb=long 2>&1
+          echo "=== PYTEST VERSION ==="
+          python -m pytest --version
+          echo "=== TEST AUTH (single file) ==="
+          python -m pytest tests/test_auth_api.py -v --tb=long; echo "EXIT_AUTH: $?"
+          echo "=== COLLECT ALL ==="
+          python -m pytest tests/ --collect-only -q 2>&1; echo "EXIT_COLLECT: $?"
+          echo "=== ALL TESTS ==="
+          python -m pytest tests/ -v --tb=long 2>&1; echo "EXIT_ALL: $?"
