@@ -5,6 +5,7 @@
   <img src="https://img.shields.io/badge/n8n-5A2B8C?style=flat&logo=n8n&logoColor=white" />
   <img src="https://img.shields.io/badge/Telegram-26A5E4?style=flat&logo=telegram&logoColor=white" />
   <img src="https://img.shields.io/badge/status-desarrollo-yellow" />
+  <img src="https://img.shields.io/github/actions/workflow/status/Genaro-B/client-management-api-tesis/tests.yml?branch=main&label=tests" />
 </div>
 
 <br />
