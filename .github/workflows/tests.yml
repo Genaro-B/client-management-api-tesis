@@ -27,20 +27,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Collect only
+      - name: Run tests with output capture
+        id: tests
         run: |
           cd backend
-          ! python -m pytest tests/ --collect-only -q 2>&1 | tee /tmp/pytest-collect.txt
-          echo "collect exit: $?"
+          set +e
+          python -m pytest tests/ --collect-only -q 2>&1 | tee /tmp/collect.txt
+          echo "COLLECT_EXIT=$?" >> "$GITHUB_ENV"
+          python -m pytest tests/ -v --tb=long 2>&1 | tee /tmp/run.txt
+          echo "RUN_EXIT=$?" >> "$GITHUB_ENV"
 
-      - name: Run tests
+      - name: Read and report error
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          cd backend
-          ! python -m pytest tests/ -v --tb=long -p no:cacheprovider 2>&1 | tee /tmp/pytest-output.txt
-          echo "pytest exit: $?"
-
-      - name: Upload output
-        uses: actions/upload-artifact@v4
-        with:
-          name: pytest-output
-          path: /tmp/pytest-*.txt
+          echo "COLLECT_EXIT: ${{ env.COLLECT_EXIT }}"
+          echo "RUN_EXIT: ${{ env.RUN_EXIT }}"
+          echo ""
+          echo "=== COLLECT OUTPUT ==="
+          cat /tmp/collect.txt 2>/dev/null || echo "No collect file"
+          echo ""
+          echo "=== RUN OUTPUT ==="
+          cat /tmp/run.txt 2>/dev/null || echo "No run file"
