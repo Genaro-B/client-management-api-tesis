@@ -1,0 +1,444 @@
+{
+  "name": "Sistema de Automatización de Prospectos",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -368,
+        192
+      ],
+      "id": "6a588e45-bebb-404d-830f-bc0c4c013111",
+      "name": "Telegram Trigger",
+      "color": "#2962FF",
+      "notes": "ENTRADA - Escucha mensajes entrantes del bot de Telegram.\nSalida: $json[\"message\"][\"text\"]",
+      "webhookId": "0c5b2694-9d23-4de9-97cc-a8c28defc244",
+      "credentials": {
+        "telegramApi": {
+          "id": "nofHqyk9CtWirFO5",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "aafb7481-8c08-45dc-9bcc-2c09e0a120fc",
+              "name": "mensaje",
+              "value": "={{$json[\"message\"][\"text\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "f9fa1be7-88e5-46bc-8834-f1694216e9a2",
+              "name": "user_id",
+              "value": "={{$json[\"message\"][\"from\"][\"id\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "name": "message_id",
+              "value": "={{$json[\"message\"][\"message_id\"]}}",
+              "type": "number"
+            },
+            {
+              "id": "fecha-001-aaaa-bbbb-cccc",
+              "name": "fecha",
+              "value": "={{new Date().toISOString()}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -208,
+        192
+      ],
+      "id": "4697e8ee-0f56-4994-8f35-282b4c58b1a0",
+      "name": "Edit Fields",
+      "color": "#AA00FF",
+      "notes": "PARSEO - Extrae campos del mensaje:\n- mensaje: texto original\n- user_id: ID de Telegram\n- message_id: ID unico del mensaje"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json[\"mensaje\"].toLowerCase()}}",
+                    "rightValue": "comprar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "e70f302f-ab05-4217-990b-7da3118ca3cb"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "02abcce6-24d7-4024-91d3-76f8bf8615a7",
+                    "leftValue": "={{$json[\"mensaje\"].toLowerCase()}}",
+                    "rightValue": "precio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "1dfe3f3a-6c24-4a47-9842-0105fe43d633",
+                    "leftValue": "={{$json[\"mensaje\"].toLowerCase()}}",
+                    "rightValue": "comprar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notContains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        176
+      ],
+      "id": "02ad928b-b7d8-49cf-b8e4-29b28ce92065",
+      "name": "Switch",
+      "color": "#FF6D00",
+      "notes": "CLASIFICADOR - 3 rutas segun intencion:\nRuta 0 (QUEDATE): mensaje contiene 'comprar'\nRuta 1 (QUEDATE): mensaje contiene 'precio'\nRuta 2 (SEGUIMIENTO): ninguna de las anteriores\nUsa toLowerCase() para case-insensitive"
+    },
+    {
+      "parameters": {
+        "chatId": "={{$json[\"user_id\"]}}",
+        "text": "Genial 🔥 decime qué producto querés y cantidad",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        576,
+        96
+      ],
+      "id": "bbcf0883-d49c-46fb-a343-16cdfc5fed5b",
+      "name": "Send a text message1",
+      "color": "#00C853",
+      "notes": "RUTA: COMPRAR (QUEDATE)\nEl usuario quiere comprar.\nResponde: 'Genial decime que producto queres y cantidad'",
+      "webhookId": "3b08eeab-0efa-46fe-80e3-5fb365071b4f",
+      "credentials": {
+        "telegramApi": {
+          "id": "nofHqyk9CtWirFO5",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{$json[\"user_id\"]}}",
+        "text": "Te paso info 👇 ¿qué producto te interesa?",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        576,
+        288
+      ],
+      "id": "f9dcb380-7b6b-42e3-b2c8-74de064742b3",
+      "name": "Send a text message2",
+      "color": "#FFD600",
+      "notes": "RUTA: PRECIO (QUEDATE)\nEl usuario pregunta por precios.\nResponde: 'Te paso info, que producto te interesa?'",
+      "webhookId": "96ef158a-d1be-4fe2-b859-bdd6a6c5f446",
+      "credentials": {
+        "telegramApi": {
+          "id": "nofHqyk9CtWirFO5",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{$json[\"user_id\"]}}",
+        "text": "Hola 👋 decime si querés ver productos o comprar",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        576,
+        464
+      ],
+      "id": "902574e0-420f-41ae-80b4-580a0a71934c",
+      "name": "Send a text message3",
+      "color": "#2979FF",
+      "notes": "RUTA: SEGUIMIENTO\nEl mensaje no tiene palabra clave clara.\nResponde: 'Hola, decime si queres ver productos o comprar'",
+      "webhookId": "bbf8acca-ab8e-4e08-ad0c-2deacef31f13",
+      "credentials": {
+        "telegramApi": {
+          "id": "nofHqyk9CtWirFO5",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/v1/interactions/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "dev-api-key-123"
+            },
+            {
+              "name": "X-Idempotency-Key",
+              "value": "={{'tg-' + $json['message_id']}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "source",
+              "value": "telegram"
+            },
+            {
+              "name": "user",
+              "value": "={{$json['user_id']}}"
+            },
+            {
+              "name": "payload",
+              "value": "={{JSON.stringify({text: $json['mensaje'], message_id: $json['message_id']})}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        224
+      ],
+      "id": "b1d1366d-df67-4e4a-b4ab-a87a4691ee38",
+      "name": "Guardar en API",
+      "color": "#00BCD4",
+      "notes": "PERSISTENCIA - POST a API REST\nEndpoint: http://127.0.0.1:8000/api/v1/interactions/\nCampos: source=telegram, user=user_id, payload={text, message_id}\nIdempotencia: X-Idempotency-Key = tg-{message_id}"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1HueJMcyC6oXd6Ei7S2bMC84p9geiZR4nVacuPMaQt2U",
+          "mode": "list",
+          "cachedResultName": "prospectos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HueJMcyC6oXd6Ei7S2bMC84p9geiZR4nVacuPMaQt2U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HueJMcyC6oXd6Ei7S2bMC84p9geiZR4nVacuPMaQt2U/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {}
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        0,
+        0
+      ],
+      "id": "dc05eed8-d0be-4ca7-9920-be93d9760e7c",
+      "name": "Append to Sheet",
+      "color": "#009688",
+      "notes": "RESPALDO - Google Sheets (APPEND)\nGuarda en planilla 'prospectos'.\nColumnas: mensaje, user_id, message_id, timestamp",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8hh3KpE8QFWLCvaB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "height": 220,
+        "width": 600,
+        "color": "#1A237E",
+        "fontSize": 14,
+        "content": "AUTOMATIZACION DE PROSPECTOS - Telegram -> CRM\n\nCuando un usuario escribe al bot de Telegram:\n1. Recibe el mensaje (Telegram Trigger)\n2. Parsea campos: mensaje, user_id, message_id (Edit Fields)\n3. Guarda EN PARALELO: Google Sheets + API REST\n4. Clasifica la intencion y responde segun corresponda (Switch)"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -260
+      ],
+      "name": "📋 Descripción General del Flujo",
+      "id": "sticky-overview-001"
+    },
+    {
+      "parameters": {
+        "height": 140,
+        "width": 500,
+        "color": "#1B5E20",
+        "fontSize": 13,
+        "content": "RUTAS DEL SWITCH:\n\nRuta 0 -> COMPRAR (QUEDATE)\n  Si el mensaje contiene 'comprar'\n\nRuta 1 -> PRECIO (QUEDATE)\n  Si el mensaje contiene 'precio'\n\nRuta 2 -> SEGUIMIENTO\n  Si no contiene ninguna palabra clave"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -120
+      ],
+      "name": "🚦 Reglas del Switch",
+      "id": "sticky-switch-002"
+    },
+    {
+      "parameters": {
+        "height": 120,
+        "width": 320,
+        "color": "#37474F",
+        "fontSize": 13,
+        "content": "LEYENDA DE COLORES:\nVERDE = QUEDATE (cliente caliente)\nAMARILLO = QUEDATE (interesado)\nAZUL = SEGUIMIENTO (primera atencion)"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        576,
+        600
+      ],
+      "name": "🎨 Leyenda de Colores",
+      "id": "sticky-legend-003"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append to Sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Guardar en API",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d316dce8-a94c-4e11-a4b5-922fb247dc29",
+  "meta": {
+    "instanceId": "3653cf1b010a382ce56c78b87e7752e8ef030df9849fb420fa30b5289e90c3e8"
+  },
+  "id": "vPP4gsTf2I4DSevo",
+  "tags": []
+}
