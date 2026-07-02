@@ -32,5 +32,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Verify dependencies
+        run: python -c "import openpyxl, httpx, fastapi, sqlalchemy, pydantic; print('All deps OK')"
+
       - name: Run tests
         run: python -m pytest tests/ -q --tb=short
