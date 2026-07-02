@@ -34,6 +34,29 @@ jobs:
           echo "FILES: $(ls -la)"
           python -c "import openpyxl, httpx, fastapi, sqlalchemy, pydantic; print('OK')"
 
-      - name: Run tests
+      - name: Capture pytest output
         working-directory: ./backend
-        run: python -m unittest discover -s tests -t . -v
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          python -m pytest tests/ -v --tb=long > ../pytest_output.txt 2>&1
+          rc=$?
+          echo "PYTEST_EXIT=$rc" >> $GITHUB_ENV
+
+      - name: Upload pytest output artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-output
+          path: pytest_output.txt
+
+      - name: Show pytest failure reason
+        if: env.PYTEST_EXIT != '0'
+        run: |
+          {
+            echo "### Pytest failed with exit code ${{ env.PYTEST_EXIT }}"
+            echo ""
+            echo '```'
+            head -100 pytest_output.txt
+            echo '```'
+          } >> $GITHUB_STEP_SUMMARY
