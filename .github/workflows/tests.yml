@@ -35,8 +35,6 @@ jobs:
           python -c "import openpyxl, httpx, fastapi, sqlalchemy, pydantic; print('OK')"
 
       - name: Run tests
-        working-directory: ./backend
-        run: |
-          rm -rf .pytest_cache __pycache__ tests/__pycache__
-          python -m pytest --version
-          python -m pytest tests/ -q --tb=short
+        run: python -m pytest backend/tests/ -v --tb=long
+        env:
+          PYTHONPATH: backend
