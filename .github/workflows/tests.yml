@@ -35,7 +35,6 @@ jobs:
           python -c "import openpyxl, httpx, fastapi, sqlalchemy, pydantic; print('OK')"
 
       - name: Run tests
-        working-directory: ./backend
         run: |
-          python -m pytest --collect-only tests/ -q 2>&1 || echo "COLLECT EXIT: $?"
-          python -m pytest tests/ -v --tb=long 2>&1 || echo "TEST EXIT: $?"
+          cd backend
+          python -m pytest tests/ -v --tb=long 2>&1
