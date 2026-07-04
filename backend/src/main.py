@@ -31,12 +31,14 @@ def create_app() -> FastAPI:
     from src.api.routes import auth as auth_router_module
     from src.api.routes import interactions as interactions_router_module
     from src.api.routes import metrics as metrics_router_module
+    from src.api.routes import products as products_router_module
 
     # Montar el router de clientes bajo el prefijo de API v1
     app.include_router(clients_router_module.router, prefix="/api/v1/clients", tags=["clients"])
     app.include_router(auth_router_module.router, prefix="/api/v1/auth", tags=["auth"])
     app.include_router(interactions_router_module.router, prefix="/api/v1/interactions", tags=["interactions"])
     app.include_router(metrics_router_module.router, prefix="/api/v1/metrics", tags=["metrics"])
+    app.include_router(products_router_module.router, prefix="/api/v1/products", tags=["products"])
 
     return app
 

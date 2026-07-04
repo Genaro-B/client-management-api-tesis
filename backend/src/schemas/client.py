@@ -1,6 +1,14 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
+
+
+class ProductoAsignado(BaseModel):
+    """Schema for a product assigned to a client."""
+    producto_id: int = Field(..., ge=1)
+    nombre: str
+    precio: float = Field(..., ge=0)
+    cantidad: int = Field(..., ge=1)
 
 
 class CreateClient(BaseModel):
@@ -29,6 +37,7 @@ class ClientResponse(BaseModel):
     fecha_registro: datetime
     activo: bool
     role: str = "user"
+    productos_asignados: List[ProductoAsignado] = []
 
     model_config = {"from_attributes": True}
 

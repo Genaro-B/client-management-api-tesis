@@ -1,0 +1,75 @@
+🎬 GUION VIDEO — DEMO COMPLETA
+================================
+App: Gestión de Clientes — Materiales de Construcción
+Usuario Admin: admin@utn.edu.ar (sin contraseña)
+API corriendo en: http://127.0.0.1:8000
+Frontend en: http://localhost:5173
+
+
+1️⃣  LOGIN
+----------
+• Abrir http://localhost:5173
+• Click "Login" (el mail ya está precargado)
+• Se ve el Dashboard con métricas
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+2️⃣  CREAR PRODUCTO
+------------------
+• Sidebar → Productos
+• Click "Agregar Producto"
+• Completar:
+    Nombre:       Ladrillo Hueco 8x18x33
+    Categoría:    Ladrillos y Bloques
+    Precio:       850.50
+    Stock:        100
+• Guardar
+• Se ve en la tabla ✅
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+3️⃣  CREAR CLIENTE
+-----------------
+• Sidebar → Clientes
+• Click "Agregar Cliente"
+• Completar:
+    Nombre:    Pablo
+    Apellido:  Rodríguez
+    Email:     pablo.rodriguez@demo.com
+    Teléfono:  +54 11 5555-0101
+• Guardar
+• Aparece en la tabla con los otros clientes demo ✅
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+4️⃣  ASIGNAR PRODUCTO AL CLIENTE
+-------------------------------
+• En la tabla de Clientes, click en "Pablo Rodríguez"
+• Se abre el detalle del cliente
+• Click "Asignar Producto"
+• Seleccionar "Ladrillo Hueco 8x18x33"
+• Cantidad: 50
+• Guardar
+• Se ve el producto asignado en el perfil del cliente ✅
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+5️⃣  INTERACCIONES (opcional, si hay datos)
+------------------------------------------
+• Sidebar → Interacciones
+• Se ve el listado de mensajes de Telegram
+• Click "Ver más" en cualquiera → muestra el detalle
+• Aparece el nombre de la persona que escribió ✅
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📌  DATOS DE CLIENTES DEMO YA CARGADOS
+---------------------------------------
+ID 17  Pablo Rodríguez     pablo.rodriguez@demo.com
+ID 18  Lucía Martínez      lucia.martinez@demo.com
+ID 19  Santiago Fernández  santiago.fernandez@demo.com
+ID 20  Valentina López     valentina.lopez@demo.com
+ID 21  Martín Torres       martin.torres@demo.com
+ID 22  Camila Díaz         camila.diaz@demo.com
+
+👑  Admin: GENARO Busto (ID 8) — intacto

@@ -27,6 +27,7 @@ if config.config_file_name:
 # Importar los modelos para que Base.metadata los conozca
 from src.database.base import Base
 from src.models.client import Client
+from src.models.product import Product
 
 target_metadata = Base.metadata
 

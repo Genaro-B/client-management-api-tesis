@@ -73,3 +73,55 @@ class ClientRepository:
         """Perform a logical delete by setting activo=False."""
         client.activo = False
         self.db.commit()
+
+    # ------------------------------------------------------------------
+    # Productos Asignados
+    # ------------------------------------------------------------------
+
+    def get_productos(self, client: Client) -> list:
+        """Return the list of assigned products for a client."""
+        return client.productos_asignados if client.productos_asignados is not None else []
+
+    def set_productos(self, client: Client, productos: list) -> list:
+        """Replace all assigned products, commit, refresh, return the list."""
+        client.productos_asignados = productos
+        self.db.commit()
+        self.db.refresh(client)
+        return client.productos_asignados if client.productos_asignados is not None else []
+
+    def add_producto(self, client: Client, producto: dict) -> list:
+        """Append a product (or increment quantity if producto_id exists), commit, refresh, return list.
+
+        NOTE: We build a completely new list of NEW dicts to ensure SQLAlchemy's
+        JSON column change tracking detects the mutation — mutating dicts in-place
+        on a JSON column does NOT trigger a flush for SQLite (the underlying
+        object identity comparison does not detect in-place mutations).
+        """
+        actual = client.productos_asignados if client.productos_asignados is not None else []
+        found = False
+        productos = []
+        for p in actual:
+            if p["producto_id"] == producto["producto_id"]:
+                productos.append({
+                    "producto_id": p["producto_id"],
+                    "nombre": p["nombre"],
+                    "precio": p["precio"],
+                    "cantidad": p["cantidad"] + producto["cantidad"],
+                })
+                found = True
+            else:
+                productos.append(dict(p))
+        if not found:
+            productos.append(producto)
+        client.productos_asignados = productos
+        self.db.commit()
+        self.db.refresh(client)
+        return client.productos_asignados if client.productos_asignados is not None else []
+
+    def remove_producto(self, client: Client, producto_id: int) -> list:
+        """Filter out a producto_id, commit, refresh, return the list."""
+        actual = client.productos_asignados if client.productos_asignados is not None else []
+        client.productos_asignados = [p for p in actual if p["producto_id"] != producto_id]
+        self.db.commit()
+        self.db.refresh(client)
+        return client.productos_asignados if client.productos_asignados is not None else []

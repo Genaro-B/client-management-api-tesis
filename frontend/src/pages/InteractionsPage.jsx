@@ -161,7 +161,10 @@ export default function InteractionsPage() {
                         <SourceBadge source={ix.source} />
                       </td>
                       <td className="py-3 px-4 text-foreground font-medium">
-                        {ix.user || <span className="text-muted-foreground italic">—</span>}
+                        {(() => {
+                          try { const p = JSON.parse(ix.payload); return (p.first_name || '') + (p.last_name ? ' ' + p.last_name : '') || ix.user || '—' }
+                          catch { return ix.user || <span className="text-muted-foreground italic">—</span> }
+                        })()}
                       </td>
                       <td className="py-3 px-4 max-w-[260px]">
                         <code className="text-[12px] text-muted-foreground font-mono block truncate">
@@ -214,7 +217,10 @@ export default function InteractionsPage() {
                   </div>
                   <div>
                     <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Usuario</p>
-                    <p className="text-foreground">{ix.user || '—'}</p>
+                    <p className="text-foreground">{(() => {
+                      try { const p = JSON.parse(ix.payload); return (p.first_name || '') + (p.last_name ? ' ' + p.last_name : '') || ix.user || '—' }
+                      catch { return ix.user || '—' }
+                    })()}</p>
                   </div>
                   <div>
                     <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Fecha</p>

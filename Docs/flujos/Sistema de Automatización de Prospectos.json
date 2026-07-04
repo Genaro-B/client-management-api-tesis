@@ -1,0 +1,421 @@
+{
+  "name": "Sistema de Automatización de Prospectos",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -3360,
+        -160
+      ],
+      "id": "c91f2764-887f-461f-a644-3d57ebb4dee4",
+      "name": "Telegram Trigger",
+      "webhookId": "0c5b2694-9d23-4de9-97cc-a8c28defc244",
+      "credentials": {
+        "telegramApi": {
+          "id": "nofHqyk9CtWirFO5",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "aafb7481-8c08-45dc-9bcc-2c09e0a120fc",
+              "name": "mensaje",
+              "value": "={{$json[\"message\"][\"text\"]}}",
+              "type": "string"
+            },
+              {
+                "id": "f9fa1be7-88e5-46bc-8834-f1694216e9a2",
+                "name": "user_id",
+                "value": "={{$json[\"message\"][\"from\"][\"id\"]}}",
+                "type": "string"
+              },
+              {
+                "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                "name": "message_id",
+                "value": "={{$json[\"message\"][\"message_id\"]}}",
+                "type": "number"
+              }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3200,
+        -160
+      ],
+      "id": "0facd8dc-3bc1-41bd-80cd-be2a81108683",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json[\"mensaje\"].toLowerCase()}}",
+                    "rightValue": "comprar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "e70f302f-ab05-4217-990b-7da3118ca3cb"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "02abcce6-24d7-4024-91d3-76f8bf8615a7",
+                    "leftValue": "={{$json[\"mensaje\"].toLowerCase()}}",
+                    "rightValue": "precio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "1dfe3f3a-6c24-4a47-9842-0105fe43d633",
+                    "leftValue": "={{$json[\"mensaje\"].toLowerCase()}}",
+                    "rightValue": "comprar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notContains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -2752,
+        -176
+      ],
+      "id": "8cc127ef-73e3-42e5-b9ce-dff72d47d78d",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "chatId": "={{$json[\"user_id\"]}}",
+        "text": "Genial 🔥 decime qué producto querés y cantidad",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -2416,
+        -256
+      ],
+      "id": "93139314-7b82-4bea-9a01-4270179b774c",
+      "name": "Send a text message1",
+      "webhookId": "3b08eeab-0efa-46fe-80e3-5fb365071b4f",
+      "credentials": {
+        "telegramApi": {
+          "id": "nofHqyk9CtWirFO5",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{$json[\"user_id\"]}}",
+        "text": "Te paso info 👇 ¿qué producto te interesa?",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -2416,
+        -64
+      ],
+      "id": "06b74ee9-f688-4849-b866-f8012cf47ccc",
+      "name": "Send a text message2",
+      "webhookId": "96ef158a-d1be-4fe2-b859-bdd6a6c5f446",
+      "credentials": {
+        "telegramApi": {
+          "id": "nofHqyk9CtWirFO5",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{$json[\"user_id\"]}}",
+        "text": "Hola 👋 decime si querés ver productos o comprar",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -2416,
+        112
+      ],
+      "id": "38d345d0-7ee9-4044-b031-4def98e83b07",
+      "name": "Send a text message3",
+      "webhookId": "bbf8acca-ab8e-4e08-ad0c-2deacef31f13",
+      "credentials": {
+        "telegramApi": {
+          "id": "nofHqyk9CtWirFO5",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/interactions/",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "dev-api-key-123"
+            },
+            {
+              "name": "X-Idempotency-Key",
+              "value": "={{'tg-' + $json['message_id']}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "source",
+              "value": "telegram"
+            },
+            {
+              "name": "user",
+              "value": "={{$json['user_id']}}"
+            },
+            {
+              "name": "payload",
+              "value": "={{JSON.stringify({text: $json['mensaje'], message_id: $json['message_id']})}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2992,
+        -128
+      ],
+      "id": "abc12345-def6-7890-abcd-ef1234567890",
+      "name": "Guardar en API"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1HueJMcyC6oXd6Ei7S2bMC84p9geiZR4nVacuPMaQt2U",
+          "mode": "list",
+          "cachedResultName": "prospectos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HueJMcyC6oXd6Ei7S2bMC84p9geiZR4nVacuPMaQt2U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HueJMcyC6oXd6Ei7S2bMC84p9geiZR4nVacuPMaQt2U/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "user_id": "={{$json[\"user_id\"]}}",
+            "mensaje": "={{$json[\"mensaje\"]}}",
+            "fecha": "={{$now}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2992,
+        -208
+      ],
+      "id": "7a745da4-71a3-4838-8731-78425819e9e7",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8hh3KpE8QFWLCvaB",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Guardar en API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar en API": {
+      "main": [
+        []
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "eb700c59-9c90-474f-afc8-221170a6680a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3653cf1b010a382ce56c78b87e7752e8ef030df9849fb420fa30b5289e90c3e8"
+  },
+  "id": "8Ppo1zcnIMqDFylZ",
+  "tags": []
+}

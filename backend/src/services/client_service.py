@@ -47,3 +47,31 @@ class ClientService:
             return False
         self.repo.soft_delete(client)
         return True
+
+    # ------------------------------------------------------------------
+    # Productos Asignados
+    # ------------------------------------------------------------------
+
+    def get_productos(self, client_id: int):
+        client = self.repo.get_by_id(client_id)
+        if not client:
+            return None
+        return self.repo.get_productos(client)
+
+    def add_producto(self, client_id: int, producto: dict):
+        client = self.repo.get_by_id(client_id)
+        if not client:
+            return None
+        return self.repo.add_producto(client, producto)
+
+    def set_productos(self, client_id: int, productos: list):
+        client = self.repo.get_by_id(client_id)
+        if not client:
+            return None
+        return self.repo.set_productos(client, productos)
+
+    def remove_producto(self, client_id: int, producto_id: int):
+        client = self.repo.get_by_id(client_id)
+        if not client:
+            return None
+        return self.repo.remove_producto(client, producto_id)

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import LoginPage from './pages/LoginPage.jsx'
 import ClientsPage from './pages/ClientsPage.jsx'
+import ProductsPage from './pages/ProductsPage.jsx'
 import MetricsPage from './pages/MetricsPage.jsx'
 import InactiveClientsPage from './pages/InactiveClientsPage.jsx'
 import InteractionsPage from './pages/InteractionsPage.jsx'
@@ -39,6 +40,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <ClientsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/products"
+          element={
+            <ProtectedRoute>
+              <ProductsPage />
             </ProtectedRoute>
           }
         />

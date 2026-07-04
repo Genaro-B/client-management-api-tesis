@@ -43,7 +43,8 @@ def test_create_client_with_telefono(client):
     assert resp.json()["telefono"] == "+5491122223333"
 
 
-def test_create_client_duplicate_email_returns_400(client):
+def test_create_client_duplicate_email_returns_existing(client):
+    """Segundo POST con mismo email devuelve 200 y el cliente existente (upsert)."""
     payload = {
         "nombre": "Uno",
         "apellido": "A",
@@ -51,10 +52,12 @@ def test_create_client_duplicate_email_returns_400(client):
     }
     resp1 = client.post(f"{PREFIX}/", json=payload)
     assert resp1.status_code == 201
+    id1 = resp1.json()["id"]
 
     resp2 = client.post(f"{PREFIX}/", json=payload)
-    assert resp2.status_code == 400
-    assert "email" in resp2.json()["detail"].lower()
+    assert resp2.status_code == 200
+    assert resp2.json()["id"] == id1
+    assert resp2.json()["email"] == "dup@example.com"
 
 
 def test_create_client_missing_nombre_returns_422(client):

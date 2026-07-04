@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Users, BarChart3, Settings, UserCircle, RotateCcw, Menu, MessageSquare } from 'lucide-react'
+import { LayoutDashboard, Users, BarChart3, Settings, UserCircle, RotateCcw, Menu, MessageSquare, Package } from 'lucide-react'
 import useAuth from '../hooks/useAuth.js'
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
+  { icon: Package, label: 'Productos', path: '/products' },
   { icon: BarChart3, label: 'Métricas', path: '/metrics' },
   { icon: MessageSquare, label: 'Interacciones', path: '/interactions' },
   { icon: Users, label: 'Clientes', path: '/dashboard' },

@@ -1,11 +1,13 @@
 from io import BytesIO
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
-from src.schemas.client import CreateClient, UpdateClient, ClientResponse
+from src.schemas.client import CreateClient, UpdateClient, ClientResponse, ProductoAsignado
+from typing import List
 from src.repositories.client_repo import ClientRepository
+from src.repositories.product_repo import ProductRepository
 from src.services.client_service import ClientService, EmailAlreadyExists
 from src.database.session import get_db
 from src.core.exceptions import to_http_exception
@@ -89,20 +91,32 @@ def export_clients(db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=ClientResponse, status_code=201)
-def create_client(payload: CreateClient, db: Session = Depends(get_db)):
-    """Crear un nuevo cliente. Las reglas de negocio se validan en la capa de servicio."""
+def create_client(payload: CreateClient, response: Response, db: Session = Depends(get_db)):
+    """Crear un nuevo cliente. Si el email ya existe, devuelve el cliente existente (200)."""
+    repo = ClientRepository(db)
+    existing = repo.get_by_email(payload.email)
+    if existing:
+        response.status_code = status.HTTP_200_OK
+        return existing
+
     service = ClientService(db)
-    try:
-        # Nota: ClientService espera parámetros primitivos. Desempaquetamos el payload.
-        client = service.create(
-            nombre=payload.nombre,
-            apellido=payload.apellido,
-            telefono=payload.telefono,
-            email=payload.email,
-        )
-        return client
-    except EmailAlreadyExists as e:
-        raise to_http_exception(e)
+    client = service.create(
+        nombre=payload.nombre,
+        apellido=payload.apellido,
+        telefono=payload.telefono,
+        email=payload.email,
+    )
+    return client
+
+
+@router.get("/by-email/{email}", response_model=ClientResponse)
+def get_client_by_email(email: str, db: Session = Depends(get_db)):
+    """Buscar cliente por email exacto. 404 si no existe."""
+    repo = ClientRepository(db)
+    client = repo.get_by_email(email)
+    if client is None:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+    return client
 
 
 @router.get("/{client_id}", response_model=ClientResponse)
@@ -141,4 +155,92 @@ def delete_client(client_id: int, db: Session = Depends(get_db)):
     if not client:
         raise HTTPException(status_code=404, detail="Cliente no encontrado")
     repo.soft_delete(client)
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Productos Asignados
+# ---------------------------------------------------------------------------
+
+
+@router.get("/{client_id}/productos", response_model=List[ProductoAsignado])
+def get_client_productos(client_id: int, db: Session = Depends(get_db)):
+    """Obtener la lista de productos asignados a un cliente."""
+    service = ClientService(db)
+    productos = service.get_productos(client_id)
+    if productos is None:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+    return productos
+
+
+@router.post("/{client_id}/productos", response_model=List[ProductoAsignado], status_code=201)
+def add_client_producto(client_id: int, payload: ProductoAsignado, db: Session = Depends(get_db)):
+    """Agregar un producto al cliente (o incrementar cantidad si ya existe).
+    Valida stock disponible y lo descuenta automáticamente."""
+    service = ClientService(db)
+    client = service.repo.get_by_id(client_id)
+    if not client:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+
+    # Check product exists and has enough stock
+    product_repo = ProductRepository(db)
+    product = product_repo.get_by_id(payload.producto_id)
+    if not product:
+        raise HTTPException(status_code=400, detail="Producto no encontrado")
+
+    # Calcular cantidad total necesaria: si ya está en el carrito, sumamos
+    current = service.repo.get_productos(client)
+    existing = next((p for p in current if p["producto_id"] == payload.producto_id), None)
+    cantidad_actual = existing["cantidad"] if existing else 0
+    cantidad_final = cantidad_actual + payload.cantidad
+
+    if product.stock < payload.cantidad:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Stock insuficiente. Disponible: {product.stock}, solicitado: {payload.cantidad}"
+        )
+
+    # Decrement stock
+    product.stock -= payload.cantidad
+    db.commit()
+
+    # Add to client's list
+    result = service.repo.add_producto(client, payload.model_dump())
+    return result
+
+
+@router.put("/{client_id}/productos", response_model=List[ProductoAsignado])
+def set_client_productos(client_id: int, payload: List[ProductoAsignado], db: Session = Depends(get_db)):
+    """Reemplazar toda la lista de productos asignados (para sync)."""
+    service = ClientService(db)
+    productos = service.set_productos(client_id, [p.model_dump() for p in payload])
+    if productos is None:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+    return productos
+
+
+@router.delete("/{client_id}/productos/{producto_id}", status_code=204)
+def remove_client_producto(client_id: int, producto_id: int, db: Session = Depends(get_db)):
+    """Eliminar un producto específico de la lista del cliente.
+    Restaura el stock automáticamente."""
+    service = ClientService(db)
+    productos = service.get_productos(client_id)
+    if productos is None:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+
+    # Find the product to get its quantity for stock restoration
+    existing = next((p for p in productos if p["producto_id"] == producto_id), None)
+    if not existing:
+        raise HTTPException(
+            status_code=404, detail="Producto no encontrado en la lista del cliente"
+        )
+
+    # Restore stock
+    product_repo = ProductRepository(db)
+    product = product_repo.get_by_id(producto_id)
+    if product:
+        product.stock += existing["cantidad"]
+        db.commit()
+
+    service.remove_producto(client_id, producto_id)
     return None

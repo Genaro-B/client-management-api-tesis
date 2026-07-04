@@ -1,0 +1,633 @@
+{
+  "name": "Sistema de Automatizacion v2 - Simple",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -368,
+        192
+      ],
+      "id": "6a588e45-bebb-404d-830f-bc0c4c013111",
+      "name": "Telegram Trigger",
+      "color": "#2962FF",
+      "notes": "ENTRADA - Escucha mensajes entrantes del bot de Telegram.\nSalida: $json[\"message\"][\"text\"]",
+      "webhookId": "0c5b2694-9d23-4de9-97cc-a8c28defc244",
+      "credentials": {
+        "telegramApi": {
+          "id": "nofHqyk9CtWirFO5",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "aafb7481-8c08-45dc-9bcc-2c09e0a120fc",
+              "name": "mensaje",
+              "value": "={{$json[\"message\"][\"text\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "f9fa1be7-88e5-46bc-8834-f1694216e9a2",
+              "name": "user_id",
+              "value": "={{$json[\"message\"][\"from\"][\"id\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "name": "message_id",
+              "value": "={{$json[\"message\"][\"message_id\"]}}",
+              "type": "number"
+            },
+            {
+              "id": "fecha-001-aaaa-bbbb-cccc",
+              "name": "fecha",
+              "value": "={{new Date().toISOString()}}",
+              "type": "string"
+            },
+            {
+              "id": "first-name-001",
+              "name": "first_name",
+              "value": "={{$json[\"message\"][\"from\"][\"first_name\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "last-name-001",
+              "name": "last_name",
+              "value": "={{$json[\"message\"][\"from\"][\"last_name\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "username-001",
+              "name": "username",
+              "value": "={{$json[\"message\"][\"from\"][\"username\"]}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -208,
+        192
+      ],
+      "id": "4697e8ee-0f56-4994-8f35-282b4c58b1a0",
+      "name": "Edit Fields",
+      "color": "#AA00FF",
+      "notes": "PARSEO - Extrae campos del mensaje:\n- mensaje: texto original\n- user_id: ID de Telegram\n- message_id: ID unico del mensaje"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/v1/interactions/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "dev-api-key-123"
+            },
+            {
+              "name": "X-Idempotency-Key",
+              "value": "={{'tg-' + $json['message_id']}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "source",
+              "value": "telegram"
+            },
+            {
+              "name": "user",
+              "value": "={{$json['user_id']}}"
+            },
+            {
+              "name": "payload",
+              "value": "={{JSON.stringify({text: $json['mensaje'], message_id: $json['message_id'], first_name: $json['first_name'], last_name: $json['last_name'], username: $json['username']})}}"
+            },
+            {
+              "name": "intent",
+              "value": "={{$json['mensaje']}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        224
+      ],
+      "id": "b1d1366d-df67-4e4a-b4ab-a87a4691ee38",
+      "name": "Guardar en API",
+      "color": "#00BCD4",
+      "notes": "PERSISTENCIA - POST a API REST\nEndpoint: http://127.0.0.1:8000/api/v1/interactions/\nCampos: source=telegram, user=user_id, payload={text, message_id}\nIdempotencia: X-Idempotency-Key = tg-{message_id}"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1HueJMcyC6oXd6Ei7S2bMC84p9geiZR4nVacuPMaQt2U",
+          "mode": "list",
+          "cachedResultName": "prospectos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HueJMcyC6oXd6Ei7S2bMC84p9geiZR4nVacuPMaQt2U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HueJMcyC6oXd6Ei7S2bMC84p9geiZR4nVacuPMaQt2U/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {}
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        0,
+        0
+      ],
+      "id": "dc05eed8-d0be-4ca7-9920-be93d9760e7c",
+      "name": "Append to Sheet",
+      "color": "#009688",
+      "notes": "RESPALDO - Google Sheets (APPEND)\nGuarda en planilla 'prospectos'.\nColumnas: mensaje, user_id, message_id, timestamp",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8hh3KpE8QFWLCvaB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "height": 220,
+        "width": 600,
+        "color": "#1A237E",
+        "fontSize": 14,
+        "content": "AUTOMATIZACION DE PROSPECTOS - Telegram -> CRM\n\nCuando un usuario escribe al bot de Telegram:\n1. Recibe el mensaje (Telegram Trigger)\n2. Parsea campos: mensaje, user_id, message_id (Edit Fields)\n3. Guarda EN PARALELO: Google Sheets + API REST\n4. Clasifica la intencion y responde segun corresponda (Switch)"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -260
+      ],
+      "name": "📋 Descripción General del Flujo",
+      "id": "sticky-overview-001"
+    },
+    {
+      "parameters": {
+        "functionCode": "const staticData = getWorkflowStaticData('global');\nconst data = $input.first().json;\nconst msg = (data.mensaje || '').toLowerCase().trim();\nconst productos = data.productos || [];\n\n// ID unico del usuario (Telegram user_id)\nconst userId = String(data.user_id || data.telegram_user_id || 'anon');\n\n// Estado persistente: modo + carrito simulado\nif (!staticData[userId]) {\n  staticData[userId] = { modo: 'menu', carrito: [] };\n}\nconst userState = staticData[userId];\n// El carrito \"real\" de la API siempre llega vacio, usamos el simulado\nconst carrito = userState.carrito || [];\n\nlet respuesta = '';\nlet accion = null;\nlet producto_id = null;\nlet producto_nombre = null;\nlet producto_precio = null;\n\n// --- MENU PRINCIPAL (resetea modo a menu) ---\nif (msg === '/start' || msg === 'hola' || msg === 'menu' || msg === '' || msg === 'volver') {\n  userState.modo = 'menu';\n  const nombre = data.first_name || 'amigo';\n  respuesta = String.fromCodePoint(0x1F44B) + ' \\u00A1Hola ' + nombre + '! Bienvenido al sistema de atenci\\u00F3n.\\n\\nEleg\\u00ED una opci\\u00F3n:\\n\\n1\\uFE0F\\u20E3 Comprar productos\\n2\\uFE0F\\u20E3 Ver nuestro cat\\u00E1logo\\n3\\uFE0F\\u20E3 Consultar precios\\n4\\uFE0F\\u20E3 Hablar con un asesor\\n5\\uFE0F\\u20E3 Otra consulta\\n6\\uFE0F\\u20E3 Ver mi carrito\\n7\\uFE0F\\u20E3 Finalizar compra';\n}\n\n// --- SELECCION DE PRODUCTO (solo si estamos en modo catalogo) ---\nelse if (userState.modo === 'catalogo' && /^\\d+$/.test(msg)) {\n  const num = parseInt(msg, 10) - 1;\n  // Solo si el numero corresponde a un producto existente\n  if (num >= 0 && num < productos.length && productos[num] && productos[num].stock > 0) {\n    const p = productos[num];\n    // Agregar al carrito simulado\n    const existente = userState.carrito.find(item => item.id === p.id);\n    if (existente) {\n      existente.cantidad += 1;\n    } else {\n      userState.carrito = [...userState.carrito, {\n        id: p.id,\n        nombre: p.nombre,\n        precio: p.precio,\n        cantidad: 1\n      }];\n    }\n    respuesta = String.fromCodePoint(0x2705) + ' *' + p.nombre + '* agregado a tu carrito!\\n\\nCantidad: ' + (existente ? existente.cantidad : 1) + '\\nPrecio: $' + p.precio.toLocaleString('es-AR', {minimumFractionDigits: 2}) + '\\n\\nEscrib\\u00ED otro n\\u00FAmero para seguir agregando, o \"menu\" para volver.';\n    accion = null; // Solo mensaje, sin API\n    producto_id = p.id;\n    producto_nombre = p.nombre;\n    producto_precio = p.precio;\n  } else if (productos[num]) {\n    respuesta = String.fromCodePoint(0x274C) + ' *' + productos[num].nombre + '* no tiene stock disponible.\\n\\nEleg\\u00ED otro producto o escrib\\u00ED \"menu\" para volver.';\n  } else {\n    respuesta = String.fromCodePoint(0x274C) + ' N\\u00FAmero de producto inv\\u00E1lido.\\n\\nEscrib\\u00ED \"menu\" para ver las opciones.';\n  }\n}\n\n// --- 1: COMPRAR (catalogo numerado) ---\nelse if (msg === '1' || msg.includes('comprar')) {\n  if (productos.length === 0) {\n    respuesta = String.fromCodePoint(0x1F4ED) + ' No hay productos disponibles.\\n\\nEscrib\\u00ED \"menu\" para volver.';\n  } else {\n    userState.modo = 'catalogo';\n    carrito.length; // referencia para mantener la var en uso\n    let catalogo = String.fromCodePoint(0x1F6D2) + ' *Productos para comprar*\\n\\nEleg\\u00ED el n\\u00FAmero del producto que quer\\u00E9s:\\n\\n';\n    productos.forEach((p, i) => {\n      if (p.stock > 0) {\n        const num = i + 1;\n        const nums = [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39];\n        const emoji = String.fromCodePoint(nums[num]) + String.fromCodePoint(0xFE0F, 0x20E3);\n        const precio = '$' + p.precio.toLocaleString('es-AR', {minimumFractionDigits: 2});\n        catalogo += emoji + ' *' + p.nombre + '* \\u2014 ' + precio + '\\n';\n      }\n    });\n    catalogo += '\\nEscrib\\u00ED el n\\u00FAmero del producto para agregarlo a tu carrito.\\nEscrib\\u00ED \"menu\" para volver.';\n    respuesta = catalogo;\n  }\n}\n\n// --- 2: CATALOGO ---\nelse if (msg === '2' || msg.includes('catalogo') || msg.includes('producto') || msg.includes('ver')) {\n  userState.modo = 'catalogo';\n  if (productos.length === 0) {\n    respuesta = String.fromCodePoint(0x1F4ED) + ' No hay productos disponibles.\\n\\nEscrib\\u00ED \"menu\" para volver.';\n  } else {\n    let catalogo = String.fromCodePoint(0x1F4CB) + ' *Nuestro Cat\\u00E1logo*\\n\\n';\n    productos.forEach(p => {\n      const precio = '$' + p.precio.toLocaleString('es-AR', {minimumFractionDigits: 2});\n      const stockTxt = p.stock > 0 ? String.fromCodePoint(0x2705) + ' Stock: ' + p.stock : String.fromCodePoint(0x274C) + ' Sin stock';\n      catalogo += '\\u2022 *' + p.nombre + '*\\n  Precio: ' + precio + ' | ' + stockTxt + '\\n';\n      if (p.categoria) catalogo += '  Categor\\u00EDa: ' + p.categoria + '\\n';\n      catalogo += '\\n';\n    });\n    catalogo += '\\u00BFQuer\\u00E9s comprar alguno? Escrib\\u00ED \"1\" o \"comprar\".\\n\\nEscrib\\u00ED \"menu\" para volver.';\n    respuesta = catalogo;\n  }\n}\n\n// --- 3: PRECIOS ---\nelse if (msg === '3' || msg.includes('precio')) {\n  if (productos.length === 0) {\n    respuesta = String.fromCodePoint(0x1F4ED) + ' No hay productos disponibles.\\n\\nEscrib\\u00ED \"menu\" para volver.';\n  } else {\n    let precios = String.fromCodePoint(0x1F4B0) + ' *Lista de Precios*\\n\\n';\n    productos.forEach(p => {\n      const precio = '$' + p.precio.toLocaleString('es-AR', {minimumFractionDigits: 2});\n      precios += '\\u2022 *' + p.nombre + '*: ' + precio + '\\n';\n    });\n    respuesta = precios + '\\nEscrib\\u00ED \"menu\" para volver.';\n  }\n}\n\n// --- 4: ASESOR ---\nelse if (msg === '4' || msg.includes('asesor') || msg.includes('hablar')) {\n  respuesta = 'Gracias por tu consulta. Un asesor se va a comunicar con vos a la brevedad.\\n\\nEscrib\\u00ED \"menu\" para volver.';\n}\n\n// --- 5: OTRA CONSULTA ---\nelse if (msg === '5' || msg.includes('consulta') || msg.includes('otra')) {\n  respuesta = 'Contame tu consulta y te respondemos a la brevedad.\\n\\nEscrib\\u00ED \"menu\" para volver.';\n}\n\n// --- 6: VER CARRITO (usa carrito simulado) ---\nelse if (msg === '6' || msg.includes('carrito') || msg.includes('mis productos')) {\n  if (userState.carrito.length === 0) {\n    respuesta = String.fromCodePoint(0x1F6D2) + ' *Tu carrito est\\u00E1 vac\\u00EDo*\\n\\nMir\\u00E1 nuestro cat\\u00E1logo (opci\\u00F3n 2) y eleg\\u00ED productos para comprar.\\n\\nEscrib\\u00ED \"menu\" para volver.';\n  } else {\n    let txt = String.fromCodePoint(0x1F6D2) + ' *Tu Carrito*\\n\\n';\n    let total = 0;\n    userState.carrito.forEach(p => {\n      const subtotal = p.precio * p.cantidad;\n      total += subtotal;\n      txt += '\\u2022 *' + p.nombre + '*\\n  $' + p.precio.toLocaleString('es-AR', {minimumFractionDigits: 2}) + ' x ' + p.cantidad + ' = $' + subtotal.toLocaleString('es-AR', {minimumFractionDigits: 2}) + '\\n';\n    });\n    txt += '\\n*Total: $' + total.toLocaleString('es-AR', {minimumFractionDigits: 2}) + '*';\n    txt += '\\n\\nPara finalizar tu compra, escrib\\u00ED \"7\" o \"finalizar\".\\nEscrib\\u00ED \"menu\" para volver.';\n    respuesta = txt;\n  }\n}\n\n// --- 7: FINALIZAR COMPRA ---\nelse if (msg === '7' || msg.includes('finalizar') || msg.includes('terminar')) {\n    respuesta = String.fromCodePoint(0x2705) + ' *\\u00A1Compra finalizada con \\u00E9xito!*\\n\\nGracias por tu compra. En breve nos pondremos en contacto para coordinar la entrega.\\n\\nEscrib\\u00ED \"menu\" para volver.';\n    accion = 'finalizar';}\n\n// --- DEFAULT ---\nelse {\n    respuesta = 'No entendí ese comando. Escribí \"menu\" para ver las opciones disponibles.';\n}\n\n// Persistir estado del carrito simulado\nstaticData[userId] = JSON.parse(JSON.stringify(userState));\n\n// Salida\nreturn [\n  {\n    json: {\n      mensaje: respuesta,\n      accion: accion,\n      producto_id: producto_id,\n      producto_nombre: producto_nombre,\n      producto_precio: producto_precio\n    }\n  }\n];",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        240,
+        176
+      ],
+      "id": "bot-router-001",
+      "name": "Bot Router",
+      "color": "#7C4DFF",
+      "notes": "ENRUTADOR - Toma el mensaje y decide que responder."
+    },
+    {
+      "parameters": {
+        "chatId": "={{$json[\"user_id\"]}}",
+        "text": "={{$json[\"mensaje\"]}}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        576,
+        176
+      ],
+      "id": "telegram-send-v2-001",
+      "name": "Telegram Send",
+      "color": "#00C853",
+      "notes": "RESPUESTA - Envia el mensaje al usuario.",
+      "credentials": {
+        "telegramApi": {
+          "id": "nofHqyk9CtWirFO5",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/api/v1/products/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "continueOnFail": true
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        400
+      ],
+      "id": "get-products-001",
+      "name": "GET Products",
+      "color": "#FF6D00",
+      "notes": "PRODUCTOS - Obtiene lista de productos activos desde la API.\ncontinueOnFail: si falla, el flujo sigue sin productos."
+    },
+    {
+      "parameters": {
+        "functionCode": "const editFieldsData = $node[\"Edit Fields\"].json;\nconst productsResponse = $input.first().json;\nconst createClientData = $node[\"Create Client\"].json;\n\nconst productos = productsResponse.items || [];\nlet carrito = [];\n\nreturn [{\n  json: {\n    ...editFieldsData,\n    productos: productos,\n    carrito: carrito,\n    cliente_id: createClientData ? createClientData.id : null\n  }\n}];",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        400,
+        400
+      ],
+      "id": "combine-products-001",
+      "name": "Combine Products",
+      "color": "#AA00FF",
+      "notes": "COMBINA - Fusiona los datos de Edit Fields con la respuesta de GET Products.\nOutput: datos del usuario + array productos[]"
+    },
+    {
+      "id": "switch-router-001",
+      "name": "Switch Router",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        576,
+        176
+      ],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.accion }}",
+                    "rightValue": "add_producto",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "switch-add-001"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.accion }}",
+                    "rightValue": "finalizar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "switch-fin-001"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ 1 }}",
+                    "rightValue": "1",
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    },
+                    "id": "switch-default-5061d9a7"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {},
+        "looseTypeValidation": true
+      }
+    },
+    {
+      "id": "add-to-carrito-001",
+      "name": "Add to Carrito",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        -20
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/v1/clients/{{ $json.cliente_id }}/productos",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "timeout": 10000
+        }
+      }
+    },
+    {
+      "id": "telegram-send-success-001",
+      "name": "TG Send Success",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        880,
+        -20
+      ],
+      "parameters": {
+        "chatId": "={{ $json.chat_id || $json.telegram_chat_id }}",
+        "text": "={{ $json.mensaje }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      }
+    },
+    {
+      "id": "clear-carrito-001",
+      "name": "Clear Carrito",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        100
+      ],
+      "parameters": {
+        "method": "PUT",
+        "url": "http://127.0.0.1:8000/api/v1/clients/{{ $json.cliente_id }}/productos",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "[]",
+        "options": {
+          "timeout": 10000
+        }
+      }
+    },
+    {
+      "id": "telegram-send-clear-001",
+      "name": "TG Send Clear",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        880,
+        100
+      ],
+      "parameters": {
+        "chatId": "={{ $json.chat_id || $json.telegram_chat_id }}",
+        "text": "={{ $json.mensaje }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/v1/clients/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "dev-api-key-123"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "nombre",
+              "value": "={{$json['first_name']}}"
+            },
+            {
+              "name": "apellido",
+              "value": "={{$json['last_name'] || ''}}"
+            },
+            {
+              "name": "email",
+              "value": "={{'tg-' + $json['user_id'] + '@telegram.com'}}"
+            },
+            {
+              "name": "telefono",
+              "value": ""
+            }
+          ]
+        },
+        "options": {
+          "continueOnFail": true
+        },
+        "contentType": "json"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -48,
+        400
+      ],
+      "id": "create-client-001",
+      "name": "Create Client",
+      "color": "#FF6D00",
+      "notes": "CREAR CLIENTE - Crea un cliente en la API. Si ya existe (email duplicado), la API devuelve el existente sin error."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append to Sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Guardar en API",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bot Router": {
+      "main": [
+        [
+          {
+            "node": "Switch Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET Products": {
+      "main": [
+        [
+          {
+            "node": "Combine Products",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Products": {
+      "main": [
+        [
+          {
+            "node": "Bot Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Router": {
+      "main": [
+        [
+          {
+            "node": "Add to Carrito",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Clear Carrito",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram Send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to Carrito": {
+      "main": [
+        [
+          {
+            "node": "TG Send Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear Carrito": {
+      "main": [
+        [
+          {
+            "node": "TG Send Clear",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Client": {
+      "main": [
+        [
+          {
+            "node": "GET Products",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {
+    "instanceId": "3653cf1b010a382ce56c78b87e7752e8ef030df9849fb420fa30b5289e90c3e8"
+  },
+  "tags": []
+}

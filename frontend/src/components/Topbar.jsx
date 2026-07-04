@@ -4,7 +4,7 @@ import ThemeToggle from './ThemeToggle.jsx'
 import Avatar from './Avatar.jsx'
 import { exportClientsToExcel } from '../services/clientService.js'
 
-export default function Topbar({ user, isAdmin, onNewClient, onLogout, title = 'Clientes', subtitle = 'Gestión de clientes del CRM' }) {
+export default function Topbar({ user, isAdmin, onNewClient, onNewProduct, onLogout, title = 'Clientes', subtitle = 'Gestión de clientes del CRM', onExport, exportLabel }) {
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -44,23 +44,23 @@ export default function Topbar({ user, isAdmin, onNewClient, onLogout, title = '
       </div>
 
       <div className="flex items-center gap-3">
-        {isAdmin && onNewClient && (
-          <button
-            onClick={onNewClient}
-            className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground text-[13px] font-semibold rounded-lg shadow-sm shadow-blue-500/20 hover:bg-blue-700 active:bg-blue-800 transition-colors duration-150"
-          >
-            <Plus size={15} strokeWidth={2.5} />
-            Nuevo Cliente
-          </button>
-        )}
+          {isAdmin && (onNewClient || onNewProduct) && (
+            <button
+              onClick={onNewClient || onNewProduct}
+              className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground text-[13px] font-semibold rounded-lg shadow-sm shadow-blue-500/20 hover:bg-blue-700 active:bg-blue-800 transition-colors duration-150"
+            >
+              <Plus size={15} strokeWidth={2.5} />
+              {onNewProduct ? 'Nuevo Producto' : 'Nuevo Cliente'}
+            </button>
+          )}
 
         <button
-          onClick={exportClientsToExcel}
+          onClick={onExport || exportClientsToExcel}
           className="flex items-center gap-2 px-4 py-2.5 bg-secondary text-slate-700 dark:text-slate-300 text-[13px] font-semibold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors duration-150"
           title="Descargar Excel"
         >
           <FileDown size={15} strokeWidth={2} />
-          Exportar Excel
+          {exportLabel || 'Exportar Excel'}
         </button>
 
         <ThemeToggle />

@@ -2,35 +2,33 @@ import { useState } from 'react'
 import { AlertCircle, Inbox, EyeOff } from 'lucide-react'
 import Sidebar from '../components/Sidebar.jsx'
 import Topbar from '../components/Topbar.jsx'
-import ClientFilters from '../components/ClientFilters.jsx'
-import ClientTable from '../components/ClientTable.jsx'
-import ClientDetailsModal from '../components/ClientDetailsModal.jsx'
-import ClientFormModal from '../components/ClientFormModal.jsx'
-import DeleteClientModal from '../components/DeleteClientModal.jsx'
-import useClients from '../hooks/useClients.js'
+import ProductFilters from '../components/ProductFilters.jsx'
+import ProductTable from '../components/ProductTable.jsx'
+import ProductDetailsModal from '../components/ProductDetailsModal.jsx'
+import ProductFormModal from '../components/ProductFormModal.jsx'
+import DeleteProductModal from '../components/DeleteProductModal.jsx'
+import useProducts from '../hooks/useProducts.js'
 import useAuth from '../hooks/useAuth.js'
+import { exportProductsToExcel } from '../services/productService.js'
 
-export default function ClientsPage() {
+export default function ProductsPage() {
   const { user, isAdmin, logout } = useAuth()
   const {
-    clients,
+    products,
     loading,
     error,
     filters,
     setFilters,
-    refreshClients,
-    createClient,
-    updateClient,
-    deleteClient,
-    assignProduct,
-    removeAssignedProduct,
-    updateProductQuantity,
-  } = useClients()
+    refreshProducts,
+    createProduct,
+    updateProduct,
+    deleteProduct,
+  } = useProducts()
 
-  const [selectedClient, setSelectedClient] = useState(null)
+  const [selectedProduct, setSelectedProduct] = useState(null)
   const [showFormModal, setShowFormModal] = useState(false)
-  const [editingClient, setEditingClient] = useState(null)
-  const [deletingClient, setDeletingClient] = useState(null)
+  const [editingProduct, setEditingProduct] = useState(null)
+  const [deletingProduct, setDeletingProduct] = useState(null)
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -39,11 +37,15 @@ export default function ClientsPage() {
         <Topbar
           user={user}
           isAdmin={isAdmin}
-          onNewClient={() => { setEditingClient(null); setShowFormModal(true) }}
+          onNewProduct={() => { setEditingProduct(null); setShowFormModal(true) }}
           onLogout={logout}
+          title="Productos"
+          subtitle="Gestión del catálogo de productos"
+          onExport={exportProductsToExcel}
+          exportLabel="Exportar Excel"
         />
         <div className="flex-1 overflow-y-auto p-8">
-          <ClientFilters
+          <ProductFilters
             filters={filters}
             onFiltersChange={setFilters}
           />
@@ -51,7 +53,7 @@ export default function ClientsPage() {
           {loading && (
             <div className="flex flex-col items-center justify-center py-28 gap-3">
               <div className="w-7 h-7 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-              <p className="text-[13px] text-muted-foreground">Cargando clientes…</p>
+              <p className="text-[13px] text-muted-foreground">Cargando productos…</p>
             </div>
           )}
 
@@ -62,10 +64,10 @@ export default function ClientsPage() {
               </div>
               <p className="text-[14px] font-semibold text-foreground">Error de conexión</p>
               <p className="text-[12px] text-muted-foreground max-w-[20rem] text-center">
-                No se pudieron cargar los clientes. Verificá la conexión e intentá de nuevo.
+                No se pudieron cargar los productos. Verificá la conexión e intentá de nuevo.
               </p>
               <button
-                onClick={refreshClients}
+                onClick={refreshProducts}
                 className="text-[13px] font-semibold text-primary hover:text-blue-700 flex items-center gap-1"
               >
                 Reintentar conexión
@@ -73,25 +75,25 @@ export default function ClientsPage() {
             </div>
           )}
 
-          {!loading && !error && clients.length === 0 && (
+          {!loading && !error && products.length === 0 && (
             <div className="flex flex-col items-center justify-center py-28 gap-3">
               <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 flex items-center justify-center">
                 <Inbox size={20} className="text-slate-400 dark:text-slate-500" />
               </div>
-              <p className="text-[14px] font-semibold text-foreground">No hay clientes</p>
+              <p className="text-[14px] font-semibold text-foreground">No hay productos</p>
               <p className="text-[12px] text-muted-foreground">
-                No se encontraron clientes para mostrar.
+                No se encontraron productos para mostrar.
               </p>
             </div>
           )}
 
-          {!loading && !error && clients.length > 0 && (
-            <ClientTable
-              clients={clients}
+          {!loading && !error && products.length > 0 && (
+            <ProductTable
+              products={products}
               isAdmin={isAdmin}
-              onView={(c) => setSelectedClient(c)}
-              onEdit={(c) => { setEditingClient(c); setShowFormModal(true) }}
-              onDelete={(c) => setDeletingClient(c)}
+              onView={(p) => setSelectedProduct(p)}
+              onEdit={(p) => { setEditingProduct(p); setShowFormModal(true) }}
+              onDelete={(p) => setDeletingProduct(p)}
             />
           )}
 
@@ -99,41 +101,38 @@ export default function ClientsPage() {
             <div className="flex items-center justify-center gap-2 mt-4 py-3 px-4 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700">
               <EyeOff size={14} className="text-slate-400 dark:text-slate-500" />
               <p className="text-[12px] text-muted-foreground">
-                Modo solo lectura — no tenés permisos para crear, editar o eliminar clientes.
+                Modo solo lectura — no tenés permisos para crear, editar o eliminar productos.
               </p>
             </div>
           )}
         </div>
       </main>
 
-      {selectedClient && (
-        <ClientDetailsModal
-          client={selectedClient}
+      {selectedProduct && (
+        <ProductDetailsModal
+          product={selectedProduct}
           isAdmin={isAdmin}
-          onClose={() => setSelectedClient(null)}
-          onEdit={() => { setEditingClient(selectedClient); setSelectedClient(null); setShowFormModal(true) }}
-          onAssignProduct={assignProduct}
-          onRemoveProduct={removeAssignedProduct}
-          onUpdateQuantity={updateProductQuantity}
+          onClose={() => setSelectedProduct(null)}
+          onEdit={() => { setEditingProduct(selectedProduct); setSelectedProduct(null); setShowFormModal(true) }}
         />
       )}
 
       {showFormModal && (
-        <ClientFormModal
-          client={editingClient}
-          onClose={() => { setShowFormModal(false); setEditingClient(null) }}
-          onSave={editingClient
-            ? (data) => updateClient(editingClient.id, data)
-            : (data) => createClient(data)
+        <ProductFormModal
+          product={editingProduct}
+          onClose={() => { setShowFormModal(false); setEditingProduct(null) }}
+          onSave={editingProduct
+            ? (data) => updateProduct(editingProduct.id, data)
+            : (data) => createProduct(data)
           }
         />
       )}
 
-      {deletingClient && (
-        <DeleteClientModal
-          client={deletingClient}
-          onClose={() => setDeletingClient(null)}
-          onConfirm={() => deleteClient(deletingClient.id).then(() => setDeletingClient(null))}
+      {deletingProduct && (
+        <DeleteProductModal
+          product={deletingProduct}
+          onClose={() => setDeletingProduct(null)}
+          onConfirm={() => deleteProduct(deletingProduct.id).then(() => setDeletingProduct(null))}
         />
       )}
     </div>

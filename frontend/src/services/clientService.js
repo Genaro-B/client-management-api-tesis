@@ -47,6 +47,22 @@ export function restoreClient(id) {
   return api.patch(`/clients/${id}/restore`).then((r) => r.data)
 }
 
+export function getClientProductos(clientId) {
+  return api.get(`/clients/${clientId}/productos`).then((r) => r.data)
+}
+
+export function addClientProducto(clientId, data) {
+  return api.post(`/clients/${clientId}/productos`, data).then((r) => r.data)
+}
+
+export function setClientProductos(clientId, data) {
+  return api.put(`/clients/${clientId}/productos`, data).then((r) => r.data)
+}
+
+export function removeClientProducto(clientId, productoId) {
+  return api.delete(`/clients/${clientId}/productos/${productoId}`)
+}
+
 export async function exportClientsToExcel() {
   try {
     const response = await api.get('/clients/export', { responseType: 'blob' })

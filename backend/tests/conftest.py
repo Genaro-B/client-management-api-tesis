@@ -17,7 +17,9 @@ from src.database.base import Base
 from src.database.session import get_db
 from src.main import create_app
 from src.models.client import Client
+from src.models.product import Product
 from src.repositories.client_repo import ClientRepository
+from src.repositories.product_repo import ProductRepository
 
 TEST_API_KEY = "dev-api-key-123"
 
@@ -92,3 +94,45 @@ def sample_inactive_client(db_session):
         activo=False,
     )
     return repo.create(client)
+
+
+@pytest.fixture(scope="function")
+def sample_product(db_session):
+    """Crea y persiste un producto de prueba con stock."""
+    repo = ProductRepository(db_session)
+    product = Product(
+        nombre="Producto Test",
+        descripcion="Producto de prueba",
+        precio=1500.50,
+        stock=10,
+        categoria="Test",
+    )
+    return repo.create(product)
+
+
+@pytest.fixture(scope="function")
+def sample_product2(db_session):
+    """Crea y persiste un segundo producto de prueba."""
+    repo = ProductRepository(db_session)
+    product = Product(
+        nombre="Otro Producto",
+        descripcion="Otro producto de prueba",
+        precio=500.00,
+        stock=5,
+        categoria="Test",
+    )
+    return repo.create(product)
+
+
+@pytest.fixture(scope="function")
+def sample_product_sin_stock(db_session):
+    """Crea y persiste un producto sin stock (stock=0)."""
+    repo = ProductRepository(db_session)
+    product = Product(
+        nombre="Sin Stock",
+        descripcion="Producto agotado",
+        precio=100.00,
+        stock=0,
+        categoria="Test",
+    )
+    return repo.create(product)
