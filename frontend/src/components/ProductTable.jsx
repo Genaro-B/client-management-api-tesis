@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Eye, Pencil, Trash2 } from 'lucide-react'
 import StatusBadge from './StatusBadge.jsx'
 import Pagination from './Pagination.jsx'
@@ -32,16 +33,37 @@ function formatPrice(price) {
   return '$' + Number(price).toLocaleString('es-AR', { minimumFractionDigits: 2 })
 }
 
+function ProductAvatar({ product }) {
+  const [imageFailed, setImageFailed] = useState(false)
+  const initial = product.nombre?.charAt(0)?.toUpperCase() || '?'
+
+  // Sin imagen, o si la imagen falla al cargar, se muestra la inicial como fallback.
+  if (!product.image_url || imageFailed) {
+    return (
+      <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 ring-1 ring-blue-100 dark:ring-blue-900 flex items-center justify-center flex-shrink-0">
+        <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400">
+          {initial}
+        </span>
+      </div>
+    )
+  }
+
+  return (
+    <img
+      src={product.image_url}
+      alt={product.nombre}
+      onError={() => setImageFailed(true)}
+      className="w-8 h-8 rounded-lg object-cover ring-1 ring-slate-100 dark:ring-slate-700 flex-shrink-0"
+    />
+  )
+}
+
 function Cell({ column, product }) {
   if (column.key === 'nombre') {
     return (
       <td className="py-4 px-5">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 ring-1 ring-blue-100 dark:ring-blue-900 flex items-center justify-center flex-shrink-0">
-            <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400">
-              {product.nombre?.charAt(0)?.toUpperCase() || '?'}
-            </span>
-          </div>
+          <ProductAvatar product={product} />
           <div>
             <span className="text-[13px] font-semibold text-slate-800 dark:text-slate-100">
               {product.nombre}

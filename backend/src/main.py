@@ -1,5 +1,10 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+
+from src.core.config import UPLOAD_DIR
 
 # Fábrica de la aplicación y punto de entrada principal
 # Este archivo conecta routers y middleware según Docs/architecture.md
@@ -24,6 +29,12 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # Servir las imágenes subidas como estáticos en /static/uploads (100% offline).
+    # La ruta se lee del entorno para que los tests puedan aislar el directorio.
+    upload_dir = os.getenv("UPLOAD_DIR", UPLOAD_DIR)
+    os.makedirs(upload_dir, exist_ok=True)
+    app.mount("/static/uploads", StaticFiles(directory=upload_dir), name="uploads")
 
     # Importar e incluir routers. Los routers están definidos en src.api.routes
     # para seguir la estructura de proyecto establecida en Docs/architecture.md.

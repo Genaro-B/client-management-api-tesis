@@ -47,6 +47,22 @@ export function restoreProduct(id) {
   return api.patch(`/products/${id}/restore`).then((r) => r.data)
 }
 
+export function uploadProductImage(id, file) {
+  const formData = new FormData()
+  formData.append('file', file)
+  // El instance axios trae Content-Type application/json por defecto; el
+  // upload multipart debe forzarlo (axios fija el boundary automáticamente).
+  return api
+    .post(`/products/${id}/image`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    .then((r) => r.data)
+}
+
+export function deleteProductImage(id) {
+  return api.delete(`/products/${id}/image`).then((r) => r.data)
+}
+
 export async function exportProductsToExcel() {
   try {
     const response = await api.get('/products/export', { responseType: 'blob' })

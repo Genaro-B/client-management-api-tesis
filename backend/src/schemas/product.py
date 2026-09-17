@@ -10,6 +10,7 @@ class CreateProduct(BaseModel):
     precio: float = Field(..., ge=0)
     stock: int = Field(default=0, ge=0)
     categoria: Optional[str] = None
+    image_url: Optional[str] = None
 
 
 class UpdateProduct(BaseModel):
@@ -19,6 +20,7 @@ class UpdateProduct(BaseModel):
     precio: Optional[float] = Field(None, ge=0)
     stock: Optional[int] = Field(None, ge=0)
     categoria: Optional[str] = None
+    image_url: Optional[str] = None
 
 
 class ProductResponse(BaseModel):
@@ -29,6 +31,7 @@ class ProductResponse(BaseModel):
     precio: float
     stock: int
     categoria: Optional[str]
+    image_url: Optional[str] = None
     activo: bool
     fecha_registro: datetime
     updated_at: Optional[datetime]

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import Modal from './Modal.jsx'
-import { Loader2 } from 'lucide-react'
+import { Loader2, ImagePlus, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
+import { uploadProductImage, deleteProductImage } from '../services/productService.js'
 
 const emptyForm = {
   nombre: '',
@@ -10,13 +12,24 @@ const emptyForm = {
   categoria: '',
 }
 
-export default function ProductFormModal({ product, onClose, onSave }) {
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024 // 2MB, mismo límite que el backend
+
+export default function ProductFormModal({ product, isAdmin, onClose, onSave, onRefresh }) {
   const isEditing = !!product
   const [form, setForm] = useState(emptyForm)
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState({})
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [previewUrl, setPreviewUrl] = useState(null)
+  const [imageError, setImageError] = useState('')
+  const [removeImage, setRemoveImage] = useState(false)
 
   useEffect(() => {
+    setSelectedFile(null)
+    setPreviewUrl(null)
+    setImageError('')
+    setRemoveImage(false)
     if (product) {
       setForm({
         nombre: product.nombre || '',
@@ -30,9 +43,41 @@ export default function ProductFormModal({ product, onClose, onSave }) {
     }
   }, [product])
 
+  // Liberar el object URL del preview al cambiar de archivo o desmontar el modal
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
+    }
+  }, [previewUrl])
+
   const handleChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }))
     if (errors[key]) setErrors((prev) => ({ ...prev, [key]: null }))
+  }
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setImageError('Solo se permiten imágenes JPG, PNG o WebP')
+      setSelectedFile(null)
+      setPreviewUrl(null)
+      e.target.value = ''
+      return
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      setImageError('La imagen supera el máximo de 2MB')
+      setSelectedFile(null)
+      setPreviewUrl(null)
+      e.target.value = ''
+      return
+    }
+
+    setImageError('')
+    setRemoveImage(false)
+    setSelectedFile(file)
+    setPreviewUrl(URL.createObjectURL(file))
   }
 
   const validate = () => {
@@ -61,7 +106,25 @@ export default function ProductFormModal({ product, onClose, onSave }) {
         stock: form.stock !== '' ? parseInt(form.stock, 10) : 0,
         categoria: form.categoria.trim() || undefined,
       }
-      await onSave(payload)
+      const saved = await onSave(payload)
+
+      // Solo admin: subir / reemplazar / quitar la imagen tras guardar el producto
+      if (isAdmin && saved?.id) {
+        try {
+          if (removeImage && saved.image_url) {
+            await deleteProductImage(saved.id)
+            toast.success('Imagen eliminada correctamente')
+            onRefresh?.()
+          } else if (selectedFile) {
+            await uploadProductImage(saved.id, selectedFile)
+            toast.success('Imagen subida correctamente')
+            onRefresh?.()
+          }
+        } catch (imageErr) {
+          toast.error(imageErr.message || 'El producto se guardó, pero no se pudo subir la imagen')
+        }
+      }
+
       onClose()
     } catch {
       // error handled by hook
@@ -69,6 +132,9 @@ export default function ProductFormModal({ product, onClose, onSave }) {
       setSaving(false)
     }
   }
+
+  const currentPreview = previewUrl || (isEditing && product.image_url && !removeImage ? product.image_url : null)
+  const showPreviewBox = !!previewUrl || (isEditing && !!product.image_url)
 
   return (
     <Modal title={isEditing ? 'Editar Producto' : 'Nuevo Producto'} onClose={onClose}>
@@ -119,6 +185,70 @@ export default function ProductFormModal({ product, onClose, onSave }) {
           onChange={(v) => handleChange('categoria', v)}
           disabled={saving}
         />
+
+        {isAdmin && (
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">
+              Imagen
+            </label>
+
+            {showPreviewBox && !removeImage && (
+              <div className="mb-2 flex items-center gap-3">
+                <div className="w-14 h-14 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 flex items-center justify-center flex-shrink-0">
+                  {currentPreview ? (
+                    <img src={currentPreview} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-[13px] font-bold text-slate-400">
+                      {form.nombre?.charAt(0)?.toUpperCase() || '?'}
+                    </span>
+                  )}
+                </div>
+                {isEditing && product.image_url && !previewUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setRemoveImage(true)}
+                    disabled={saving}
+                    className="text-[12px] font-semibold text-red-500 hover:text-red-600 disabled:opacity-60 flex items-center gap-1"
+                  >
+                    <Trash2 size={12} />
+                    Quitar imagen
+                  </button>
+                )}
+              </div>
+            )}
+
+            {removeImage && (
+              <p className="text-[11px] text-amber-600 dark:text-amber-500 mb-2">
+                Se quitará la imagen al guardar.
+              </p>
+            )}
+
+            {removeImage ? (
+              <button
+                type="button"
+                onClick={() => setRemoveImage(false)}
+                disabled={saving}
+                className="text-[12px] font-semibold text-primary hover:text-blue-700 disabled:opacity-60"
+              >
+                Cancelar quitar imagen
+              </button>
+            ) : (
+              <label className="cursor-pointer inline-flex items-center gap-2 py-2 px-3 rounded-lg bg-secondary text-[12px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-60 transition-colors duration-150">
+                <ImagePlus size={14} />
+                {currentPreview ? 'Reemplazar imagen' : 'Subir imagen'}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleFileChange}
+                  disabled={saving}
+                  className="hidden"
+                />
+              </label>
+            )}
+
+            {imageError && <p className="text-[11px] text-destructive mt-1">{imageError}</p>}
+          </div>
+        )}
 
         <div className="flex gap-2.5 pt-2">
           <button

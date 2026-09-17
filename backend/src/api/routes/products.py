@@ -1,15 +1,25 @@
+import os
 from io import BytesIO
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from src.schemas.product import CreateProduct, UpdateProduct, ProductResponse
 from src.repositories.product_repo import ProductRepository
 from src.services.product_service import ProductService
+from src.services.product_image_service import ProductImageService
+from src.storage.image_storage import ImageStorage, LocalImageStorage
+from src.core.config import UPLOAD_DIR
+from src.core.exceptions import ImageTooLargeError, UnsupportedImageTypeError, to_http_exception
 from src.database.session import get_db
 
 router = APIRouter()
+
+
+def get_image_storage() -> ImageStorage:
+    """Proveer la implementación concreta de ImageStorage (inyección de dependencia)."""
+    return LocalImageStorage(base_dir=os.getenv("UPLOAD_DIR", UPLOAD_DIR))
 
 
 @router.get("/inactive")
@@ -136,3 +146,43 @@ def delete_product(product_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Producto no encontrado")
     repo.soft_delete(product)
     return None
+
+
+@router.post("/{product_id}/image", response_model=ProductResponse)
+def upload_product_image(
+    product_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    storage: ImageStorage = Depends(get_image_storage),
+):
+    """Subir una imagen para un producto. Solo acceso admin.
+
+    Valida tipo (JPG/PNG/WebP por content-type + magic bytes) y tamaño
+    (máx. 2MB). Si el producto ya tenía imagen, se reemplaza el archivo.
+    """
+    service = ProductImageService(db, storage)
+    image_bytes = file.file.read()
+    try:
+        result = service.upload(product_id, image_bytes, file.content_type or "")
+    except (UnsupportedImageTypeError, ImageTooLargeError) as exc:
+        raise to_http_exception(exc)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    return result
+
+
+@router.delete("/{product_id}/image", response_model=ProductResponse)
+def delete_product_image(
+    product_id: int,
+    db: Session = Depends(get_db),
+    storage: ImageStorage = Depends(get_image_storage),
+):
+    """Quitar la imagen de un producto. Solo acceso admin.
+
+    Idempotente: si el producto no tenía imagen, responde igual con image_url null.
+    """
+    service = ProductImageService(db, storage)
+    result = service.remove(product_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    return result

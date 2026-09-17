@@ -128,11 +128,13 @@ export default function ProductsPage() {
       {showFormModal && (
         <ProductFormModal
           product={editingProduct}
+          isAdmin={isAdmin}
           onClose={() => { setShowFormModal(false); setEditingProduct(null) }}
           onSave={editingProduct
             ? (data) => updateProduct(editingProduct.id, data)
             : (data) => createProduct(data)
           }
+          onRefresh={refreshProducts}
         />
       )}
 

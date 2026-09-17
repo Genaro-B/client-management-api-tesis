@@ -11,6 +11,7 @@ class Product(Base):
     precio = Column(Float, nullable=False, default=0.0)
     stock = Column(Integer, nullable=False, default=0)
     categoria = Column(String(100), nullable=True)
+    image_url = Column(String(500), nullable=True)
     activo = Column(Boolean, nullable=False, server_default="1")
     fecha_registro = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
