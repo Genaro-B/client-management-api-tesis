@@ -212,3 +212,94 @@ def test_list_interactions_returns_all_fields(client):
     assert "intent" in item
     assert "result" in item
     assert "timestamp" in item
+
+
+# ---------------------------------------------------------------------------
+# GET / — Filtro por cliente (client_id)
+# ---------------------------------------------------------------------------
+
+
+def _crear_cliente(client, email):
+    resp = client.post(
+        "/api/v1/clients/",
+        json={"nombre": "Cliente", "apellido": "Test", "email": email},
+    )
+    assert resp.status_code in (200, 201)
+    return resp.json()["id"]
+
+
+def _crear_interaccion(client, email, n):
+    client.post(
+        "/api/v1/interactions/",
+        json={
+            "source": "api",
+            "payload": json.dumps({"n": n}),
+            "clientLookup": {"email": email},
+        },
+        headers={"X-Api-Key": TEST_API_KEY},
+    )
+
+
+def test_list_interactions_filter_by_client(client):
+    """Filtro por client_id devuelve solo sus interacciones con total correcto."""
+    c1 = _crear_cliente(client, "filter1@x.com")
+    _crear_cliente(client, "filter2@x.com")
+
+    _crear_interaccion(client, "filter1@x.com", 1)
+    _crear_interaccion(client, "filter1@x.com", 2)
+    _crear_interaccion(client, "filter2@x.com", 3)
+
+    resp = client.get(f"/api/v1/interactions/?client_id={c1}")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total"] == 2
+    assert all(item["clientId"] == c1 for item in data["items"])
+
+
+def test_list_interactions_without_filter_returns_all(client):
+    """Sin filtro mantiene el comportamiento actual (todas las interacciones)."""
+    c1 = _crear_cliente(client, "nofilter1@x.com")
+    c2 = _crear_cliente(client, "nofilter2@x.com")
+
+    _crear_interaccion(client, "nofilter1@x.com", 1)
+    _crear_interaccion(client, "nofilter1@x.com", 2)
+    _crear_interaccion(client, "nofilter2@x.com", 3)
+
+    resp = client.get("/api/v1/interactions/")
+    data = resp.json()
+    assert data["total"] == 3
+    assert len(data["items"]) == 3
+
+
+def test_list_interactions_filter_client_without_interactions(client):
+    """Cliente sin interacciones devuelve items vacío y total 0."""
+    c1 = _crear_cliente(client, "empty@x.com")
+
+    resp = client.get(f"/api/v1/interactions/?client_id={c1}")
+    data = resp.json()
+    assert data["items"] == []
+    assert data["total"] == 0
+
+
+def test_list_interactions_filter_nonexistent_client(client):
+    """client_id inexistente devuelve items vacío y total 0."""
+    resp = client.get("/api/v1/interactions/?client_id=99999")
+    data = resp.json()
+    assert data["items"] == []
+    assert data["total"] == 0
+
+
+def test_list_interactions_filter_with_pagination(client):
+    """El filtro se combina con limit/offset y el total respeta el filtro."""
+    c1 = _crear_cliente(client, "page@x.com")
+    _crear_cliente(client, "page2@x.com")
+
+    for i in range(25):
+        _crear_interaccion(client, "page@x.com", i)
+    _crear_interaccion(client, "page2@x.com", 999)
+
+    resp = client.get(f"/api/v1/interactions/?client_id={c1}&limit=10&offset=10")
+    data = resp.json()
+    assert len(data["items"]) == 10
+    assert data["total"] == 25
+    assert all(item["clientId"] == c1 for item in data["items"])

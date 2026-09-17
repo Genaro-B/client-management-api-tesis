@@ -58,6 +58,8 @@ export async function exportProductsToExcel() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
+    const { toast } = await import('sonner')
+    toast.success('Archivo exportado correctamente')
   } catch (err) {
     const { toast } = await import('sonner')
     toast.error(err.message || 'Error al exportar Excel')

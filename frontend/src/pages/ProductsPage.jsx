@@ -19,6 +19,10 @@ export default function ProductsPage() {
     error,
     filters,
     setFilters,
+    page,
+    setPage,
+    totalPages,
+    total,
     refreshProducts,
     createProduct,
     updateProduct,
@@ -91,6 +95,10 @@ export default function ProductsPage() {
             <ProductTable
               products={products}
               isAdmin={isAdmin}
+              page={page}
+              totalPages={totalPages}
+              total={total}
+              onPageChange={setPage}
               onView={(p) => setSelectedProduct(p)}
               onEdit={(p) => { setEditingProduct(p); setShowFormModal(true) }}
               onDelete={(p) => setDeletingProduct(p)}

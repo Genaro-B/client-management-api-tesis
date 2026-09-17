@@ -8,6 +8,7 @@ import InteractionsPage from './pages/InteractionsPage.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
 import { Toaster } from 'sonner'
 import useAuth from './hooks/useAuth.js'
+import AdminBotWidget from './components/AdminBotWidget.jsx'
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, initializing } = useAuth()
@@ -21,6 +22,14 @@ function PublicRoute({ children }) {
   if (initializing) return null
   if (isAuthenticated) return <Navigate to="/dashboard" replace />
   return children
+}
+
+// El widget del asistente administrativo solo se muestra para usuarios admin.
+// En la pantalla de login no hay sesión activa, por lo que isAdmin es false ahí.
+function AdminBotLauncher() {
+  const { isAdmin } = useAuth()
+  if (!isAdmin) return null
+  return <AdminBotWidget />
 }
 
 export default function App() {
@@ -86,6 +95,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Toaster richColors closeButton position="top-right" />
+      <AdminBotLauncher />
     </BrowserRouter>
   )
 }

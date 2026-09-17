@@ -1,6 +1,7 @@
 import { Eye, Pencil, Trash2 } from 'lucide-react'
 import Avatar from './Avatar.jsx'
 import StatusBadge from './StatusBadge.jsx'
+import Pagination from './Pagination.jsx'
 
 const columns = [
   { key: 'id', label: 'ID', mono: true },
@@ -85,7 +86,7 @@ function Cell({ column, client }) {
   return null
 }
 
-export default function ClientTable({ clients, isAdmin, onView, onEdit, onDelete }) {
+export default function ClientTable({ clients, isAdmin, onView, onEdit, onDelete, page, totalPages, total, onPageChange }) {
   const visibleColumns = isAdmin ? columns : columns.filter((c) => c.key !== 'acciones')
 
   return (
@@ -145,11 +146,12 @@ export default function ClientTable({ clients, isAdmin, onView, onEdit, onDelete
           ))}
         </tbody>
       </table>
-      <div className="flex items-center justify-between py-3 px-5 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30">
-        <span className="text-[11px] text-muted-foreground">
-          {clients.length} {clients.length === 1 ? 'cliente encontrado' : 'clientes encontrados'}
-        </span>
-      </div>
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        onPageChange={onPageChange}
+      />
     </div>
   )
 }

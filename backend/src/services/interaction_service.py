@@ -7,7 +7,7 @@ from src.repositories.interaction_repo import InteractionRepository
 from src.repositories.client_repo import ClientRepository
 
 # Known interaction sources
-VALID_SOURCES = {"telegram", "webhook", "n8n", "api", "system"}
+VALID_SOURCES = {"telegram", "webhook", "n8n", "api", "system", "admin-bot"}
 
 
 class ValidationError(Exception):

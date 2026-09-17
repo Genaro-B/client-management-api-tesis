@@ -1,9 +1,39 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Modal from './Modal.jsx'
 import Avatar from './Avatar.jsx'
 import StatusBadge from './StatusBadge.jsx'
 import AssignProductModal from './AssignProductModal.jsx'
-import { Pencil, Plus, Trash2, Minus, Plus as PlusIcon } from 'lucide-react'
+import { Pencil, Plus, Trash2, Minus, Plus as PlusIcon, RefreshCw, History } from 'lucide-react'
+import { getInteractions } from '../services/interactionService.js'
+
+function formatTimestamp(ts) {
+  if (!ts) return '—'
+  try {
+    return new Date(ts).toLocaleString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  } catch {
+    return ts
+  }
+}
+
+function payloadResumen(payload) {
+  if (!payload) return '—'
+  try {
+    const obj = JSON.parse(payload)
+    if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+      const first = Object.values(obj)[0]
+      if (typeof first === 'string') return first
+    }
+    return JSON.stringify(obj)
+  } catch {
+    return payload
+  }
+}
 
 export default function ClientDetailsModal({
   client,
@@ -15,6 +45,29 @@ export default function ClientDetailsModal({
   onUpdateQuantity,
 }) {
   const [showAssignModal, setShowAssignModal] = useState(false)
+
+  // --- Historial de interacciones (timeline del cliente) ---
+  const [interactions, setInteractions] = useState([])
+  const [loadingInteractions, setLoadingInteractions] = useState(true)
+  const [errorInteractions, setErrorInteractions] = useState(false)
+
+  const loadInteractions = useCallback(async () => {
+    setLoadingInteractions(true)
+    setErrorInteractions(false)
+    try {
+      const res = await getInteractions({ client_id: client.id, limit: 50 })
+      setInteractions(res.items || [])
+    } catch {
+      setErrorInteractions(true)
+    } finally {
+      setLoadingInteractions(false)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [client.id])
+
+  useEffect(() => {
+    loadInteractions()
+  }, [loadInteractions])
 
   const productos = client.productos_asignados || []
   const total = productos.reduce((acc, p) => acc + p.precio * p.cantidad, 0)
@@ -140,6 +193,70 @@ export default function ClientDetailsModal({
                 </tr>
               </tfoot>
             </table>
+          </div>
+        )}
+      </div>
+
+      {/* Historial de interacciones */}
+      <div className="mt-6">
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-[13px] font-semibold text-foreground flex items-center gap-1.5">
+            <History size={14} className="text-muted-foreground" />
+            Historial de interacciones
+          </h4>
+          <button
+            onClick={loadInteractions}
+            disabled={loadingInteractions}
+            className="p-1 rounded-md text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition-colors duration-150 disabled:opacity-40"
+            title="Actualizar historial"
+          >
+            <RefreshCw size={13} className={loadingInteractions ? 'animate-spin' : ''} />
+          </button>
+        </div>
+
+        {loadingInteractions ? (
+          <div className="flex items-center justify-center gap-2 py-6">
+            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            <p className="text-[12px] text-muted-foreground">Cargando interacciones…</p>
+          </div>
+        ) : errorInteractions ? (
+          <div className="flex flex-col items-center gap-2 py-6 rounded-lg border border-dashed border-red-200 dark:border-red-900">
+            <p className="text-[12px] text-muted-foreground">
+              No se pudo cargar el historial de interacciones.
+            </p>
+            <button
+              onClick={loadInteractions}
+              className="text-[12px] font-semibold text-primary hover:text-blue-700"
+            >
+              Reintentar
+            </button>
+          </div>
+        ) : interactions.length === 0 ? (
+          <p className="text-[12px] text-muted-foreground py-4 text-center italic">
+            Sin interacciones registradas
+          </p>
+        ) : (
+          <div className="max-h-[40vh] overflow-y-auto rounded-lg border border-slate-100 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800">
+            {interactions.map((interaccion) => (
+              <div key={interaccion.id} className="py-2.5 px-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">
+                    {interaccion.source}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground font-mono">
+                    {formatTimestamp(interaccion.timestamp)}
+                  </span>
+                </div>
+                <p className="text-[12px] text-foreground mt-1">
+                  {payloadResumen(interaccion.payload)}
+                </p>
+                {interaccion.intent && (
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    Intención: <span className="font-mono">{interaccion.intent}</span>
+                  </p>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>

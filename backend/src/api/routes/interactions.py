@@ -38,17 +38,26 @@ class InteractionListResponse(BaseModel):
 def list_interactions(
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
+    client_id: Optional[int] = Query(None, ge=1),
     db: Session = Depends(get_db),
 ):
-    """List all interactions, newest first."""
+    """List all interactions, newest first.
+
+    Soporta un filtro opcional por cliente (`client_id`): cuando está presente,
+    devuelve únicamente las interacciones cuyo `clientId` coincide. El `total`
+    refleja el total filtrado y el filtro es combinable con limit/offset.
+    """
+    query = db.query(Interaction)
+    if client_id is not None:
+        query = query.filter(Interaction.clientId == client_id)
     items = (
-        db.query(Interaction)
+        query
         .order_by(Interaction.id.desc())
         .offset(offset)
         .limit(limit)
         .all()
     )
-    total = db.query(Interaction).count()
+    total = query.count()
     return {"items": items, "total": total}
 
 

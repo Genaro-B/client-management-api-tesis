@@ -18,6 +18,10 @@ export default function ClientsPage() {
     error,
     filters,
     setFilters,
+    page,
+    setPage,
+    totalPages,
+    total,
     refreshClients,
     createClient,
     updateClient,
@@ -89,6 +93,10 @@ export default function ClientsPage() {
             <ClientTable
               clients={clients}
               isAdmin={isAdmin}
+              page={page}
+              totalPages={totalPages}
+              total={total}
+              onPageChange={setPage}
               onView={(c) => setSelectedClient(c)}
               onEdit={(c) => { setEditingClient(c); setShowFormModal(true) }}
               onDelete={(c) => setDeletingClient(c)}
