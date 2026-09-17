@@ -7,7 +7,7 @@ import InactiveClientsPage from './pages/InactiveClientsPage.jsx'
 import InteractionsPage from './pages/InteractionsPage.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
 import { Toaster } from 'sonner'
-import useAuth from './hooks/useAuth.js'
+import useAuth, { AuthProvider } from './hooks/useAuth.js'
 import AdminBotWidget from './components/AdminBotWidget.jsx'
 
 function ProtectedRoute({ children }) {
@@ -34,68 +34,70 @@ function AdminBotLauncher() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <PublicRoute>
-              <LoginPage />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <ClientsPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/products"
-          element={
-            <ProtectedRoute>
-              <ProductsPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/metrics"
-          element={
-            <ProtectedRoute>
-              <MetricsPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/interactions"
-          element={
-            <ProtectedRoute>
-              <InteractionsPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/inactive"
-          element={
-            <ProtectedRoute>
-              <InactiveClientsPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <ProfilePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-      <Toaster richColors closeButton position="top-right" />
-      <AdminBotLauncher />
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <PublicRoute>
+                <LoginPage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <ClientsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products"
+            element={
+              <ProtectedRoute>
+                <ProductsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/metrics"
+            element={
+              <ProtectedRoute>
+                <MetricsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/interactions"
+            element={
+              <ProtectedRoute>
+                <InteractionsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/inactive"
+            element={
+              <ProtectedRoute>
+                <InactiveClientsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+        <Toaster richColors closeButton position="top-right" />
+        <AdminBotLauncher />
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
