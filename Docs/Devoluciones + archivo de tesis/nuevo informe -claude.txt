@@ -1,0 +1,117 @@
+Dictamen de Evaluación Académica — Versión Final (V2)
+
+Título: Diseño, modelización e implementación de un sistema de automatización de procesos basado en integración de servicios e inteligencia artificial en entornos de bajo costo
+
+Autor: Genaro Busto | Legajo N.° 52610 | UTN – FRM – TUP
+
+Referencia: Evaluación comparativa respecto del Informe de Auditoría previo (16 pp.)
+
+Fecha: Septiembre 2026
+
+A. Síntesis de correcciones realizadas
+El autor abordó de manera sustancial la totalidad de las cuatro observaciones críticas identificadas en el informe de auditoría. El cuadro siguiente registra el estado de cada una.
+
+✓ Resultados sin datos → resuelto: Tabla 4 (128 casos, 100%), Tabla 5 (5 endpoints, n=30, con media/mín/máx/DS), Tabla 6 (por intención), IC al 95% y CV calculados.
+✓ Tablas y figuras ausentes → resuelto: 10 figuras + 7 tablas en el cuerpo + 5 tablas en Anexos + fragmentos de código (Fragmento 1 y 2) + esquema DDL + respuestas reales de la API.
+✓ Referencias huérfanas → resuelto: la gran mayoría de las obras aparece ahora citada en el cuerpo con formato autor-año. Se incorporaron 11 referencias nuevas (2022-2025).
+✓ Implementación no verificable → resuelto: se identifican FastAPI, SQLite, n8n, Python 3.13, pytest, Telegram Bot API; se incluyen fragmentos de código reales, Tabla A.1 con versiones, Tabla B.1 con nodos, respuestas reales de la API y descripción del esquema DDL.
+B. Síntesis ejecutiva
+La versión final transforma cualitativamente el trabajo. El giro más significativo —y conceptualmente honesto— es la reformulación del componente de procesamiento inteligente: la V2 abandona la pretensión de un LLM real y declara que el prototipo opera con reglas determinísticas de pattern matching, reservando la IA como extensión futura. Esto resuelve la mayor incoherencia de la versión anterior (afirmar integración de LLM sin evidencia) y convierte la hipótesis en verificable: el sistema ejecuta ciclos de automatización completos con herramientas accesibles, con una precisión del 100% en las rutas predefinidas. Los datos de rendimiento son reales, reproducibles y coherentes con la arquitectura declarada. Las debilidades que persisten son de segundo orden: algunas citas nuevas presentan señales de verificación externa requerida, el resumen ejecutivo del Abstract incluye estadísticas que mezclan dos métricas heterogéneas, y la Figura 1 y otras figuras anunciadas no son verificables desde este documento (son referencias a imágenes embebidas en el .docx). Con todo, el trabajo es sólido y defensable.
+
+Veredicto actualizado
+
+Aprobado con observaciones menores
+
+La defensa queda habilitada. Las correcciones realizadas resuelven las cuatro observaciones críticas previas. Las observaciones que persisten son de carácter formal o de detalle y pueden atenderse antes o durante la defensa sin requerir reelaboración estructural del trabajo.
+
+C. Evaluación detallada — estado por dimensión
+Excelente
+1. Estructura general y formato
+Mejorado
+El campo "Co-Director" fue eliminado (ya no aparece el marcador de plantilla). La portada es consistente. El índice refleja la nueva estructura (Figura 8–10, Tabla B.1–B.2, C.1, D.1, E.1 incorporadas). Se corrigió la discrepancia de paginación reportada: el documento ya no muestra el pie "de 71". El Abstract ahora incluye el párrafo de limitaciones ausente en V1, siendo fiel al Resumen. Impacto: eliminados todos los riesgos formales identificados en la auditoría.
+
+Excelente
+2. Planteamiento del problema
+Sin cambio necesario
+Se incorporó la cita faltante que respaldaba "diversas investigaciones han demostrado" (Lacity y Willcocks, 2016; Venkiteela y Kalluri, 2025). La afirmación sin respaldo más grave de la V1 queda corregida.
+
+Excelente
+3. Hipótesis
+Mejorado
+La hipótesis fue reformulada para contemplar explícitamente las dos variantes del componente de interpretación (reglas determinísticas vs. LLM vía API). Esto la hace operacionalizable en su versión implementada y honesta respecto de lo que el prototipo efectivamente hace. Los umbrales de aceptación se incorporaron en §3.3: tiempo inferior a 5 s (simple) / 10 s (complejo), precisión ≥ 80%, tasa de error HTTP 5xx inferior al 1%. Los umbrales quedan definidos a priori y los resultados los superan ampliamente.
+
+Excelente
+4. Objetivos
+Sin cambio necesario
+La trazabilidad se mantiene. El OE5 fue ajustado ("interpretación de solicitudes en lenguaje natural") acorde al enfoque determinístico adoptado. La coherencia objetivo–capítulo–conclusión es correcta.
+
+Excelente
+5. Estado del arte
+Mejorado significativamente
+La sección §2.5 incorpora la distinción correcta entre iPaaS (n8n, Zapier) y orquestadores DAG (Airflow), corrigiendo la imprecisión señalada en la auditoría. Se añaden referencias recientes (Xi et al. 2023; Ajimati et al. 2025; El Kamouchi y Kissi 2023; Jangam et al. 2024) que anclan el trabajo en el estado del arte sobre automatización de bajo costo y agentes LLM. La Tabla 1 formaliza la comparación de herramientas que antes era solo prosa. La bibliografía pasa de 0% a fuentes con año 2022-2025.
+
+Excelente
+6. Marco teórico
+Mejorado
+Las referencias antes aludidas sin citar en el texto (Fielding 2000, Vaswani et al. 2017, Hohpe y Woolf 2003, Newman 2015, Russell y Norvig 2021, etc.) aparecen ahora citadas en el punto de uso con formato APA. Se incorporan Devlin et al. (2019), Brown et al. (2020), Kleppmann (2017), Minsky (1967), Goodfellow et al. (2016) con citas en el cuerpo. Se añade la referencia a Minsky con una descripción correcta de su obra ("Composing communications: Toward artificial intelligence, MIT AI Lab, Memo 157"), aunque la entrada actualizada en la lista bibliográfica difiere del título original ("Computation: Finite and Infinite Machines") —ver observación en §D.
+
+Excelente
+7. Metodología
+Mejorado significativamente
+Se incorporaron en §3.3 los umbrales de aceptación cuantitativos a priori. La Tabla 2 ahora incluye instrumento de medición y unidades para cada variable. Se definió la población, muestra y muestreo (§3.4): 128 casos automatizados para la API + 38 interacciones vía Telegram, con criterios de inclusión y exclusión explícitos. Se abordó la validez de la variable "precisión" mediante criterio de codificación automática (comparación campo intent vs. categoría esperada), eliminando la subjetividad del evaluador humano. La cita a Wohlin et al. (2012) respalda el diseño de pruebas. Impacto: las principales debilidades metodológicas de la V1 quedan resueltas.
+
+Excelente
+8. Resultados / desarrollo
+Transformado
+Este es el cambio más importante de la V2. El capítulo de Resultados ahora contiene: Tabla 4 con 128 pruebas y tasas de éxito por grupo; Tabla 5 con 5 endpoints, media/mínimo/máximo/desviación estándar (n=30); §5.3 con IC al 95% calculados (fórmula correcta) y coeficiente de variación por endpoint; Tabla 6 con precisión por intención (9 intenciones, 117 casos totales, 100%); §5.7 con análisis de 3 casos límite que reconocen honestamente las fallas del pattern matching; capturas de pantalla del sistema real (Figuras 9, 10); respuestas reales de la API en Anexo E. El capítulo ya no afirma lo que debería demostrar: muestra los datos y deja que hablen por sí mismos.
+
+Excelente
+9. Discusión
+Mejorado
+La discusión ya puede cumplir su función: interpreta datos que ahora existen. Se añade en §6.2 una cuantificación del ahorro de costo estimado (menos de USD 50 anuales vs. USD ~10,000+ de plataformas enterprise), con ratio de 200×, que refuerza la hipótesis de manera concreta. La reformulación del componente de IA como extensión futura corrige la inconsistencia señalada previamente en este capítulo. Observación persistente: el costo de USD 50 se menciona sin fuente documental de los precios comparativos; en la defensa puede ser cuestionado.
+
+Excelente
+10. Conclusiones
+Mejorado
+Las conclusiones ahora se apoyan en evidencia medible. La primera conclusión ("es técnicamente viable") está respaldada por 128 pruebas al 100%. La segunda conclusión reencuadra correctamente el papel de la IA: el componente determinístico es suficiente para el dominio acotado; la IA es una extensión viable, no el núcleo del trabajo. Este giro es conceptualmente más honesto y más fácil de defender ante un tribunal.
+
+Excelente
+11. Trabajos futuros
+Sin cambio necesario
+Se mantiene la solidez de esta sección. Se añade §6.4 una referencia explícita al trabajo en curso de incorporación del componente LLM, lo que da verosimilitud a la línea de evolución propuesta.
+
+Adecuado
+12. Bibliografía y citación
+Mejorado — observaciones menores
+La lista crece de 20 a ~31 entradas. La tasa de citas en el cuerpo pasa de 3 a la gran mayoría de las obras listadas. Se incorporan DOIs en las referencias recientes. Observaciones que persisten: (a) Minsky (1967) aparece en la lista con el título "Composing communications: Toward artificial intelligence, MIT AI Lab, Memo 157", que difiere de la obra canónica "Computation: Finite and Infinite Machines" (Prentice Hall, 1967) que figuraba en V1 — requiere verificación: si es el Memo 157 real, el título y la fuente deben corroborarse; si es la obra canónica, debe restaurarse el título correcto. (b) Cuatro citas al final de párrafos (Viswanadhapalli y Ramana, 2025 en las palabras clave; Venkiteela y Kalluri, 2025 al final de un párrafo de Introducción; Zhang et al. 2025 en §2.3; Ajiga et al. 2024 en §2.5) están ubicadas en posiciones inusuales que sugieren ser inserciones post-hoc para completar el citado requerido, sin que el texto las integre argumentativamente. No se afirma que sean fabricadas, pero se recomienda verificación externa. (c) Lacity y Willcocks (2021) aparece en la lista pero no se detecta su cita en el cuerpo — posible referencia huérfana nueva.
+
+Excelente
+13. Originalidad e integridad académica
+Sin variación
+El registro sigue siendo homogéneo. No se detectan saltos de voz. El análisis de casos límite (§5.7) es una adición positiva que demuestra honestidad intelectual: el autor reconoce explícitamente que el sistema falla ante lenguaje natural no contemplado en el catálogo, lo cual es exactamente lo que debe hacer un investigador.
+
+D. Observaciones que persisten (menores)
+Obs. 1 — Cita Minsky en la lista bibliográfica: el título ahora difiere del que figuraba en V1. Si es el Memo 157, la fuente no es un libro publicado sino un reporte técnico; el formato APA sería distinto. Requiere verificar cuál obra se utiliza efectivamente en §2.3 y corregir la entrada en consecuencia.
+Obs. 2 — Abstract §3: la fórmula IC (x-bar ± 1.96·s/√n) aparece como texto directo en el Abstract en inglés. Es inusual para un resumen ejecutivo e interrumpe la lectura. Considerar reemplazarla por "los resultados muestran intervalos de confianza al 95% consistentes con la hipótesis".
+Obs. 3 — Las palabras clave en español incluyen la cita "(Viswanadhapalli y Ramana, 2025)". Las palabras clave no llevan citas. Esta cita debe eliminarse de esa ubicación.
+Obs. 4 — La precisión del 100% declarada en §5.3 y en el Abstract corresponde exclusivamente a las rutas cubiertas por el catálogo. El §5.7 aclara esto con los casos límite. Sin embargo, en la síntesis ejecutiva del Resumen español no queda igual de claro que el 100% es sobre las rutas predefinidas, lo que puede generar una expectativa incorrecta. Se recomienda añadir la aclaración "en las rutas definidas por el catálogo de intenciones" también en el Resumen español.
+Obs. 5 — Los CV del §5.3 para endpoints de lectura simple (CV = 143% para GET /clients/{id}) son altos y merecen una explicación más completa. El texto los atribuye a "valores atípicos", lo cual es razonable, pero el tribunal puede preguntar por qué no se reportan los resultados excluyendo los outliers. Preparar esta respuesta.
+E. Evaluación comparativa V1 → V2
+Capítulo	Puntaje V1	Puntaje V2	Δ
+1. Introducción	7,0	8,5	+1,5
+2. Marco teórico	6,5	8,5	+2,0
+3. Marco metodológico	5,0	8,0	+3,0
+4. Desarrollo	4,5	8,5	+4,0
+5. Resultados	2,5	8,5	+6,0
+6. Discusión	6,0	8,5	+2,5
+7. Conclusiones	5,5	8,5	+3,0
+8. Recomendaciones	7,0	8,0	+1,0
+9. Referencias	4,0	7,5	+3,5
+10. Anexos	3,5	9,0	+5,5
+Promedio	5,15	8,35	+3,2
+F. Preguntas para la defensa oral
+1. El §5.7 muestra que "Quiero comprar jabón" no es reconocido y cae al fallback. ¿Cómo estimaría la cobertura real del sistema frente a un conjunto de mensajes no controlados? ¿Qué criterio usaría para decidir cuándo el catálogo de intenciones es suficiente y cuándo conviene incorporar el componente LLM?
+2. Los coeficientes de variación de los endpoints de lectura superan el 100%. Más allá de la explicación por outliers, ¿qué modelo estadístico sería más adecuado para representar estos tiempos de respuesta, y por qué eligió la media aritmética en lugar de la mediana para describir la tendencia central?
+3. La comparación de costo con MuleSoft/Dell Boomi (ratio 200×) aparece en §6.2 sin respaldo bibliográfico. ¿De dónde provienen los USD 50 y el USD ~10.000? ¿Cómo controlaría que esa comparación sea justa en términos de funcionalidad equivalente?
+4. El modelo híbrido que propone define la interfaz para que un LLM sustituya al clasificador determinístico. ¿Qué cambios concretos en el nodo Bot Router de n8n requeriría esa sustitución, y cómo garantizaría que el contrato entre la capa de interpretación y la de orquestación se mantiene estable?
+5. La suite de pruebas del bot (117 casos conversacionales) se ejecutó manualmente. ¿Qué estrategia usaría para automatizar esas pruebas, de manera que puedan repetirse en cada cambio del catálogo de intenciones?
