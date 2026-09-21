@@ -219,12 +219,35 @@ n8n configura automáticamente el webhook de Telegram.
 
 ## 🔄 Flujos n8n
 
-El proyecto incluye dos flujos de automatización en n8n documentados en detalle:
+El proyecto incluye flujos de automatización en n8n. Los **JSON exportados** viven en `Docs/flujos/` y están trackeados en git (no contienen tokens — las credenciales se referencian por ID y se configuran en la UI de n8n):
 
-| Flujo | Archivo | Propósito |
-|-------|---------|-----------|
-| **Sistema de Automatización de Prospectos** | `Docs/n8n-flow-documentation.md` | Flujo principal: trigger de Telegram → clasificación por intención → respuestas automáticas |
-| **Telegram → API Interaction** | `Docs/n8n-flow-documentation.md` | Flujo auxiliar: webhook → POST a backend con idempotencia |
+| Flujo | Archivo exportado | Propósito |
+|-------|-------------------|-----------|
+| **Sistema de Automatización de Prospectos** | `Docs/flujos/Sistema de Automatización de Prospectos.json` | Flujo principal: Telegram Trigger → clasificación por intención (Switch) → respuestas automáticas + persistencia en API y Google Sheets |
+| **Telegram → API Interaction** | `Docs/flujos/telegram-n8n-flow.json` | Flujo auxiliar: webhook POST → build headers/body → POST `/api/v1/interactions/` con idempotencia |
+
+Versiones alternativas del flujo principal (historial de iteraciones) en `Docs/flujos/Actual/`: `v2-flujo-mejorado.json` y `Sistema de Automatizacion v2 - Simple.json`.
+
+### 📤 Cómo exportar un flujo desde n8n
+
+El JSON exportado es lo que se versiona en el repo. Para exportarlo:
+
+1. Abrir n8n: `http://localhost:5678`.
+2. Ir a **Workflows** y abrir el flujo que querés guardar.
+3. Click en **⋮ (menú de opciones)** en el extremo superior derecho del editor (junto al nombre del workflow).
+4. Elegir **Download** → descarga el archivo `<nombre-del-flujo>.json`.
+5. Guardar el archivo en `Docs/flujos/` (o `Docs/flujos/Actual/` si es una versión iterativa) reemplazando la anterior.
+
+> ⚠️ **Antes de commitear el JSON:** revisar que no contenga tokens reales. n8n exporta las credenciales como *referencias por ID* (campo `credentials` con `id`/`name`), no el secreto. Si aparece algún valor sensible en `parameters`, se configura vía variable de entorno (`{{ $env.API_KEY }}`) y se commitea solo la referencia.
+
+### 📥 Cómo importar y activar un flujo
+
+1. Abrir n8n: `http://localhost:5678`.
+2. Ir a **Workflows → Add Workflow → Import from File** (o arrastrar el `.json` a la lista de workflows).
+3. Seleccionar el archivo deseado, ej. `Docs/flujos/telegram-n8n-flow.json`.
+4. **Configurar credenciales** en los nodos que las pidan (Telegram, Google Sheets) — se conecta el nodo con la cuenta existente en n8n.
+5. **Ajustar variables**: en los nodos `HTTP Request` verificar `API_URL` (usar `http://127.0.0.1:8000`, no `localhost` — problemas de IPv6 en Windows) y `API_KEY` (Settings → Environment Variables).
+6. Click en **Active** (toggle arriba a la derecha) para activar el workflow.
 
 > 📖 Ver [`Docs/n8n-flow-documentation.md`](Docs/n8n-flow-documentation.md) para documentación completa de cada nodo,
 > diagramas de conexión, y consideraciones técnicas sobre Google Sheets, Gmail, ngrok y seguridad.
