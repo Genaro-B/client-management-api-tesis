@@ -13,12 +13,12 @@ export default function Modal({ title, children, onClose, size = 'md' }) {
   const maxWidth = size === 'sm' ? 'max-w-md' : 'max-w-lg'
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
-    >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-[rgba(15,23,42,0.40)] dark:bg-[rgba(0,0,0,0.60)] backdrop-blur-[2px]" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop — clic afuera del modal cierra */}
+      <div
+        className="absolute inset-0 bg-[rgba(15,23,42,0.40)] dark:bg-[rgba(0,0,0,0.60)] backdrop-blur-[2px]"
+        onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+      />
 
       {/* Modal shell */}
       <div

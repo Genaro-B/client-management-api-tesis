@@ -301,6 +301,31 @@ Las fixtures compartidas viven en `tests/conftest.py`:
 - `auth_headers` — headers con `X-Api-Key` para endpoints protegidos
 - `sample_client` / `sample_inactive_client` — clientes precargados
 
+### Tests Frontend
+
+Suite de tests del panel web con **Vitest 2 + React Testing Library** corriendo en **jsdom**, aislada del backend (axios y servicios mockeados, sin requests de red):
+
+| Archivo | Tests | ¿Qué cubre? |
+|---------|-------|-------------|
+| `src/hooks/useTheme.test.js` | 5 | Tema: init desde localStorage, fallback a matchMedia, toggle + persistencia, clase `dark` en `<html>` |
+| `src/services/authService.test.js` | 6 | Login POST `/api/v1/auth/login`, mapeo de respuesta, errores, helpers de `sessionStorage` |
+| `src/components/Pagination.test.jsx` | 7 | Rango "Mostrando X–Y de Z", botones Anterior/Siguiente (disabled y callbacks), sin controles con 1 página |
+| `src/components/StatusBadge.test.jsx` | 4 | Estado Activo/Inactivo (booleano y numérico) |
+| `src/components/Avatar.test.jsx` | 4 | Iniciales, uppercase, fallback `?`, `<img>` con alt |
+| `src/components/Modal.test.jsx` | 5 | Título/children, cierre con Escape, clic en backdrop, botón X, clic interno no cierra |
+| `src/components/ThemeToggle.test.jsx` | 3 | Ícono Moon/Sun según tema, clic invierte y persiste |
+| `src/state/AuthContext.test.jsx` | 6 | Restauración de sesión, login ok/error, logout, `isAdmin`/`isAuthenticated` |
+| `src/pages/LoginPage.test.jsx` | 5 | Formulario, submit navega a `/dashboard`, quick login admin, error visible |
+
+**Total: 45 tests · jsdom · sin backend**
+
+```bash
+cd frontend
+npm install        # primera vez (instala devDeps de testing)
+npm test           # corrida única
+npm run test:watch # modo watch
+```
+
 ---
 
 ## 📁 Estructura del Proyecto
@@ -366,13 +391,13 @@ Las fixtures compartidas viven en `tests/conftest.py`:
 | Feature | Estado | Descripción |
 |---------|--------|-------------|
 | **Ollama / AI** | ⏳ Pendiente | Integración con modelos locales (Llama 3, Mistral, Phi) para respuestas inteligentes en Telegram. Requiere instalar [Ollama](https://ollama.com/download) y descargar un modelo (`ollama pull llama3.2:1b`). |
-| **Tests Frontend** | ⏳ Pendiente | Suite de tests con Vitest + React Testing Library para componentes y páginas. |
 | **Autenticación con password** | ⏳ Pendiente | Sistema de login con email + contraseña (reemplazar email-only actual). |
 | **Migración a MySQL** | ⏳ Pendiente | Base de datos definitiva para producción con migraciones desde SQLite. |
 | **Docker** | ⏳ Pendiente | `Dockerfile` + `docker-compose` para backend, frontend y base de datos. |
 | **Dashboard Streamlit** | ✅ Implementado | Dashboard interno con métricas, CRUD de clientes e interacciones, consulta directa a DB. |
 | **Dashboard de gráficos** | ✅ Implementado | Endpoint `GET /api/v1/metrics/dashboard` + frontend con Recharts. |
 | **Paginación real** | ✅ Implementado | Backend con limit/offset, frontend con controles de paginación. |
+| **Tests Frontend** | ✅ Implementado | Suite de tests con Vitest + React Testing Library: hooks, servicios, componentes, contexto y páginas (45 tests en jsdom). |
 
 ---
 
