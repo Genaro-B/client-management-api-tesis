@@ -3,7 +3,7 @@
 Sigue el mismo patrón que test_clients_api.py:
 - Usa las fixtures compartidas de conftest.py
 - Cada test arranca con BD limpia
-- Los tests de API usan el TestClient de FastAPI
+- Los tests de API usan el TestClient de FastAPI (con Bearer JWT)
 """
 import pytest
 
@@ -24,16 +24,16 @@ def _payload(producto_id=1, nombre="Producto Test", precio=1500.50, cantidad=2):
 # ---------------------------------------------------------------------------
 
 
-def test_get_productos_empty(client, sample_client):
+def test_get_productos_empty(client, sample_client, admin_headers_bearer):
     """Un cliente nuevo debe tener lista vacía de productos."""
-    resp = client.get(f"{PREFIX}/{sample_client.id}/productos")
+    resp = client.get(f"{PREFIX}/{sample_client.id}/productos", headers=admin_headers_bearer)
     assert resp.status_code == 200
     assert resp.json() == []
 
 
-def test_get_productos_client_not_found_returns_404(client):
+def test_get_productos_client_not_found_returns_404(client, admin_headers_bearer):
     """Cliente inexistente debe devolver 404."""
-    resp = client.get(f"{PREFIX}/99999/productos")
+    resp = client.get(f"{PREFIX}/99999/productos", headers=admin_headers_bearer)
     assert resp.status_code == 404
 
 
@@ -42,11 +42,12 @@ def test_get_productos_client_not_found_returns_404(client):
 # ---------------------------------------------------------------------------
 
 
-def test_add_producto_happy_path(client, sample_client, sample_product):
+def test_add_producto_happy_path(client, sample_client, sample_product, admin_headers_bearer):
     """Agregar un producto a un cliente."""
     resp = client.post(
         f"{PREFIX}/{sample_client.id}/productos",
         json=_payload(producto_id=sample_product.id),
+        headers=admin_headers_bearer,
     )
     assert resp.status_code == 201
     data = resp.json()
@@ -57,13 +58,14 @@ def test_add_producto_happy_path(client, sample_client, sample_product):
     assert data[0]["cantidad"] == 2
 
 
-def test_add_producto_increment_quantity(client, sample_client, sample_product):
+def test_add_producto_increment_quantity(client, sample_client, sample_product, admin_headers_bearer):
     """Agregar el mismo producto dos veces incrementa la cantidad."""
     pid = sample_product.id
-    client.post(f"{PREFIX}/{sample_client.id}/productos", json=_payload(producto_id=pid))
+    client.post(f"{PREFIX}/{sample_client.id}/productos", json=_payload(producto_id=pid), headers=admin_headers_bearer)
     resp = client.post(
         f"{PREFIX}/{sample_client.id}/productos",
         json=_payload(producto_id=pid),
+        headers=admin_headers_bearer,
     )
     assert resp.status_code == 201
     data = resp.json()
@@ -71,11 +73,12 @@ def test_add_producto_increment_quantity(client, sample_client, sample_product):
     assert data[0]["cantidad"] == 4  # 2 + 2
 
 
-def test_add_producto_multiple_different(client, sample_client, sample_product, sample_product2):
+def test_add_producto_multiple_different(client, sample_client, sample_product, sample_product2, admin_headers_bearer):
     """Agregar productos distintos crea entradas separadas."""
     client.post(
         f"{PREFIX}/{sample_client.id}/productos",
         json=_payload(producto_id=sample_product.id),
+        headers=admin_headers_bearer,
     )
     resp = client.post(
         f"{PREFIX}/{sample_client.id}/productos",
@@ -85,6 +88,7 @@ def test_add_producto_multiple_different(client, sample_client, sample_product, 
             precio=500.00,
             cantidad=1,
         ),
+        headers=admin_headers_bearer,
     )
     assert resp.status_code == 201
     data = resp.json()
@@ -93,66 +97,72 @@ def test_add_producto_multiple_different(client, sample_client, sample_product, 
     assert ids == {sample_product.id, sample_product2.id}
 
 
-def test_add_producto_client_not_found_returns_404(client):
+def test_add_producto_client_not_found_returns_404(client, admin_headers_bearer):
     """Agregar producto a cliente inexistente devuelve 404."""
     resp = client.post(
         f"{PREFIX}/99999/productos",
         json=_payload(),
+        headers=admin_headers_bearer,
     )
     assert resp.status_code == 404
 
 
-def test_add_producto_cantidad_zero_returns_422(client, sample_client):
+def test_add_producto_cantidad_zero_returns_422(client, sample_client, admin_headers_bearer):
     """Cantidad debe ser >= 1."""
     payload = _payload(cantidad=0)
     resp = client.post(
         f"{PREFIX}/{sample_client.id}/productos",
         json=payload,
+        headers=admin_headers_bearer,
     )
     assert resp.status_code == 422
 
 
-def test_add_producto_producto_id_zero_returns_422(client, sample_client):
+def test_add_producto_producto_id_zero_returns_422(client, sample_client, admin_headers_bearer):
     """producto_id debe ser >= 1."""
     payload = _payload(producto_id=0)
     resp = client.post(
         f"{PREFIX}/{sample_client.id}/productos",
         json=payload,
+        headers=admin_headers_bearer,
     )
     assert resp.status_code == 422
 
 
-def test_add_producto_precio_negativo_returns_422(client, sample_client):
+def test_add_producto_precio_negativo_returns_422(client, sample_client, admin_headers_bearer):
     """precio debe ser >= 0."""
     payload = _payload(precio=-10)
     resp = client.post(
         f"{PREFIX}/{sample_client.id}/productos",
         json=payload,
+        headers=admin_headers_bearer,
     )
     assert resp.status_code == 422
 
 
-def test_add_producto_insufficient_stock(client, sample_client, sample_product_sin_stock):
+def test_add_producto_insufficient_stock(client, sample_client, sample_product_sin_stock, admin_headers_bearer):
     """Producto sin stock debe devolver error 400."""
     resp = client.post(
         f"{PREFIX}/{sample_client.id}/productos",
         json=_payload(producto_id=sample_product_sin_stock.id),
+        headers=admin_headers_bearer,
     )
     assert resp.status_code == 400
     assert "Stock insuficiente" in resp.json()["detail"]
 
 
-def test_add_producto_not_found_returns_400(client, sample_client):
+def test_add_producto_not_found_returns_400(client, sample_client, admin_headers_bearer):
     """producto_id que no existe en la DB debe devolver 400."""
     resp = client.post(
         f"{PREFIX}/{sample_client.id}/productos",
         json=_payload(producto_id=9999),
+        headers=admin_headers_bearer,
     )
     assert resp.status_code == 400
     assert "Producto no encontrado" in resp.json()["detail"]
 
 
-def test_add_producto_stock_decrements(client, sample_client, sample_product, db_session):
+def test_add_producto_stock_decrements(client, sample_client, sample_product, db_session, admin_headers_bearer):
     """Al agregar un producto al cliente, se descuenta del stock."""
     pid = sample_product.id
     stock_inicial = sample_product.stock  # 10
@@ -160,6 +170,7 @@ def test_add_producto_stock_decrements(client, sample_client, sample_product, db
     client.post(
         f"{PREFIX}/{sample_client.id}/productos",
         json=_payload(producto_id=pid, cantidad=2),
+        headers=admin_headers_bearer,
     )
 
     # Verificar stock decrementado
@@ -174,11 +185,12 @@ def test_add_producto_stock_decrements(client, sample_client, sample_product, db
 # ---------------------------------------------------------------------------
 
 
-def test_set_productos_replace_all(client, sample_client, sample_product):
+def test_set_productos_replace_all(client, sample_client, sample_product, admin_headers_bearer):
     """PUT reemplaza toda la lista de productos."""
     client.post(
         f"{PREFIX}/{sample_client.id}/productos",
         json=_payload(producto_id=sample_product.id),
+        headers=admin_headers_bearer,
     )
 
     nuevos = [
@@ -188,6 +200,7 @@ def test_set_productos_replace_all(client, sample_client, sample_product):
     resp = client.put(
         f"{PREFIX}/{sample_client.id}/productos",
         json=nuevos,
+        headers=admin_headers_bearer,
     )
     assert resp.status_code == 200
     data = resp.json()
@@ -196,25 +209,28 @@ def test_set_productos_replace_all(client, sample_client, sample_product):
     assert data[1]["producto_id"] == 20
 
 
-def test_set_productos_empty_list(client, sample_client, sample_product):
+def test_set_productos_empty_list(client, sample_client, sample_product, admin_headers_bearer):
     """PUT con lista vacía limpia los productos."""
     client.post(
         f"{PREFIX}/{sample_client.id}/productos",
         json=_payload(producto_id=sample_product.id),
+        headers=admin_headers_bearer,
     )
     resp = client.put(
         f"{PREFIX}/{sample_client.id}/productos",
         json=[],
+        headers=admin_headers_bearer,
     )
     assert resp.status_code == 200
     assert resp.json() == []
 
 
-def test_set_productos_client_not_found_returns_404(client):
+def test_set_productos_client_not_found_returns_404(client, admin_headers_bearer):
     """PUT en cliente inexistente devuelve 404."""
     resp = client.put(
         f"{PREFIX}/99999/productos",
         json=[{"producto_id": 1, "nombre": "X", "precio": 10, "cantidad": 1}],
+        headers=admin_headers_bearer,
     )
     assert resp.status_code == 404
 
@@ -224,24 +240,25 @@ def test_set_productos_client_not_found_returns_404(client):
 # ---------------------------------------------------------------------------
 
 
-def test_remove_producto_happy_path(client, sample_client, sample_product, sample_product2):
+def test_remove_producto_happy_path(client, sample_client, sample_product, sample_product2, admin_headers_bearer):
     """Eliminar un producto existente de la lista."""
     p1, p2 = sample_product.id, sample_product2.id
-    client.post(f"{PREFIX}/{sample_client.id}/productos", json=_payload(producto_id=p1))
+    client.post(f"{PREFIX}/{sample_client.id}/productos", json=_payload(producto_id=p1), headers=admin_headers_bearer)
     client.post(
         f"{PREFIX}/{sample_client.id}/productos",
         json=_payload(producto_id=p2, nombre="Otro", precio=500, cantidad=1),
+        headers=admin_headers_bearer,
     )
 
-    resp = client.delete(f"{PREFIX}/{sample_client.id}/productos/{p1}")
+    resp = client.delete(f"{PREFIX}/{sample_client.id}/productos/{p1}", headers=admin_headers_bearer)
     assert resp.status_code == 204
 
-    get_resp = client.get(f"{PREFIX}/{sample_client.id}/productos")
+    get_resp = client.get(f"{PREFIX}/{sample_client.id}/productos", headers=admin_headers_bearer)
     assert len(get_resp.json()) == 1
     assert get_resp.json()[0]["producto_id"] == p2
 
 
-def test_remove_producto_restores_stock(client, sample_client, sample_product, db_session):
+def test_remove_producto_restores_stock(client, sample_client, sample_product, db_session, admin_headers_bearer):
     """Al eliminar un producto, se restaura el stock."""
     pid = sample_product.id
     stock_inicial = sample_product.stock  # 10
@@ -249,8 +266,9 @@ def test_remove_producto_restores_stock(client, sample_client, sample_product, d
     client.post(
         f"{PREFIX}/{sample_client.id}/productos",
         json=_payload(producto_id=pid, cantidad=3),
+        headers=admin_headers_bearer,
     )
-    client.delete(f"{PREFIX}/{sample_client.id}/productos/{pid}")
+    client.delete(f"{PREFIX}/{sample_client.id}/productos/{pid}", headers=admin_headers_bearer)
 
     from src.repositories.product_repo import ProductRepository
     repo = ProductRepository(db_session)
@@ -258,19 +276,20 @@ def test_remove_producto_restores_stock(client, sample_client, sample_product, d
     assert product.stock == stock_inicial  # Vuelve a 10
 
 
-def test_remove_producto_client_not_found_returns_404(client):
+def test_remove_producto_client_not_found_returns_404(client, admin_headers_bearer):
     """Eliminar producto de cliente inexistente devuelve 404."""
-    resp = client.delete(f"{PREFIX}/99999/productos/1")
+    resp = client.delete(f"{PREFIX}/99999/productos/1", headers=admin_headers_bearer)
     assert resp.status_code == 404
 
 
-def test_remove_producto_not_in_list_returns_404(client, sample_client, sample_product):
+def test_remove_producto_not_in_list_returns_404(client, sample_client, sample_product, admin_headers_bearer):
     """Eliminar un producto_id que no está en la lista devuelve 404."""
     client.post(
         f"{PREFIX}/{sample_client.id}/productos",
         json=_payload(producto_id=sample_product.id),
+        headers=admin_headers_bearer,
     )
-    resp = client.delete(f"{PREFIX}/{sample_client.id}/productos/999")
+    resp = client.delete(f"{PREFIX}/{sample_client.id}/productos/999", headers=admin_headers_bearer)
     assert resp.status_code == 404
 
 
@@ -279,23 +298,25 @@ def test_remove_producto_not_in_list_returns_404(client, sample_client, sample_p
 # ---------------------------------------------------------------------------
 
 
-def test_get_productos_after_operations(client, sample_client, sample_product, sample_product2):
+def test_get_productos_after_operations(client, sample_client, sample_product, sample_product2, admin_headers_bearer):
     """GET después de POST, PUT y DELETE muestra estado correcto."""
     p1, p2 = sample_product.id, sample_product2.id
-    client.post(f"{PREFIX}/{sample_client.id}/productos", json=_payload(producto_id=p1))
+    client.post(f"{PREFIX}/{sample_client.id}/productos", json=_payload(producto_id=p1), headers=admin_headers_bearer)
     client.post(
         f"{PREFIX}/{sample_client.id}/productos",
         json=_payload(producto_id=p2, nombre="Otro", precio=500, cantidad=1),
+        headers=admin_headers_bearer,
     )
-    assert len(client.get(f"{PREFIX}/{sample_client.id}/productos").json()) == 2
+    assert len(client.get(f"{PREFIX}/{sample_client.id}/productos", headers=admin_headers_bearer).json()) == 2
 
-    client.delete(f"{PREFIX}/{sample_client.id}/productos/{p1}")
-    assert len(client.get(f"{PREFIX}/{sample_client.id}/productos").json()) == 1
+    client.delete(f"{PREFIX}/{sample_client.id}/productos/{p1}", headers=admin_headers_bearer)
+    assert len(client.get(f"{PREFIX}/{sample_client.id}/productos", headers=admin_headers_bearer).json()) == 1
 
     client.put(
         f"{PREFIX}/{sample_client.id}/productos",
         json=[{"producto_id": 99, "nombre": "Final", "precio": 999, "cantidad": 1}],
+        headers=admin_headers_bearer,
     )
-    data = client.get(f"{PREFIX}/{sample_client.id}/productos").json()
+    data = client.get(f"{PREFIX}/{sample_client.id}/productos", headers=admin_headers_bearer).json()
     assert len(data) == 1
     assert data[0]["producto_id"] == 99

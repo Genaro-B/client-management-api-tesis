@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { login as apiLogin, getStoredUser, saveUser, updateUser } from '../services/authService.js'
+import { login as apiLogin, changePassword as apiChangePassword, getStoredUser, saveUser, updateUser } from '../services/authService.js'
 import { toast } from 'sonner'
 
 const AuthContext = createContext(null)
@@ -15,11 +15,11 @@ export function AuthProvider({ children }) {
     setInitializing(false)
   }, [])
 
-  const login = useCallback(async (email) => {
+  const login = useCallback(async (email, password) => {
     setLoading(true)
     setError(null)
     try {
-      const userData = await apiLogin(email)
+      const userData = await apiLogin(email, password)
       saveUser(userData)
       setUser(userData)
       toast.success(`Bienvenido, ${userData.nombre}`)
@@ -32,8 +32,21 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
+  const changePassword = useCallback(async (currentPassword, newPassword) => {
+    const result = await apiChangePassword(currentPassword, newPassword)
+    // Limpiar el flag en el usuario en memoria y persistir el cambio
+    setUser((prev) => {
+      const updated = { ...prev, password_change_required: false }
+      saveUser(updated)
+      return updated
+    })
+    toast.success('Contraseña actualizada correctamente')
+    return result
+  }, [])
+
   const logout = useCallback(() => {
     sessionStorage.removeItem('crm_user')
+    sessionStorage.removeItem('crm_token')
     setUser(null)
     toast.success('Sesión cerrada correctamente')
   }, [])
@@ -63,6 +76,7 @@ export function AuthProvider({ children }) {
     error,
     login,
     logout,
+    changePassword,
     updateProfile,
     updateAvatar,
     setError,

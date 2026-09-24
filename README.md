@@ -155,9 +155,19 @@ npm run dev
 ```
 
 ✅ `http://localhost:5173` — Panel web  
-🔑 **Admin:** `genarobusto@gmail.com` (sin contraseña — solo email)
+🔑 **Admin:** `genarobusto@gmail.com` — password provisoria `cambiar123` (se pide cambiarla en el primer login)
 
 > El frontend utiliza el proxy de Vite (`/api → localhost:8000`), no requiere configuración CORS adicional.
+
+> **Primera vez en dev:** correr el script de migración de passwords para sembrar el hash de
+> `cambiar123` en la base (`dev.db`):
+>
+> ```bash
+> cd backend
+> ..\.venv\Scripts\python scripts\migrate_passwords.py migrate
+> # Opcional: fijar una password específica para el admin
+> ..\.venv\Scripts\python scripts\migrate_passwords.py set --email genarobusto@gmail.com --password "elegi-una-segura"
+> ```
 
 ### 3. Dashboard Streamlit (interno)
 
@@ -201,19 +211,28 @@ n8n configura automáticamente el webhook de Telegram.
 
 | Método | Ruta | Descripción | Auth |
 |--------|------|-------------|------|
-| `GET` | `/api/v1/clients/` | Listar clientes | — |
-| `POST` | `/api/v1/clients/` | Crear cliente | — |
-| `GET` | `/api/v1/clients/{id}` | Obtener cliente | — |
-| `PATCH` | `/api/v1/clients/{id}` | Actualizar cliente | — |
-| `DELETE` | `/api/v1/clients/{id}` | Eliminar cliente (soft-delete) | — |
-| `GET` | `/api/v1/clients/inactive` | Clientes inactivos | Admin |
-| `PATCH` | `/api/v1/clients/{id}/restore` | Restaurar cliente | Admin |
-| `GET` | `/api/v1/clients/export` | Exportar a Excel | — |
-| `POST` | `/api/v1/auth/login` | Iniciar sesión | — |
-| `GET` | `/api/v1/interactions/` | Listar interacciones | — |
-| `POST` | `/api/v1/interactions/` | Crear interacción | `X-Api-Key` |
+| `POST` | `/api/v1/auth/login` | Iniciar sesión (email + password) | — |
+| `POST` | `/api/v1/auth/change-password` | Cambiar password (exige password actual) | `Bearer` |
+| `GET` | `/api/v1/clients/` | Listar clientes | `Bearer` |
+| `POST` | `/api/v1/clients/` | Crear cliente | `Bearer` |
+| `GET` | `/api/v1/clients/{id}` | Obtener cliente | `Bearer` |
+| `PATCH` | `/api/v1/clients/{id}` | Actualizar cliente | `Bearer` |
+| `DELETE` | `/api/v1/clients/{id}` | Eliminar cliente (soft-delete) | `Bearer` |
+| `GET` | `/api/v1/clients/inactive` | Clientes inactivos | `Bearer` + Admin |
+| `PATCH` | `/api/v1/clients/{id}/restore` | Restaurar cliente | `Bearer` + Admin |
+| `GET` | `/api/v1/clients/export` | Exportar a Excel | `Bearer` |
+| `GET` | `/api/v1/clients/{id}/productos` | Productos del cliente | `Bearer` |
+| `POST` | `/api/v1/clients/{id}/productos` | Agregar producto al cliente | `Bearer` |
+| `PUT` | `/api/v1/clients/{id}/productos` | Reemplazar productos del cliente | `Bearer` |
+| `DELETE` | `/api/v1/clients/{id}/productos/{pid}` | Quitar producto del cliente | `Bearer` |
+| `GET` | `/api/v1/interactions/` | Listar interacciones | `Bearer` |
+| `POST` | `/api/v1/interactions/` | Crear interacción (flujos n8n) | `X-Api-Key` |
+| `GET` | `/api/v1/metrics/dashboard` | Métricas agregadas del panel | `Bearer` |
+| `POST` | `/api/v1/admin-bot/consult` | Asistente administrativo | `Bearer` |
 
-> Los endpoints protegidos con **`X-Api-Key`** requieren el header con la clave configurada en la variable de entorno `API_KEY`.
+> **`Bearer`** = header `Authorization: Bearer <token>` obtenido de `POST /auth/login` (JWT HS256).
+> Solo cuentas con `role="admin"` pueden loguearse; el token expira a las 8 h.
+> **`X-Api-Key`** = clave de la variable de entorno `API_KEY` (la conservan SOLO los endpoints de ingesta de n8n).
 
 ---
 
@@ -264,12 +283,19 @@ La suite de tests está organizada en **tres capas** que reflejan la arquitectur
 | **Repositorio** | `test_interaction_repository.py` | 3 | Persistencia de interacciones, linking con clientes |
 | **Servicio** | `test_client_service.py` | 2 | Reglas de negocio: unicidad de email |
 | **Servicio** | `test_interaction_service.py` | 10 | Validaciones, clientLookup, idempotencia |
-| **API** | `test_clients_api.py` | 22 | CRUD completo clientes vía HTTP, exportación Excel |
-| **API** | `test_auth_api.py` | 5 | Login: exitoso, email no registrado, cuenta inactiva |
-| **API** | `test_interaction_api.py` | 10 | POST con auth/idempotencia + GET listado |
-| **API** | `test_integration_post.py` | 1 | Smoke test de creación de cliente |
+| **Seguridad** | `test_security.py` | 10 | bcrypt (hash/verify), JWT (create/decode, exp, tamper) |
+| **Deps** | `test_deps.py` | 10 | `get_current_user` (401 sin/válido/vencido/inactivo), `require_admin` (403) |
+| **API** | `test_clients_api.py` | 37 | CRUD clientes vía HTTP, exportación, JWT 401, require_admin 403 |
+| **API** | `test_products_api.py` | 33 | CRUD productos, imágenes, JWT 401 |
+| **API** | `test_auth_api.py` | 13 | Login bcrypt+JWT, solo admin, change-password (flag) |
+| **API** | `test_metrics_api.py` | 5 | Dashboard métricas + JWT 401 |
+| **API** | `test_admin_bot_api.py` | 14 | Consultas por intención con datos reales, registro como interacción |
+| **API** | `test_interaction_api.py` | 15 | POST con X-Api-Key (n8n), idempotencia, GET listado con JWT |
+| **API** | `test_client_productos_api.py` | 20 | Productos asignados (POST/PUT/DELETE, stock) |
+| **API** | `test_integration_post.py` | 4 | Smoke test creación de cliente + JWT 401 |
+| **Script** | `test_migrate_passwords.py` | 6 | Migración idempotente, `set` de password admin |
 
-**Total: 65 tests · 1.2s de ejecución**
+**Total: 253 tests** (247 tests de API/seguridad + 6 del script de migración)
 
 ### Cómo correrlos
 
@@ -283,6 +309,11 @@ cd backend
 
 # Ejecutar por nombre
 ..\.venv\Scripts\python -m pytest tests/ -k "login" -v
+
+# Migración de passwords (sembrar cambiar123 + flag)
+..\.venv\Scripts\python scripts\migrate_passwords.py migrate
+# Fijar password de una cuenta admin
+..\.venv\Scripts\python scripts\migrate_passwords.py set --email admin@x.com --password "secreta"
 ```
 
 > ⚠️ **Importante:** Usar siempre el Python del entorno virtual (`.venv\Scripts\python.exe`), no el global. El sistema Python (`C:\Python314`) no tiene `openpyxl` ni las dependencias del proyecto.
@@ -291,15 +322,17 @@ cd backend
 
 Todas las pruebas de API usan **SQLite en memoria** con `StaticPool`, lo que significa:
 - ✅ **Aisladas:** cada test arranca con una base de datos vacía
-- ✅ **Rápidas:** ~1.2s para los 65 tests
+- ✅ **Rápidas:** ~36s para los 253 tests
 - ✅ **Sin efectos secundarios:** no tocan la base de datos real (`dev.db`)
 - ✅ **Sin dependencias externas:** no necesitan n8n, Telegram ni ngrok
 
 Las fixtures compartidas viven en `tests/conftest.py`:
 - `db_session` — sesión SQLite en memoria por test
 - `client` — `TestClient` de FastAPI con la BD overrideada
-- `auth_headers` — headers con `X-Api-Key` para endpoints protegidos
+- `auth_headers` — headers con `X-Api-Key` para endpoints de n8n
 - `sample_client` / `sample_inactive_client` — clientes precargados
+- `sample_admin` — usuario admin con `password_hash` de `cambiar123`
+- `admin_headers_bearer` — headers `Authorization: Bearer <jwt>` para endpoints protegidos
 
 ### Tests Frontend
 
@@ -308,16 +341,16 @@ Suite de tests del panel web con **Vitest 2 + React Testing Library** corriendo 
 | Archivo | Tests | ¿Qué cubre? |
 |---------|-------|-------------|
 | `src/hooks/useTheme.test.js` | 5 | Tema: init desde localStorage, fallback a matchMedia, toggle + persistencia, clase `dark` en `<html>` |
-| `src/services/authService.test.js` | 6 | Login POST `/api/v1/auth/login`, mapeo de respuesta, errores, helpers de `sessionStorage` |
+| `src/services/authService.test.js` | 12 | Login `{email,password}` + guardado de token, interceptores Bearer/401, changePassword, helpers de `sessionStorage` |
 | `src/components/Pagination.test.jsx` | 7 | Rango "Mostrando X–Y de Z", botones Anterior/Siguiente (disabled y callbacks), sin controles con 1 página |
 | `src/components/StatusBadge.test.jsx` | 4 | Estado Activo/Inactivo (booleano y numérico) |
 | `src/components/Avatar.test.jsx` | 4 | Iniciales, uppercase, fallback `?`, `<img>` con alt |
 | `src/components/Modal.test.jsx` | 5 | Título/children, cierre con Escape, clic en backdrop, botón X, clic interno no cierra |
 | `src/components/ThemeToggle.test.jsx` | 3 | Ícono Moon/Sun según tema, clic invierte y persiste |
-| `src/state/AuthContext.test.jsx` | 6 | Restauración de sesión, login ok/error, logout, `isAdmin`/`isAuthenticated` |
-| `src/pages/LoginPage.test.jsx` | 5 | Formulario, submit navega a `/dashboard`, quick login admin, error visible |
+| `src/state/AuthContext.test.jsx` | 9 | Restauración de sesión, login ok/error, `changePassword` (flag), logout limpia token, `isAdmin`/`isAuthenticated` |
+| `src/pages/LoginPage.test.jsx` | 7 | Formulario email+password, navegación a `/dashboard` o `/change-password`, validaciones, error visible |
 
-**Total: 45 tests · jsdom · sin backend**
+**Total: 56 tests · jsdom · sin backend**
 
 ```bash
 cd frontend
@@ -342,6 +375,7 @@ npm run test:watch # modo watch
 │   │   ├── schemas/           # Esquemas Pydantic
 │   │   └── services/          # Lógica de negocio
 │   ├── requirements.txt
+│   ├── scripts/               # Scripts de mantenimiento (migración de passwords)
 │   └── dev.db                 # Base de datos local (no trackeada)
 │
 ├── dashboard/
@@ -371,18 +405,26 @@ npm run test:watch # modo watch
 | Variable | Valor por defecto | Descripción |
 |----------|-------------------|-------------|
 | `DATABASE_URL` | `sqlite:///./dev.db` | Cadena de conexión a la base de datos |
-| `API_KEY` | `dev-api-key-123` | Clave para endpoints protegidos (`X-Api-Key`) |
+| `API_KEY` | `dev-api-key-123` | Clave para endpoints de ingesta n8n (`X-Api-Key`) |
+| `JWT_SECRET_KEY` | `dev-secret-key-change-me` | Clave secreta para firmar tokens JWT (HS256) |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | `480` | Expiración del token en minutos (8 h) |
 
-> En producción, cambiar `API_KEY` por un valor seguro y configurar `DATABASE_URL` para usar MySQL.
+> En producción, cambiar `API_KEY` por un valor seguro, setear `JWT_SECRET_KEY` a una clave aleatoria larga
+> (≥32 bytes) y configurar `DATABASE_URL` para usar MySQL.
 
 ---
 
 ## 🔐 Seguridad
 
+- El login del panel usa **email + password** (bcrypt) y emite **JWT HS256** (`Authorization: Bearer`)
+- **Solo cuentas `role="admin"`** pueden loguearse (los clientes/prospectos con `role="user"` no entran al panel)
+- La password provisoria de migración es **`cambiar123`** y el flag `password_change_required` obliga a
+  cambiarla en el primer login (`POST /auth/change-password` exige la password actual)
+- Los endpoints de **ingesta n8n** (`POST /interactions`) conservan `X-Api-Key` y NO requieren JWT
+- Las **`API_KEY` / `JWT_SECRET_KEY`** por defecto son solo para desarrollo → **cambiar en producción**
 - Los archivos **`.json` exportados de n8n** contienen tokens y credenciales → **ignorados por git**
-- La **`API_KEY`** por defecto es solo para desarrollo → **cambiar en producción**
-- El login es **email-only** (sin contraseña) durante desarrollo
 - La base de datos **SQLite** no debe usarse en producción
+- **Deuda conocida:** no hay rate-limit de login (brute-force) ni revocación de tokens — fuera de scope (tesis)
 
 ---
 
@@ -391,13 +433,13 @@ npm run test:watch # modo watch
 | Feature | Estado | Descripción |
 |---------|--------|-------------|
 | **Ollama / AI** | ⏳ Pendiente | Integración con modelos locales (Llama 3, Mistral, Phi) para respuestas inteligentes en Telegram. Requiere instalar [Ollama](https://ollama.com/download) y descargar un modelo (`ollama pull llama3.2:1b`). |
-| **Autenticación con password** | ⏳ Pendiente | Sistema de login con email + contraseña (reemplazar email-only actual). |
+| **Autenticación con password** | ✅ Implementado | Login email + password (bcrypt), JWT HS256, protección de endpoints del panel, cambio obligatorio de la password provisoria. |
 | **Migración a MySQL** | ⏳ Pendiente | Base de datos definitiva para producción con migraciones desde SQLite. |
 | **Docker** | ⏳ Pendiente | `Dockerfile` + `docker-compose` para backend, frontend y base de datos. |
 | **Dashboard Streamlit** | ✅ Implementado | Dashboard interno con métricas, CRUD de clientes e interacciones, consulta directa a DB. |
 | **Dashboard de gráficos** | ✅ Implementado | Endpoint `GET /api/v1/metrics/dashboard` + frontend con Recharts. |
 | **Paginación real** | ✅ Implementado | Backend con limit/offset, frontend con controles de paginación. |
-| **Tests Frontend** | ✅ Implementado | Suite de tests con Vitest + React Testing Library: hooks, servicios, componentes, contexto y páginas (45 tests en jsdom). |
+| **Tests Frontend** | ✅ Implementado | Suite de tests con Vitest + React Testing Library: hooks, servicios, componentes, contexto y páginas (56 tests en jsdom). |
 
 ---
 

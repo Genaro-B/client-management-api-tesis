@@ -7,3 +7,5 @@ pydantic>=2.2
 pytest>=8.0
 httpx>=0.24
 openpyxl>=3.1
+bcrypt>=4.1
+PyJWT>=2.8

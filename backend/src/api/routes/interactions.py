@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 
 from src.schemas.interaction import CreateInteraction, InteractionResponse
+from src.models.client import Client
 from src.models.interaction import Interaction
 from src.services.interaction_service import (
     InteractionService,
@@ -15,6 +16,7 @@ from src.services.interaction_service import (
     IdempotencyConflict,
 )
 from src.core.auth import verify_api_key
+from src.core.deps import get_current_user
 from src.database.session import get_db
 
 router = APIRouter()
@@ -40,6 +42,7 @@ def list_interactions(
     offset: int = Query(0, ge=0),
     client_id: Optional[int] = Query(None, ge=1),
     db: Session = Depends(get_db),
+    _user: Client = Depends(get_current_user),
 ):
     """List all interactions, newest first.
 

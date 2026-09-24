@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import LoginPage from './pages/LoginPage.jsx'
+import ChangePasswordPage from './pages/ChangePasswordPage.jsx'
 import ClientsPage from './pages/ClientsPage.jsx'
 import ProductsPage from './pages/ProductsPage.jsx'
 import MetricsPage from './pages/MetricsPage.jsx'
@@ -50,6 +51,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ClientsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/change-password"
+            element={
+              <ProtectedRoute>
+                <ChangePasswordPage />
               </ProtectedRoute>
             }
           />

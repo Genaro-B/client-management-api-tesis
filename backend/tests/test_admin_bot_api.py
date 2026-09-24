@@ -6,6 +6,7 @@ Verifica:
 - Fallback no-entendido con sugerencias.
 - Validación 422 de mensaje vacío/ausente.
 - Registro de cada consulta como interacción con source="admin-bot" e intent.
+- El endpoint exige Bearer JWT (401 sin token).
 """
 import json
 from datetime import datetime, timedelta, timezone
@@ -16,6 +17,11 @@ from src.models.product import Product
 from src.core.config import LOW_STOCK_THRESHOLD
 
 PREFIX = "/api/v1/admin-bot"
+
+
+def test_consult_without_token_returns_401(client):
+    resp = client.post(f"{PREFIX}/consult", json={"mensaje": "cómo vamos"})
+    assert resp.status_code == 401
 
 
 def _now_utc():
@@ -54,7 +60,7 @@ def _crear_producto(db_session, nombre, stock, **kwargs):
 # ---------------------------------------------------------------------------
 
 
-def test_consulta_clientes_nuevos_mes_responde_datos_reales(client, db_session):
+def test_consulta_clientes_nuevos_mes_responde_datos_reales(client, db_session, admin_headers_bearer):
     """3 clientes registrados este mes -> respuesta menciona el 3."""
     mes = _mes_start()
     for i in range(3):
@@ -86,7 +92,7 @@ def test_consulta_clientes_nuevos_mes_responde_datos_reales(client, db_session):
 
     resp = client.post(f"{PREFIX}/consult", json={
         "mensaje": "¿cuántos clientes nuevos hay este mes?"
-    })
+    }, headers=admin_headers_bearer)
     assert resp.status_code == 200
     data = resp.json()
     assert data["intent"] == "clientes-nuevos-mes"
@@ -94,18 +100,18 @@ def test_consulta_clientes_nuevos_mes_responde_datos_reales(client, db_session):
     assert "Nuevo0" in data["respuesta"]  # menciona los detalles
 
 
-def test_consulta_clientes_nuevos_mes_sin_datos(client, db_session):
+def test_consulta_clientes_nuevos_mes_sin_datos(client, db_session, admin_headers_bearer):
     """Sin clientes nuevos, la respuesta lo dice sin romperse."""
     resp = client.post(f"{PREFIX}/consult", json={
         "mensaje": "clientes nuevos del mes"
-    })
+    }, headers=admin_headers_bearer)
     assert resp.status_code == 200
     data = resp.json()
     assert data["intent"] == "clientes-nuevos-mes"
     assert "no" in data["respuesta"].lower() or "0" in data["respuesta"]
 
 
-def test_consulta_stock_bajo_lista_productos(client, db_session):
+def test_consulta_stock_bajo_lista_productos(client, db_session, admin_headers_bearer):
     """Productos con stock <= umbral se listan; los demás no."""
     _crear_producto(db_session, "Umbral", stock=LOW_STOCK_THRESHOLD)
     _crear_producto(db_session, "Critico", stock=3)
@@ -114,7 +120,7 @@ def test_consulta_stock_bajo_lista_productos(client, db_session):
 
     resp = client.post(f"{PREFIX}/consult", json={
         "mensaje": "qué productos tienen stock bajo"
-    })
+    }, headers=admin_headers_bearer)
     assert resp.status_code == 200
     data = resp.json()
     assert data["intent"] == "stock-bajo"
@@ -123,19 +129,19 @@ def test_consulta_stock_bajo_lista_productos(client, db_session):
     assert "Sano" not in data["respuesta"]
 
 
-def test_consulta_stock_bajo_sin_productos(client, db_session):
+def test_consulta_stock_bajo_sin_productos(client, db_session, admin_headers_bearer):
     """Sin productos bajo el umbral, la respuesta es tranquilizadora."""
     _crear_producto(db_session, "Sano", stock=100)
     db_session.commit()
 
-    resp = client.post(f"{PREFIX}/consult", json={"mensaje": "stock bajo"})
+    resp = client.post(f"{PREFIX}/consult", json={"mensaje": "stock bajo"}, headers=admin_headers_bearer)
     assert resp.status_code == 200
     data = resp.json()
     assert data["intent"] == "stock-bajo"
     assert "no" in data["respuesta"].lower()
 
 
-def test_consulta_interacciones_hoy_responde_conteo_real(client, db_session):
+def test_consulta_interacciones_hoy_responde_conteo_real(client, db_session, admin_headers_bearer):
     """7 interacciones hoy -> respuesta menciona 7; las de ayer no cuentan."""
     hoy = _hoy_start()
     for i in range(7):
@@ -154,14 +160,14 @@ def test_consulta_interacciones_hoy_responde_conteo_real(client, db_session):
 
     resp = client.post(f"{PREFIX}/consult", json={
         "mensaje": "cuántas interacciones hubo hoy"
-    })
+    }, headers=admin_headers_bearer)
     assert resp.status_code == 200
     data = resp.json()
     assert data["intent"] == "interacciones-hoy"
     assert "7" in data["respuesta"]
 
 
-def test_consulta_producto_mas_vendido_responde_top(client, db_session):
+def test_consulta_producto_mas_vendido_responde_top(client, db_session, admin_headers_bearer):
     """Agrega cantidades del JSON productos_asignados y devuelve el top 5."""
     p1 = _crear_producto(db_session, "Producto Uno", stock=100)
     p2 = _crear_producto(db_session, "Producto Dos", stock=100)
@@ -186,7 +192,7 @@ def test_consulta_producto_mas_vendido_responde_top(client, db_session):
 
     resp = client.post(f"{PREFIX}/consult", json={
         "mensaje": "cuál es el producto más vendido"
-    })
+    }, headers=admin_headers_bearer)
     assert resp.status_code == 200
     data = resp.json()
     assert data["intent"] == "producto-top"
@@ -196,18 +202,18 @@ def test_consulta_producto_mas_vendido_responde_top(client, db_session):
     assert data["respuesta"].index("Producto Uno") < data["respuesta"].index("Producto Dos")
 
 
-def test_consulta_producto_mas_vendido_sin_asignaciones(client, db_session):
+def test_consulta_producto_mas_vendido_sin_asignaciones(client, db_session, admin_headers_bearer):
     """Sin productos asignados, la respuesta es informativa."""
     resp = client.post(f"{PREFIX}/consult", json={
         "mensaje": "producto más vendido"
-    })
+    }, headers=admin_headers_bearer)
     assert resp.status_code == 200
     data = resp.json()
     assert data["intent"] == "producto-top"
     assert "no" in data["respuesta"].lower()
 
 
-def test_consulta_metricas_responde_resumen(client, db_session):
+def test_consulta_metricas_responde_resumen(client, db_session, admin_headers_bearer):
     """Mismos cálculos de summary que /metrics/dashboard."""
     hoy = _hoy_start()
     for i in range(3):
@@ -227,7 +233,7 @@ def test_consulta_metricas_responde_resumen(client, db_session):
 
     resp = client.post(f"{PREFIX}/consult", json={
         "mensaje": "cómo vamos con el negocio"
-    })
+    }, headers=admin_headers_bearer)
     assert resp.status_code == 200
     data = resp.json()
     assert data["intent"] == "metricas-generales"
@@ -243,10 +249,10 @@ def test_consulta_metricas_responde_resumen(client, db_session):
 # ---------------------------------------------------------------------------
 
 
-def test_texto_no_entendido_sugiere_consultas_validas(client):
+def test_texto_no_entendido_sugiere_consultas_validas(client, admin_headers_bearer):
     resp = client.post(f"{PREFIX}/consult", json={
         "mensaje": "qué clima hace en marte"
-    })
+    }, headers=admin_headers_bearer)
     assert resp.status_code == 200
     data = resp.json()
     assert data["intent"] == "no-entendido"
@@ -259,18 +265,18 @@ def test_texto_no_entendido_sugiere_consultas_validas(client):
 # ---------------------------------------------------------------------------
 
 
-def test_mensaje_vacio_devuelve_422(client):
-    resp = client.post(f"{PREFIX}/consult", json={"mensaje": ""})
+def test_mensaje_vacio_devuelve_422(client, admin_headers_bearer):
+    resp = client.post(f"{PREFIX}/consult", json={"mensaje": ""}, headers=admin_headers_bearer)
     assert resp.status_code == 422
 
 
-def test_mensaje_solo_espacios_devuelve_422(client):
-    resp = client.post(f"{PREFIX}/consult", json={"mensaje": "   "})
+def test_mensaje_solo_espacios_devuelve_422(client, admin_headers_bearer):
+    resp = client.post(f"{PREFIX}/consult", json={"mensaje": "   "}, headers=admin_headers_bearer)
     assert resp.status_code == 422
 
 
-def test_mensaje_ausente_devuelve_422(client):
-    resp = client.post(f"{PREFIX}/consult", json={})
+def test_mensaje_ausente_devuelve_422(client, admin_headers_bearer):
+    resp = client.post(f"{PREFIX}/consult", json={}, headers=admin_headers_bearer)
     assert resp.status_code == 422
 
 
@@ -279,13 +285,13 @@ def test_mensaje_ausente_devuelve_422(client):
 # ---------------------------------------------------------------------------
 
 
-def test_consulta_se_registra_como_interaccion(client, db_session):
+def test_consulta_se_registra_como_interaccion(client, db_session, admin_headers_bearer):
     resp = client.post(f"{PREFIX}/consult", json={
         "mensaje": "productos con stock bajo"
-    })
+    }, headers=admin_headers_bearer)
     assert resp.status_code == 200
 
-    items = client.get("/api/v1/interactions/").json()["items"]
+    items = client.get("/api/v1/interactions/", headers=admin_headers_bearer).json()["items"]
     assert len(items) == 1
     registro = items[0]
     assert registro["source"] == "admin-bot"
@@ -293,9 +299,9 @@ def test_consulta_se_registra_como_interaccion(client, db_session):
     assert "stock bajo" in registro["payload"]
 
 
-def test_consulta_no_entendida_tambien_se_registra(client, db_session):
-    client.post(f"{PREFIX}/consult", json={"mensaje": "hola mundo"})
-    items = client.get("/api/v1/interactions/").json()["items"]
+def test_consulta_no_entendida_tambien_se_registra(client, db_session, admin_headers_bearer):
+    client.post(f"{PREFIX}/consult", json={"mensaje": "hola mundo"}, headers=admin_headers_bearer)
+    items = client.get("/api/v1/interactions/", headers=admin_headers_bearer).json()["items"]
     assert len(items) == 1
     assert items[0]["source"] == "admin-bot"
     assert items[0]["intent"] == "no-entendido"

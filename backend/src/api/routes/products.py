@@ -6,6 +6,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from src.schemas.product import CreateProduct, UpdateProduct, ProductResponse
+from src.models.client import Client
 from src.repositories.product_repo import ProductRepository
 from src.services.product_service import ProductService
 from src.services.product_image_service import ProductImageService
@@ -13,6 +14,7 @@ from src.storage.image_storage import ImageStorage, LocalImageStorage
 from src.core.config import UPLOAD_DIR
 from src.core.exceptions import ImageTooLargeError, UnsupportedImageTypeError, to_http_exception
 from src.database.session import get_db
+from src.core.deps import get_current_user
 
 router = APIRouter()
 
@@ -28,6 +30,7 @@ def list_inactive_products(
     limit: int = 50,
     offset: int = 0,
     db: Session = Depends(get_db),
+    _user: Client = Depends(get_current_user),
 ):
     """Listar productos inactivos (soft-deleted)."""
     repo = ProductRepository(db)
@@ -36,7 +39,7 @@ def list_inactive_products(
 
 
 @router.patch("/{product_id}/restore", response_model=ProductResponse)
-def restore_product(product_id: int, db: Session = Depends(get_db)):
+def restore_product(product_id: int, db: Session = Depends(get_db), _user: Client = Depends(get_current_user)):
     """Restaurar un producto previamente eliminado (soft delete)."""
     repo = ProductRepository(db)
     product = repo.get_by_id(product_id)
@@ -48,7 +51,7 @@ def restore_product(product_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/export")
-def export_products(db: Session = Depends(get_db)):
+def export_products(db: Session = Depends(get_db), _user: Client = Depends(get_current_user)):
     """Exportar todos los productos activos a un archivo Excel (.xlsx)."""
     repo = ProductRepository(db)
     products = repo.list_all()
@@ -99,7 +102,7 @@ def export_products(db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=ProductResponse, status_code=201)
-def create_product(payload: CreateProduct, db: Session = Depends(get_db)):
+def create_product(payload: CreateProduct, db: Session = Depends(get_db), _user: Client = Depends(get_current_user)):
     """Crear un nuevo producto."""
     service = ProductService(db)
     product = service.create(
@@ -113,7 +116,7 @@ def create_product(payload: CreateProduct, db: Session = Depends(get_db)):
 
 
 @router.get("/{product_id}", response_model=ProductResponse)
-def get_product(product_id: int, db: Session = Depends(get_db)):
+def get_product(product_id: int, db: Session = Depends(get_db), _user: Client = Depends(get_current_user)):
     repo = ProductRepository(db)
     product = repo.get_by_id(product_id)
     if product is None or not product.activo:
@@ -122,7 +125,7 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/")
-def list_products(q: str = None, limit: int = 50, offset: int = 0, db: Session = Depends(get_db)):
+def list_products(q: str = None, limit: int = 50, offset: int = 0, db: Session = Depends(get_db), _user: Client = Depends(get_current_user)):
     """Listar productos activos. Soporta búsqueda por nombre/categoría y paginación."""
     repo = ProductRepository(db)
     items, total = repo.list(limit=limit, offset=offset, q=q)
@@ -130,7 +133,7 @@ def list_products(q: str = None, limit: int = 50, offset: int = 0, db: Session =
 
 
 @router.patch("/{product_id}", response_model=ProductResponse)
-def update_product(product_id: int, payload: UpdateProduct, db: Session = Depends(get_db)):
+def update_product(product_id: int, payload: UpdateProduct, db: Session = Depends(get_db), _user: Client = Depends(get_current_user)):
     service = ProductService(db)
     result = service.update(product_id, **payload.model_dump(exclude_unset=True))
     if result is None:
@@ -139,7 +142,7 @@ def update_product(product_id: int, payload: UpdateProduct, db: Session = Depend
 
 
 @router.delete("/{product_id}", status_code=204)
-def delete_product(product_id: int, db: Session = Depends(get_db)):
+def delete_product(product_id: int, db: Session = Depends(get_db), _user: Client = Depends(get_current_user)):
     repo = ProductRepository(db)
     product = repo.get_by_id(product_id)
     if not product:
@@ -154,6 +157,7 @@ def upload_product_image(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     storage: ImageStorage = Depends(get_image_storage),
+    _user: Client = Depends(get_current_user),
 ):
     """Subir una imagen para un producto. Solo acceso admin.
 
@@ -176,6 +180,7 @@ def delete_product_image(
     product_id: int,
     db: Session = Depends(get_db),
     storage: ImageStorage = Depends(get_image_storage),
+    _user: Client = Depends(get_current_user),
 ):
     """Quitar la imagen de un producto. Solo acceso admin.
 

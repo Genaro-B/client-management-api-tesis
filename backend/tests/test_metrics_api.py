@@ -2,6 +2,7 @@
 
 Usa conftest.py compartido: fixture `client` (TestClient con BD en memoria)
 y fixture `db_session` (sesión SQLAlchemy para crear datos de prueba).
+El endpoint exige Bearer JWT (401 sin token).
 """
 from datetime import datetime, timedelta, timezone
 
@@ -11,9 +12,14 @@ from src.models.interaction import Interaction
 PREFIX = "/api/v1/metrics"
 
 
-def test_dashboard_returns_all_sections(client):
-    """Verifica que la respuesta tenga las secciones esperadas según spec."""
+def test_dashboard_without_token_returns_401(client):
     resp = client.get(f"{PREFIX}/dashboard")
+    assert resp.status_code == 401
+
+
+def test_dashboard_returns_all_sections(client, admin_headers_bearer):
+    """Verifica que la respuesta tenga las secciones esperadas según spec."""
+    resp = client.get(f"{PREFIX}/dashboard", headers=admin_headers_bearer)
     assert resp.status_code == 200
     data = resp.json()
     assert "summary" in data
@@ -23,7 +29,7 @@ def test_dashboard_returns_all_sections(client):
     assert "topIntents" in data
 
 
-def test_dashboard_summary_with_data(client, db_session):
+def test_dashboard_summary_with_data(client, db_session, admin_headers_bearer):
     """Crea 3 clientes no-admin + 1 admin, y 10 interacciones.
     Verifica totalClients, activeClients, inactiveClients, totalInteractions,
     interactionsToday e interactionsThisWeek.
@@ -62,7 +68,7 @@ def test_dashboard_summary_with_data(client, db_session):
         ))
     db_session.commit()
 
-    resp = client.get(f"{PREFIX}/dashboard")
+    resp = client.get(f"{PREFIX}/dashboard", headers=admin_headers_bearer)
     assert resp.status_code == 200
     s = resp.json()["summary"]
 
@@ -75,9 +81,9 @@ def test_dashboard_summary_with_data(client, db_session):
     assert s["interactionsThisWeek"] == 5, f"expected 5, got {s['interactionsThisWeek']}"
 
 
-def test_dashboard_returns_empty_timeline_when_no_data(client):
+def test_dashboard_returns_empty_timeline_when_no_data(client, admin_headers_bearer):
     """Cuando no hay interacciones, el timeline debe tener 30 días con count 0."""
-    resp = client.get(f"{PREFIX}/dashboard")
+    resp = client.get(f"{PREFIX}/dashboard", headers=admin_headers_bearer)
     assert resp.status_code == 200
     timeline = resp.json()["interactionsTimeline"]
     assert len(timeline) == 30, f"expected 30, got {len(timeline)}"
@@ -85,14 +91,14 @@ def test_dashboard_returns_empty_timeline_when_no_data(client):
         assert entry["count"] == 0, f"expected 0 for {entry['date']}, got {entry['count']}"
 
 
-def test_dashboard_interactions_by_source(client, db_session):
+def test_dashboard_interactions_by_source(client, db_session, admin_headers_bearer):
     """Crea interacciones con distintas fuentes y verifica el agrupamiento."""
     db_session.add(Interaction(source="telegram", payload='{"msg":"a"}'))
     db_session.add(Interaction(source="telegram", payload='{"msg":"b"}'))
     db_session.add(Interaction(source="api", payload='{"msg":"c"}'))
     db_session.commit()
 
-    resp = client.get(f"{PREFIX}/dashboard")
+    resp = client.get(f"{PREFIX}/dashboard", headers=admin_headers_bearer)
     assert resp.status_code == 200
     data = resp.json()
     assert data["interactionsBySource"] == {

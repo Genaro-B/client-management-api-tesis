@@ -6,11 +6,13 @@ from sqlalchemy.orm import Session
 
 from src.schemas.client import CreateClient, UpdateClient, ClientResponse, ProductoAsignado
 from typing import List
+from src.models.client import Client
 from src.repositories.client_repo import ClientRepository
 from src.repositories.product_repo import ProductRepository
 from src.services.client_service import ClientService, EmailAlreadyExists
 from src.database.session import get_db
 from src.core.exceptions import to_http_exception
+from src.core.deps import get_current_user, require_admin
 
 router = APIRouter()
 
@@ -21,6 +23,7 @@ def list_inactive_clients(
     limit: int = 50,
     offset: int = 0,
     db: Session = Depends(get_db),
+    _admin: Client = Depends(require_admin),
 ):
     """Listar clientes inactivos (soft-deleted). Solo acceso admin."""
     repo = ClientRepository(db)
@@ -29,7 +32,7 @@ def list_inactive_clients(
 
 
 @router.patch("/{client_id}/restore", response_model=ClientResponse)
-def restore_client(client_id: int, db: Session = Depends(get_db)):
+def restore_client(client_id: int, db: Session = Depends(get_db), _admin: Client = Depends(require_admin)):
     """Restaurar un cliente previamente eliminado (soft delete). Solo acceso admin."""
     repo = ClientRepository(db)
     client = repo.get_by_id(client_id)
@@ -41,7 +44,7 @@ def restore_client(client_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/export")
-def export_clients(db: Session = Depends(get_db)):
+def export_clients(db: Session = Depends(get_db), _user: Client = Depends(get_current_user)):
     """Exportar todos los clientes a un archivo Excel (.xlsx)."""
     repo = ClientRepository(db)
     clients = repo.list_all()
@@ -91,7 +94,7 @@ def export_clients(db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=ClientResponse, status_code=201)
-def create_client(payload: CreateClient, response: Response, db: Session = Depends(get_db)):
+def create_client(payload: CreateClient, response: Response, db: Session = Depends(get_db), _user: Client = Depends(get_current_user)):
     """Crear un nuevo cliente. Si el email ya existe, devuelve el cliente existente (200)."""
     repo = ClientRepository(db)
     existing = repo.get_by_email(payload.email)
@@ -110,7 +113,7 @@ def create_client(payload: CreateClient, response: Response, db: Session = Depen
 
 
 @router.get("/by-email/{email}", response_model=ClientResponse)
-def get_client_by_email(email: str, db: Session = Depends(get_db)):
+def get_client_by_email(email: str, db: Session = Depends(get_db), _user: Client = Depends(get_current_user)):
     """Buscar cliente por email exacto. 404 si no existe."""
     repo = ClientRepository(db)
     client = repo.get_by_email(email)
@@ -120,7 +123,7 @@ def get_client_by_email(email: str, db: Session = Depends(get_db)):
 
 
 @router.get("/{client_id}", response_model=ClientResponse)
-def get_client(client_id: int, db: Session = Depends(get_db)):
+def get_client(client_id: int, db: Session = Depends(get_db), _user: Client = Depends(get_current_user)):
     repo = ClientRepository(db)
     client = repo.get_by_id(client_id)
     if client is None or not client.activo:
@@ -129,7 +132,7 @@ def get_client(client_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/")
-def list_clients(q: str = None, limit: int = 50, offset: int = 0, db: Session = Depends(get_db)):
+def list_clients(q: str = None, limit: int = 50, offset: int = 0, db: Session = Depends(get_db), _user: Client = Depends(get_current_user)):
     """Listar clientes activos. Soporta búsqueda por nombre y paginación."""
     repo = ClientRepository(db)
     items, total = repo.list(limit=limit, offset=offset, nombre=q)
@@ -137,7 +140,7 @@ def list_clients(q: str = None, limit: int = 50, offset: int = 0, db: Session = 
 
 
 @router.patch("/{client_id}", response_model=ClientResponse)
-def update_client(client_id: int, payload: UpdateClient, db: Session = Depends(get_db)):
+def update_client(client_id: int, payload: UpdateClient, db: Session = Depends(get_db), _user: Client = Depends(get_current_user)):
     service = ClientService(db)
     try:
         result = service.update(client_id, **payload.model_dump(exclude_unset=True))
@@ -149,7 +152,7 @@ def update_client(client_id: int, payload: UpdateClient, db: Session = Depends(g
 
 
 @router.delete("/{client_id}", status_code=204)
-def delete_client(client_id: int, db: Session = Depends(get_db)):
+def delete_client(client_id: int, db: Session = Depends(get_db), _user: Client = Depends(get_current_user)):
     repo = ClientRepository(db)
     client = repo.get_by_id(client_id)
     if not client:
@@ -164,7 +167,7 @@ def delete_client(client_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/{client_id}/productos", response_model=List[ProductoAsignado])
-def get_client_productos(client_id: int, db: Session = Depends(get_db)):
+def get_client_productos(client_id: int, db: Session = Depends(get_db), _user: Client = Depends(get_current_user)):
     """Obtener la lista de productos asignados a un cliente."""
     service = ClientService(db)
     productos = service.get_productos(client_id)
@@ -174,7 +177,7 @@ def get_client_productos(client_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/{client_id}/productos", response_model=List[ProductoAsignado], status_code=201)
-def add_client_producto(client_id: int, payload: ProductoAsignado, db: Session = Depends(get_db)):
+def add_client_producto(client_id: int, payload: ProductoAsignado, db: Session = Depends(get_db), _user: Client = Depends(get_current_user)):
     """Agregar un producto al cliente (o incrementar cantidad si ya existe).
     Valida stock disponible y lo descuenta automáticamente."""
     service = ClientService(db)
@@ -210,7 +213,7 @@ def add_client_producto(client_id: int, payload: ProductoAsignado, db: Session =
 
 
 @router.put("/{client_id}/productos", response_model=List[ProductoAsignado])
-def set_client_productos(client_id: int, payload: List[ProductoAsignado], db: Session = Depends(get_db)):
+def set_client_productos(client_id: int, payload: List[ProductoAsignado], db: Session = Depends(get_db), _user: Client = Depends(get_current_user)):
     """Reemplazar toda la lista de productos asignados (para sync)."""
     service = ClientService(db)
     productos = service.set_productos(client_id, [p.model_dump() for p in payload])
@@ -220,7 +223,7 @@ def set_client_productos(client_id: int, payload: List[ProductoAsignado], db: Se
 
 
 @router.delete("/{client_id}/productos/{producto_id}", status_code=204)
-def remove_client_producto(client_id: int, producto_id: int, db: Session = Depends(get_db)):
+def remove_client_producto(client_id: int, producto_id: int, db: Session = Depends(get_db), _user: Client = Depends(get_current_user)):
     """Eliminar un producto específico de la lista del cliente.
     Restaura el stock automáticamente."""
     service = ClientService(db)

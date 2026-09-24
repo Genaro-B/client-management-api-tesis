@@ -10,6 +10,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from src.database.session import get_db
+from src.core.deps import get_current_user
 from src.models.client import Client
 from src.models.interaction import Interaction
 
@@ -17,7 +18,7 @@ router = APIRouter()
 
 
 @router.get("/dashboard")
-def get_dashboard(db: Session = Depends(get_db)):
+def get_dashboard(db: Session = Depends(get_db), _user: Client = Depends(get_current_user)):
     """Retorna métricas agregadas para el dashboard principal.
 
     Devuelve: summary, interactionsBySource, interactionsTimeline,

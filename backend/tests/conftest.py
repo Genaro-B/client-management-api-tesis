@@ -20,8 +20,10 @@ from src.models.client import Client
 from src.models.product import Product
 from src.repositories.client_repo import ClientRepository
 from src.repositories.product_repo import ProductRepository
+from src.core.security import hash_password, create_access_token
 
 TEST_API_KEY = "dev-api-key-123"
+DEFAULT_PASSWORD = "cambiar123"
 
 
 @pytest.fixture(scope="function")
@@ -94,6 +96,33 @@ def sample_inactive_client(db_session):
         activo=False,
     )
     return repo.create(client)
+
+
+@pytest.fixture(scope="function")
+def sample_admin(db_session):
+    """Crea y persiste un usuario admin con password_hash de 'cambiar123'.
+
+    Es la cuenta "panel" de los tests: loguea con {email, password} y
+    genera headers Bearer válidos para los endpoints protegidos.
+    """
+    repo = ClientRepository(db_session)
+    client = Client(
+        nombre="Admin",
+        apellido="Test",
+        email="admin@test.com",
+        role="admin",
+        password_hash=hash_password(DEFAULT_PASSWORD),
+        password_change_required=False,
+    )
+    return repo.create(client)
+
+
+@pytest.fixture(scope="function")
+def admin_headers_bearer(db_session, sample_admin):
+    """Headers con Bearer token válido, generado directo con create_access_token
+    (sin pasar por el endpoint de login — aísla los tests de la protección JWT)."""
+    token = create_access_token(sample_admin.id)
+    return {"Authorization": f"Bearer {token}"}
 
 
 @pytest.fixture(scope="function")

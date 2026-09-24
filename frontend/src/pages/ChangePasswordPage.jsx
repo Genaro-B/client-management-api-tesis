@@ -1,27 +1,32 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Mail, Lock, Loader2, AlertCircle, ShieldCheck } from 'lucide-react'
+import { Lock, Loader2, AlertCircle, ShieldCheck, KeyRound } from 'lucide-react'
 import useAuth from '../hooks/useAuth.js'
 
-export default function LoginPage() {
-  const { login, loading, error, setError } = useAuth()
+export default function ChangePasswordPage() {
+  const { changePassword, loading, error, setError } = useAuth()
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!email.trim()) {
-      setError?.('Ingresá tu email')
+    if (!currentPassword) {
+      setError?.('Ingresá tu contraseña actual')
       return
     }
-    if (!password) {
-      setError?.('Ingresá tu contraseña')
+    if (newPassword.length < 6) {
+      setError?.('La nueva contraseña debe tener al menos 6 caracteres')
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      setError?.('Las contraseñas no coinciden')
       return
     }
     try {
-      const user = await login(email.trim(), password)
-      navigate(user?.password_change_required ? '/change-password' : '/dashboard')
+      await changePassword(currentPassword, newPassword)
+      navigate('/dashboard')
     } catch {
       // error handled by hook
     }
@@ -63,17 +68,21 @@ export default function LoginPage() {
           <p className="text-[13px] text-muted-foreground mt-2 max-w-md">
             Sistema de automatización y administración de prospectos
           </p>
-          <p className="text-[12px] text-slate-400 dark:text-slate-500 mt-1">
-            Plataforma para la gestión y seguimiento de prospectos académicos.
-          </p>
         </div>
 
-        {/* Login Card */}
+        {/* Change Password Card */}
         <div className="w-full max-w-md bg-card border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl">
           <div className="p-6">
-            <h2 className="text-[15px] font-semibold text-foreground mb-5">
-              Iniciar sesión
-            </h2>
+            <div className="flex items-center gap-2 mb-1">
+              <KeyRound size={16} className="text-primary" />
+              <h2 className="text-[15px] font-semibold text-foreground">
+                Cambiar contraseña
+              </h2>
+            </div>
+            <p className="text-[12px] text-muted-foreground mb-5">
+              Es la primera vez que ingresás con la contraseña provisoria. Elegí
+              una contraseña nueva para continuar.
+            </p>
 
             {error && (
               <div className="flex items-center gap-2.5 p-3 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900 mb-4">
@@ -85,15 +94,15 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">
-                  Email
+                  Contraseña actual
                 </label>
                 <div className="relative">
-                  <Mail size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <Lock size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
-                    type="email"
-                    placeholder="Ingrese su email institucional"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    type="password"
+                    placeholder="Contraseña provisoria"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
                     disabled={loading}
                     className="w-full bg-background border border-slate-200 dark:border-slate-600 rounded-lg py-2.5 pl-9 pr-3 text-[13px] text-foreground placeholder:text-muted-foreground outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_3px_rgba(37,99,235,0.20)] disabled:opacity-60"
                   />
@@ -102,15 +111,32 @@ export default function LoginPage() {
 
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">
-                  Contraseña
+                  Nueva contraseña
                 </label>
                 <div className="relative">
                   <Lock size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="password"
-                    placeholder="Ingrese su contraseña"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Mínimo 6 caracteres"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    disabled={loading}
+                    className="w-full bg-background border border-slate-200 dark:border-slate-600 rounded-lg py-2.5 pl-9 pr-3 text-[13px] text-foreground placeholder:text-muted-foreground outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_3px_rgba(37,99,235,0.20)] disabled:opacity-60"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">
+                  Confirmar nueva contraseña
+                </label>
+                <div className="relative">
+                  <Lock size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="password"
+                    placeholder="Repetí la nueva contraseña"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                     disabled={loading}
                     className="w-full bg-background border border-slate-200 dark:border-slate-600 rounded-lg py-2.5 pl-9 pr-3 text-[13px] text-foreground placeholder:text-muted-foreground outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_3px_rgba(37,99,235,0.20)] disabled:opacity-60"
                   />
@@ -123,7 +149,7 @@ export default function LoginPage() {
                 className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-[13px] font-semibold hover:bg-blue-700 disabled:opacity-60 transition-colors duration-150 flex items-center justify-center gap-2"
               >
                 {loading && <Loader2 size={14} className="animate-spin" />}
-                {loading ? 'Validando acceso…' : 'Iniciar sesión'}
+                {loading ? 'Guardando…' : 'Cambiar contraseña'}
               </button>
             </form>
           </div>

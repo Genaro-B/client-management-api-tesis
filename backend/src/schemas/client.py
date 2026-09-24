@@ -43,14 +43,31 @@ class ClientResponse(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    """Schema for login requests — email only, no password."""
+    """Schema for login requests — email + password obligatorios."""
     email: EmailStr
+    password: str = Field(min_length=1)
 
 
-class AuthResponse(BaseModel):
-    """Response returned after successful authentication."""
+class ChangePasswordRequest(BaseModel):
+    """Schema para POST /auth/change-password — exige password actual + nueva."""
+    current_password: str = Field(min_length=1)
+    new_password: str = Field(min_length=6)
+
+
+class UserOut(BaseModel):
+    """Usuario del panel expuesto en la respuesta de login."""
     id: int
     email: EmailStr
     nombre: str
     apellido: str
     role: str
+    password_change_required: bool
+
+    model_config = {"from_attributes": True}
+
+
+class AuthResponse(BaseModel):
+    """Response returned after successful authentication."""
+    access_token: str
+    token_type: str = "bearer"
+    user: UserOut

@@ -1,48 +1,17 @@
-"""Test de integración para endpoint POST /api/v1/clients."""
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import FastAPI
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-from src.database.base import Base
-from src.database.session import get_db
-from src.api.routes.clients import router
+"""Test de integración para endpoint POST /api/v1/clients.
 
-# Crear app de prueba con el mismo router que usa la app real
-app = FastAPI()
-app.include_router(router, prefix="/api/v1/clients")
+Reescrito sobre las fixtures compartidas de conftest.py:
+- `client`: app real + BD SQLite en memoria + X-Api-Key configurada.
+- `admin_headers_bearer`: Bearer JWT de un admin (el router ahora lo exige).
+"""
+from src.models.client import Client
 
 
-@pytest.fixture
-def client():
-    """Crea app de prueba con BD SQLite en memoria y retorna TestClient."""
-    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False}, poolclass=StaticPool)
-    Base.metadata.create_all(engine)
-    TestSessionLocal = sessionmaker(bind=engine)
-
-    def override_get_db():
-        """Sobrescribe get_db para usar la BD en memoria del test."""
-        db = TestSessionLocal()
-        try:
-            yield db
-        finally:
-            db.close()
-
-    # Aplicar override de dependencia en la app de prueba
-    app.dependency_overrides[get_db] = override_get_db
-
-    with TestClient(app) as c:
-        yield c
-
-    # Limpiar overrides después del test
-    app.dependency_overrides.clear()
-
-
-def test_post_creates(client):
+def test_post_creates(client, admin_headers_bearer):
     resp = client.post(
         "/api/v1/clients/",
         json={"nombre": "Juan", "apellido": "Perez", "email": "e@x.com"},
+        headers=admin_headers_bearer,
     )
     assert resp.status_code == 201
     data = resp.json()
@@ -52,3 +21,38 @@ def test_post_creates(client):
     assert "id" in data
     assert "fecha_registro" in data
     assert data["activo"] is True
+
+
+def test_post_creates_in_db(client, db_session, admin_headers_bearer):
+    """El cliente creado existe en la DB con todos los campos."""
+    client.post(
+        "/api/v1/clients/",
+        json={"nombre": "Maria", "apellido": "Gomez", "email": "maria@x.com"},
+        headers=admin_headers_bearer,
+    )
+    created = db_session.query(Client).filter_by(email="maria@x.com").first()
+    assert created is not None
+    assert created.nombre == "Maria"
+    assert created.apellido == "Gomez"
+    assert created.activo is True
+    assert created.fecha_registro is not None
+
+
+def test_post_duplicate_email_es_idempotente(client, admin_headers_bearer):
+    """Email duplicado devuelve 200 con el cliente existente (idempotencia)."""
+    payload = {"nombre": "Juan", "apellido": "Perez", "email": "dup@x.com"}
+    resp1 = client.post("/api/v1/clients/", json=payload, headers=admin_headers_bearer)
+    assert resp1.status_code == 201
+
+    resp2 = client.post("/api/v1/clients/", json=payload, headers=admin_headers_bearer)
+    assert resp2.status_code == 200
+    assert resp2.json()["email"] == "dup@x.com"
+
+
+def test_post_sin_token_returns_401(client):
+    """Sin Bearer JWT el endpoint está protegido (401)."""
+    resp = client.post(
+        "/api/v1/clients/",
+        json={"nombre": "Juan", "apellido": "Perez", "email": "notok@x.com"},
+    )
+    assert resp.status_code == 401
