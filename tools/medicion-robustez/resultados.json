@@ -1,0 +1,665 @@
+{
+  "generado": "2026-10-01T21:52:42.807Z",
+  "flujo": "Docs/flujos/Actual/v2-flujo-mejorado.json",
+  "node": "Bot Router",
+  "nota_metodologica": "Cada mensaje se evalua con estado conversacional limpio (modo=menu, carrito vacio). Se mide la CAPA DE CLASIFICACION, no el flujo de extremo a extremo.",
+  "definiciones": {
+    "precision": "Porcentaje de mensajes que rutean a la intencion esperada.",
+    "cobertura_del_catalogo": "Porcentaje de las invocadas del catalogo que el clasificador sigue alcanzando bajo mutacion.",
+    "tasa_de_fallback": "Porcentaje de mensajes que caen en la rama por defecto (\"No entendi ese comando\")."
+  },
+  "auditoria_variantes_documentadas": {
+    "total": 16,
+    "recognized": 15,
+    "porcentaje": 93.8,
+    "no_reconocidas": [
+      {
+        "intencion": "carrito",
+        "mensaje": "mis productos",
+        "detectado": "catalogo",
+        "ok": false
+      }
+    ],
+    "detalle": [
+      {
+        "intencion": "menu",
+        "mensaje": "hola",
+        "detectado": "menu",
+        "ok": true
+      },
+      {
+        "intencion": "menu",
+        "mensaje": "menu",
+        "detectado": "menu",
+        "ok": true
+      },
+      {
+        "intencion": "menu",
+        "mensaje": "volver",
+        "detectado": "menu",
+        "ok": true
+      },
+      {
+        "intencion": "comprar",
+        "mensaje": "comprar",
+        "detectado": "comprar",
+        "ok": true
+      },
+      {
+        "intencion": "comprar",
+        "mensaje": "quiero comprar",
+        "detectado": "comprar",
+        "ok": true
+      },
+      {
+        "intencion": "catalogo",
+        "mensaje": "catalogo",
+        "detectado": "catalogo",
+        "ok": true
+      },
+      {
+        "intencion": "catalogo",
+        "mensaje": "ver productos",
+        "detectado": "catalogo",
+        "ok": true
+      },
+      {
+        "intencion": "precios",
+        "mensaje": "precio",
+        "detectado": "precios",
+        "ok": true
+      },
+      {
+        "intencion": "asesor",
+        "mensaje": "asesor",
+        "detectado": "asesor",
+        "ok": true
+      },
+      {
+        "intencion": "asesor",
+        "mensaje": "hablar con alguien",
+        "detectado": "asesor",
+        "ok": true
+      },
+      {
+        "intencion": "otra",
+        "mensaje": "consulta",
+        "detectado": "otra",
+        "ok": true
+      },
+      {
+        "intencion": "otra",
+        "mensaje": "otra cosa",
+        "detectado": "otra",
+        "ok": true
+      },
+      {
+        "intencion": "carrito",
+        "mensaje": "carrito",
+        "detectado": "carrito",
+        "ok": true
+      },
+      {
+        "intencion": "carrito",
+        "mensaje": "mis productos",
+        "detectado": "catalogo",
+        "ok": false
+      },
+      {
+        "intencion": "finalizar",
+        "mensaje": "finalizar",
+        "detectado": "finalizar",
+        "ok": true
+      },
+      {
+        "intencion": "finalizar",
+        "mensaje": "terminar",
+        "detectado": "finalizar",
+        "ok": true
+      }
+    ]
+  },
+  "mutacion": {
+    "mensajes": 201,
+    "precision": 76.1,
+    "cobertura_del_catalogo": 100,
+    "tasa_de_fallback": 17.9,
+    "por_regla": {
+      "M1": {
+        "nombre": "agregar palabras de cortesia",
+        "ok": 36,
+        "total": 45
+      },
+      "M2": {
+        "nombre": "agregar o anteponer puntuacion",
+        "ok": 48,
+        "total": 60
+      },
+      "M3": {
+        "nombre": "escribir en mayusculas",
+        "ok": 15,
+        "total": 15
+      },
+      "M6": {
+        "nombre": "error tipografico (borrar un caracter)",
+        "ok": 2,
+        "total": 15
+      },
+      "M7": {
+        "nombre": "sustantivo en plural",
+        "ok": 12,
+        "total": 15
+      },
+      "M8": {
+        "nombre": "envolver en una oracion",
+        "ok": 36,
+        "total": 45
+      },
+      "M4": {
+        "nombre": "escribir con tildes",
+        "ok": 0,
+        "total": 2
+      },
+      "M5": {
+        "nombre": "reordenar las palabras",
+        "ok": 4,
+        "total": 4
+      }
+    },
+    "fallos": [
+      {
+        "intencion": "menu",
+        "base": "hola",
+        "regla": "M1",
+        "reglaNombre": "agregar palabras de cortesia",
+        "mensaje": "por favor hola",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "hola",
+        "regla": "M1",
+        "reglaNombre": "agregar palabras de cortesia",
+        "mensaje": "hola por favor",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "hola",
+        "regla": "M1",
+        "reglaNombre": "agregar palabras de cortesia",
+        "mensaje": "hola, hola",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "hola",
+        "regla": "M2",
+        "reglaNombre": "agregar o anteponer puntuacion",
+        "mensaje": "hola!",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "hola",
+        "regla": "M2",
+        "reglaNombre": "agregar o anteponer puntuacion",
+        "mensaje": "hola?",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "hola",
+        "regla": "M2",
+        "reglaNombre": "agregar o anteponer puntuacion",
+        "mensaje": "¿hola?",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "hola",
+        "regla": "M2",
+        "reglaNombre": "agregar o anteponer puntuacion",
+        "mensaje": "hola.",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "hola",
+        "regla": "M6",
+        "reglaNombre": "error tipografico (borrar un caracter)",
+        "mensaje": "hla",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "hola",
+        "regla": "M7",
+        "reglaNombre": "sustantivo en plural",
+        "mensaje": "holas",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "hola",
+        "regla": "M8",
+        "reglaNombre": "envolver en una oracion",
+        "mensaje": "quisiera hola por favor",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "hola",
+        "regla": "M8",
+        "reglaNombre": "envolver en una oracion",
+        "mensaje": "necesito hola",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "hola",
+        "regla": "M8",
+        "reglaNombre": "envolver en una oracion",
+        "mensaje": "dame hola",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "menu",
+        "regla": "M1",
+        "reglaNombre": "agregar palabras de cortesia",
+        "mensaje": "por favor menu",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "menu",
+        "regla": "M1",
+        "reglaNombre": "agregar palabras de cortesia",
+        "mensaje": "menu por favor",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "menu",
+        "regla": "M1",
+        "reglaNombre": "agregar palabras de cortesia",
+        "mensaje": "hola, menu",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "menu",
+        "regla": "M2",
+        "reglaNombre": "agregar o anteponer puntuacion",
+        "mensaje": "menu!",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "menu",
+        "regla": "M2",
+        "reglaNombre": "agregar o anteponer puntuacion",
+        "mensaje": "menu?",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "menu",
+        "regla": "M2",
+        "reglaNombre": "agregar o anteponer puntuacion",
+        "mensaje": "¿menu?",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "menu",
+        "regla": "M2",
+        "reglaNombre": "agregar o anteponer puntuacion",
+        "mensaje": "menu.",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "menu",
+        "regla": "M4",
+        "reglaNombre": "escribir con tildes",
+        "mensaje": "menú",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "menu",
+        "regla": "M6",
+        "reglaNombre": "error tipografico (borrar un caracter)",
+        "mensaje": "mnu",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "menu",
+        "regla": "M7",
+        "reglaNombre": "sustantivo en plural",
+        "mensaje": "menus",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "menu",
+        "regla": "M8",
+        "reglaNombre": "envolver en una oracion",
+        "mensaje": "quisiera menu por favor",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "menu",
+        "regla": "M8",
+        "reglaNombre": "envolver en una oracion",
+        "mensaje": "necesito menu",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "menu",
+        "regla": "M8",
+        "reglaNombre": "envolver en una oracion",
+        "mensaje": "dame menu",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "volver",
+        "regla": "M1",
+        "reglaNombre": "agregar palabras de cortesia",
+        "mensaje": "por favor volver",
+        "detectado": "catalogo",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "volver",
+        "regla": "M1",
+        "reglaNombre": "agregar palabras de cortesia",
+        "mensaje": "volver por favor",
+        "detectado": "catalogo",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "volver",
+        "regla": "M1",
+        "reglaNombre": "agregar palabras de cortesia",
+        "mensaje": "hola, volver",
+        "detectado": "catalogo",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "volver",
+        "regla": "M2",
+        "reglaNombre": "agregar o anteponer puntuacion",
+        "mensaje": "volver!",
+        "detectado": "catalogo",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "volver",
+        "regla": "M2",
+        "reglaNombre": "agregar o anteponer puntuacion",
+        "mensaje": "volver?",
+        "detectado": "catalogo",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "volver",
+        "regla": "M2",
+        "reglaNombre": "agregar o anteponer puntuacion",
+        "mensaje": "¿volver?",
+        "detectado": "catalogo",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "volver",
+        "regla": "M2",
+        "reglaNombre": "agregar o anteponer puntuacion",
+        "mensaje": "volver.",
+        "detectado": "catalogo",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "volver",
+        "regla": "M6",
+        "reglaNombre": "error tipografico (borrar un caracter)",
+        "mensaje": "vlver",
+        "detectado": "catalogo",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "volver",
+        "regla": "M7",
+        "reglaNombre": "sustantivo en plural",
+        "mensaje": "volvers",
+        "detectado": "catalogo",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "volver",
+        "regla": "M8",
+        "reglaNombre": "envolver en una oracion",
+        "mensaje": "quisiera volver por favor",
+        "detectado": "catalogo",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "volver",
+        "regla": "M8",
+        "reglaNombre": "envolver en una oracion",
+        "mensaje": "necesito volver",
+        "detectado": "catalogo",
+        "ok": false
+      },
+      {
+        "intencion": "menu",
+        "base": "volver",
+        "regla": "M8",
+        "reglaNombre": "envolver en una oracion",
+        "mensaje": "dame volver",
+        "detectado": "catalogo",
+        "ok": false
+      },
+      {
+        "intencion": "comprar",
+        "base": "comprar",
+        "regla": "M6",
+        "reglaNombre": "error tipografico (borrar un caracter)",
+        "mensaje": "cmprar",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "comprar",
+        "base": "quiero comprar",
+        "regla": "M6",
+        "reglaNombre": "error tipografico (borrar un caracter)",
+        "mensaje": "quiero cmprar",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "catalogo",
+        "base": "catalogo",
+        "regla": "M4",
+        "reglaNombre": "escribir con tildes",
+        "mensaje": "catálogo",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "catalogo",
+        "base": "catalogo",
+        "regla": "M6",
+        "reglaNombre": "error tipografico (borrar un caracter)",
+        "mensaje": "ctalogo",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "precios",
+        "base": "precio",
+        "regla": "M6",
+        "reglaNombre": "error tipografico (borrar un caracter)",
+        "mensaje": "pecio",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "asesor",
+        "base": "asesor",
+        "regla": "M6",
+        "reglaNombre": "error tipografico (borrar un caracter)",
+        "mensaje": "aesor",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "otra",
+        "base": "consulta",
+        "regla": "M6",
+        "reglaNombre": "error tipografico (borrar un caracter)",
+        "mensaje": "cnsulta",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "otra",
+        "base": "otra cosa",
+        "regla": "M6",
+        "reglaNombre": "error tipografico (borrar un caracter)",
+        "mensaje": "ora cosa",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "carrito",
+        "base": "carrito",
+        "regla": "M6",
+        "reglaNombre": "error tipografico (borrar un caracter)",
+        "mensaje": "crrito",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "finalizar",
+        "base": "finalizar",
+        "regla": "M6",
+        "reglaNombre": "error tipografico (borrar un caracter)",
+        "mensaje": "fnalizar",
+        "detectado": "fallback",
+        "ok": false
+      },
+      {
+        "intencion": "finalizar",
+        "base": "terminar",
+        "regla": "M6",
+        "reglaNombre": "error tipografico (borrar un caracter)",
+        "mensaje": "trminar",
+        "detectado": "fallback",
+        "ok": false
+      }
+    ]
+  },
+  "replay_tabla7": [
+    {
+      "id": "T7-1",
+      "etiqueta": "variacion minima fuera de catalogo",
+      "pasos": [
+        {
+          "mensaje": "Quiero comprar jamon"
+        }
+      ],
+      "nota": "La tesis afirma 0 % (no matchea). El codigo usa includes(\"comprar\").",
+      "observed": [
+        {
+          "mensaje": "Quiero comprar jamon",
+          "detectado": "comprar",
+          "salida": "🛒 *Productos para comprar*"
+        }
+      ]
+    },
+    {
+      "id": "T7-2",
+      "etiqueta": "puntuacion que rompe la igualdad exacta",
+      "pasos": [
+        {
+          "mensaje": "hola!"
+        }
+      ],
+      "nota": "El menu exige igualdad exacta (msg === \"hola\").",
+      "observed": [
+        {
+          "mensaje": "hola!",
+          "detectado": "fallback",
+          "salida": "No entendí ese comando. Escribí \"menu\" para ver las opcion"
+        }
+      ]
+    },
+    {
+      "id": "T7-3",
+      "etiqueta": "numero fuera de rango en modo catalogo",
+      "pasos": [
+        {
+          "mensaje": "2"
+        },
+        {
+          "mensaje": "10"
+        }
+      ],
+      "nota": "Requiere estar en modo catalogo. Comportamiento esperado: validacion.",
+      "observed": [
+        {
+          "mensaje": "2",
+          "detectado": "catalogo",
+          "salida": "📋 *Nuestro Catálogo*"
+        },
+        {
+          "mensaje": "10",
+          "detectado": "numero_invalido",
+          "salida": "❌ Número de producto inválido."
+        }
+      ]
+    }
+  ]
+}

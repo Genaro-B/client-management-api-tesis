@@ -17,12 +17,20 @@ JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-secret-key-change-me")
 # Expiración del token en minutos (default 480 = 8 horas).
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "480"))
 
+# Costo bcrypt. Default 12 (seguro); los tests bajan a 4 via BCRYPT_ROUNDS
+# para que la suite corra en segundos sin tocar la config de producción.
+# Se lee en cada llamada (os.getenv es barato) para que conftest pueda
+# setearlo antes de importar la suite.
+def _bcrypt_rounds() -> int:
+    return int(os.getenv("BCRYPT_ROUNDS", "12"))
+
 ALGORITHM = "HS256"
 
 
 def hash_password(plain: str) -> str:
     """Hashear una password con bcrypt (salt aleatorio por llamada)."""
-    return bcrypt.hashpw(plain.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    salt = bcrypt.gensalt(rounds=_bcrypt_rounds())
+    return bcrypt.hashpw(plain.encode("utf-8"), salt).decode("utf-8")
 
 
 def verify_password(plain: str, hashed: str) -> bool:

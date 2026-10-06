@@ -13,6 +13,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+# bcrypt lento (rounds alto) solo se paga en producción; acá en tests lo
+# bajamos para que la suite corra en segundos. Leer ANTES de importar src.
+os.environ.setdefault("BCRYPT_ROUNDS", "4")
+
 from src.database.base import Base
 from src.database.session import get_db
 from src.main import create_app
