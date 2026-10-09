@@ -1,0 +1,58 @@
+# Especificación - Dashboard de Inteligencia Comercial
+
+## Objetivo
+
+Transformar el dashboard administrativo en un centro de
+información y asistencia para la gestión del comercio.
+
+## Módulos
+
+### 1. Resumen comercial
+- Ventas
+- Ingresos
+- Ticket promedio
+- Comparación temporal
+
+### 2. Gestión de stock
+- Stock actual
+- Stock crítico
+- Productos agotados
+- Riesgo de quiebre
+- Stock inmovilizado
+- Recomendación de reposición
+
+### 3. Análisis de productos
+- Más vendidos
+- Mayor crecimiento
+- Baja rotación
+- Productos relacionados
+
+### 4. Análisis temporal
+- Ventas por día
+- Ventas por horario
+- Comparación de períodos
+
+### 5. Alertas
+- Stock crítico
+- Productos agotados
+- Variaciones anormales
+- Baja rotación
+
+### 6. Actividad
+- Ventas
+- Actualizaciones
+- Pedidos de Telegram
+- Cambios de stock
+
+### 7. Asistente
+- Consultas sobre ventas
+- Consultas sobre stock
+- Recomendaciones
+- Resúmenes automáticos
+
+### 8. Integración Telegram / n8n
+- Recepción de pedidos
+- Actualización de stock
+- Notificaciones
+- Resumen diario
+- Alertas administrativas
