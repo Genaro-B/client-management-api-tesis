@@ -9,16 +9,25 @@ import {
 } from 'recharts'
 import Sidebar from '../components/Sidebar.jsx'
 import Topbar from '../components/Topbar.jsx'
+import MetricCard from '../components/MetricCard.jsx'
+import StockAlertBanner from '../components/StockAlertBanner.jsx'
 import useAuth from '../hooks/useAuth.js'
 import { getDashboard } from '../services/metricService.js'
+import { getProducts } from '../services/productService.js'
+import { computeStockBands } from '../utils/stock.js'
 
-const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
+// Series de gráficos desde los design tokens (app.css @theme) — sin hex
+// hardcodeados, los mismos valores en light y dark.
+const CHART_COLORS = [1, 2, 3, 4, 5, 6].map((n) => `var(--color-chart-${n})`)
 
 export default function MetricsPage() {
   const { user, isAdmin, logout } = useAuth()
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  // Resumen de stock para el banner de alertas: misma lógica que el panel
+  // /stock (computeStockBands). Si falla la carga, simplemente no hay banner.
+  const [stockSummary, setStockSummary] = useState(null)
 
   const fetchData = () => {
     setLoading(true)
@@ -31,6 +40,9 @@ export default function MetricsPage() {
 
   useEffect(() => {
     fetchData()
+    getProducts({ limit: 10000 })
+      .then((res) => setStockSummary(computeStockBands(res.items || [])))
+      .catch(() => setStockSummary(null))
   }, [])
 
   const summaryCards = data
@@ -39,49 +51,61 @@ export default function MetricsPage() {
           label: 'Total Clientes',
           value: data.summary.totalClients,
           icon: Users,
-          bg: 'bg-blue-50 dark:bg-blue-950/50',
-          ring: 'ring-blue-100 dark:ring-blue-900',
-          color: 'text-blue-600 dark:text-blue-400',
+          tone: {
+            bg: 'bg-blue-50 dark:bg-blue-950/50',
+            ring: 'ring-blue-100 dark:ring-blue-900',
+            color: 'text-blue-600 dark:text-blue-400',
+          },
         },
         {
           label: 'Activos',
           value: data.summary.activeClients,
           icon: UserCheck,
-          bg: 'bg-emerald-50 dark:bg-emerald-950/50',
-          ring: 'ring-emerald-100 dark:ring-emerald-900',
-          color: 'text-emerald-600 dark:text-emerald-400',
+          tone: {
+            bg: 'bg-emerald-50 dark:bg-emerald-950/50',
+            ring: 'ring-emerald-100 dark:ring-emerald-900',
+            color: 'text-emerald-600 dark:text-emerald-400',
+          },
         },
         {
           label: 'Inactivos',
           value: data.summary.inactiveClients,
           icon: UserX,
-          bg: 'bg-slate-50 dark:bg-slate-800',
-          ring: 'ring-slate-200 dark:ring-slate-700',
-          color: 'text-slate-500 dark:text-slate-400',
+          tone: {
+            bg: 'bg-slate-50 dark:bg-slate-800',
+            ring: 'ring-slate-200 dark:ring-slate-700',
+            color: 'text-slate-500 dark:text-slate-400',
+          },
         },
         {
           label: 'Total Interacciones',
           value: data.summary.totalInteractions,
           icon: MessageSquare,
-          bg: 'bg-violet-50 dark:bg-violet-950/50',
-          ring: 'ring-violet-100 dark:ring-violet-900',
-          color: 'text-violet-600 dark:text-violet-400',
+          tone: {
+            bg: 'bg-violet-50 dark:bg-violet-950/50',
+            ring: 'ring-violet-100 dark:ring-violet-900',
+            color: 'text-violet-600 dark:text-violet-400',
+          },
         },
         {
           label: 'Hoy',
           value: data.summary.interactionsToday,
           icon: CalendarDays,
-          bg: 'bg-amber-50 dark:bg-amber-950/50',
-          ring: 'ring-amber-100 dark:ring-amber-900',
-          color: 'text-amber-600 dark:text-amber-400',
+          tone: {
+            bg: 'bg-amber-50 dark:bg-amber-950/50',
+            ring: 'ring-amber-100 dark:ring-amber-900',
+            color: 'text-amber-600 dark:text-amber-400',
+          },
         },
         {
           label: 'Esta Semana',
           value: data.summary.interactionsThisWeek,
           icon: Clock,
-          bg: 'bg-rose-50 dark:bg-rose-950/50',
-          ring: 'ring-rose-100 dark:ring-rose-900',
-          color: 'text-rose-600 dark:text-rose-400',
+          tone: {
+            bg: 'bg-rose-50 dark:bg-rose-950/50',
+            ring: 'ring-rose-100 dark:ring-rose-900',
+            color: 'text-rose-600 dark:text-rose-400',
+          },
         },
       ]
     : []
@@ -109,6 +133,9 @@ export default function MetricsPage() {
               Dashboard con métricas agregadas del sistema
             </p>
           </div>
+
+          {/* Banner de alertas de stock (oculto si no hay alertas) */}
+          <StockAlertBanner summary={stockSummary} />
 
           {/* Loading state */}
           {loading && (
@@ -141,23 +168,13 @@ export default function MetricsPage() {
               {/* ── Summary cards: 3×2 grid ── */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 {summaryCards.map((card) => (
-                  <div key={card.label} className="bg-card border border-border rounded-xl p-6 shadow-sm">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div
-                        className={`w-10 h-10 rounded-xl ${card.bg} ring-1 ${card.ring} flex items-center justify-center`}
-                      >
-                        <card.icon size={18} className={card.color} />
-                      </div>
-                      <div>
-                        <p className="text-[12px] text-muted-foreground font-medium uppercase tracking-wider">
-                          {card.label}
-                        </p>
-                      </div>
-                    </div>
-                    <p className="text-[32px] font-bold text-foreground font-display tracking-tight">
-                      {card.value}
-                    </p>
-                  </div>
+                  <MetricCard
+                    key={card.label}
+                    label={card.label}
+                    value={card.value}
+                    icon={card.icon}
+                    tone={card.tone}
+                  />
                 ))}
               </div>
 
@@ -224,7 +241,7 @@ export default function MetricsPage() {
                         <Line
                           type="monotone"
                           dataKey="count"
-                          stroke="#3b82f6"
+                          stroke="var(--color-chart-1)"
                           strokeWidth={2}
                           dot={false}
                           activeDot={{ r: 4 }}
@@ -265,7 +282,7 @@ export default function MetricsPage() {
                       <Tooltip />
                       <Bar
                         dataKey="count"
-                        fill="#3b82f6"
+                        fill="var(--color-chart-1)"
                         radius={[0, 4, 4, 0]}
                         barSize={24}
                       />
