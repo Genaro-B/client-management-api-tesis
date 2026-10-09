@@ -12,6 +12,14 @@ from sqlalchemy.orm import Session
 
 # db.py already set up sys.path when imported — safe to import backend models
 from src.models import Client, Interaction
+from src.models.product import Product
+
+# Umbral de stock crítico: misma fuente que el admin bot (backend config),
+# con fallback determinista si el backend no está importable.
+try:
+    from src.core.config import LOW_STOCK_THRESHOLD
+except Exception:  # pragma: no cover
+    LOW_STOCK_THRESHOLD = 5
 
 
 # ═══════════════════════════════════════════════════════════
@@ -234,3 +242,116 @@ def get_client_interactions(
         .all()
     )
     return [_interaction_to_dict(i) for i in interactions]
+
+
+# ═══════════════════════════════════════════════════════════
+# Stock (panel + banner de alertas)
+# ═══════════════════════════════════════════════════════════
+
+def get_stock_summary(session: Session, threshold: int | None = None) -> dict:
+    """Group active products into stock bands (color semaphore).
+
+    Only active products are considered (same criteria as the admin bot's
+    ``stock-bajo`` intent). Bands are disjoint:
+
+    - out_of_stock: stock <= 0
+    - low_stock:    0 < stock <= threshold
+    - normal:       stock > threshold
+
+    Args:
+        threshold: critical-stock threshold. Defaults to the backend's
+            LOW_STOCK_THRESHOLD (5).
+
+    Returns:
+        dict with keys: threshold, out_of_stock, low_stock, normal
+        (lists of {"id", "nombre", "stock", "categoria"}) and counts
+        ({"out_of_stock", "low_stock", "normal", "alert"}), where
+        alert = out_of_stock + low_stock.
+    """
+    if threshold is None:
+        threshold = LOW_STOCK_THRESHOLD
+
+    products = (
+        session.query(Product)
+        .filter(Product.activo.is_(True))
+        .order_by(Product.stock.asc(), Product.nombre.asc())
+        .all()
+    )
+
+    out_of_stock = []
+    low_stock = []
+    normal = []
+    for product in products:
+        item = {
+            "id": product.id,
+            "nombre": product.nombre,
+            "stock": product.stock,
+            "categoria": product.categoria,
+        }
+        if product.stock <= 0:
+            out_of_stock.append(item)
+        elif product.stock <= threshold:
+            low_stock.append(item)
+        else:
+            normal.append(item)
+
+    return {
+        "threshold": threshold,
+        "out_of_stock": out_of_stock,
+        "low_stock": low_stock,
+        "normal": normal,
+        "counts": {
+            "out_of_stock": len(out_of_stock),
+            "low_stock": len(low_stock),
+            "normal": len(normal),
+            "alert": len(out_of_stock) + len(low_stock),
+        },
+    }
+
+
+# ═══════════════════════════════════════════════════════════
+# Activity feed
+# ═══════════════════════════════════════════════════════════
+
+def get_recent_activity(
+    session: Session, limit: int = 20, payload_max: int = 140,
+) -> list[dict]:
+    """Return the most recent interactions joined with their client name.
+
+    Args:
+        limit: how many interactions to return (default 20).
+        payload_max: payload truncation length (default 140 chars).
+
+    Returns:
+        list of {"id", "timestamp" (ISO str or None), "source", "intent",
+        "payload" (truncated), "client_name" ("Nombre Apellido" or None)}
+        ordered by timestamp desc (id desc as tie-breaker).
+    """
+    rows = (
+        session.query(Interaction, Client)
+        .outerjoin(Client, Interaction.clientId == Client.id)
+        .order_by(Interaction.timestamp.desc(), Interaction.id.desc())
+        .limit(limit)
+        .all()
+    )
+
+    activity = []
+    for interaction, client in rows:
+        payload = interaction.payload or ""
+        if len(payload) > payload_max:
+            payload = payload[:payload_max].rstrip() + "…"
+        activity.append({
+            "id": interaction.id,
+            "timestamp": (
+                interaction.timestamp.isoformat()
+                if interaction.timestamp
+                else None
+            ),
+            "source": interaction.source,
+            "intent": interaction.intent,
+            "payload": payload,
+            "client_name": (
+                f"{client.nombre} {client.apellido}" if client else None
+            ),
+        })
+    return activity
