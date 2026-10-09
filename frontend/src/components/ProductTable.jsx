@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Eye, Pencil, Trash2 } from 'lucide-react'
 import StatusBadge from './StatusBadge.jsx'
 import Pagination from './Pagination.jsx'
+import { getStockBand } from '../utils/stock.js'
 
 const columns = [
   { key: 'id', label: 'ID', mono: true },
@@ -84,9 +85,12 @@ function Cell({ column, product }) {
 
   if (column.key === 'stock') {
     const stock = product.stock ?? '—'
-    const stockClass = stock === 0
+    // Banda compartida con el panel de stock (utils/stock.js): el umbral
+    // exacto (5) es crítico, igual que el backend.
+    const band = product.stock == null ? 'normal' : getStockBand(product.stock)
+    const stockClass = band === 'out_of_stock'
       ? 'text-red-500 dark:text-red-400'
-      : stock < 5
+      : band === 'low_stock'
         ? 'text-amber-500 dark:text-amber-400'
         : 'text-slate-600 dark:text-slate-300'
     return (
@@ -150,10 +154,19 @@ export default function ProductTable({ products, isAdmin, onView, onEdit, onDele
           </tr>
         </thead>
         <tbody className="divide-y divide-[#f8fafc] dark:divide-slate-800">
-          {products.map((product) => (
+          {products.map((product) => {
+            // Fila teñida según la banda: agotados/críticos se ven de un
+            // vistazo (semáforo), sin esperar a leer el número de stock.
+            const band = product.stock == null ? 'normal' : getStockBand(product.stock)
+            const rowBandClass = band === 'out_of_stock'
+              ? 'bg-red-50/60 dark:bg-red-950/25'
+              : band === 'low_stock'
+                ? 'bg-amber-50/50 dark:bg-amber-950/15'
+                : ''
+            return (
             <tr
               key={product.id}
-              className="group transition-colors duration-150 hover:bg-blue-50/30 dark:hover:bg-blue-950/20"
+              className={`group transition-colors duration-150 hover:bg-blue-50/30 dark:hover:bg-blue-950/20 ${rowBandClass}`}
             >
               {visibleColumns.map((col) => {
                 if (col.key === 'acciones') {
@@ -188,7 +201,8 @@ export default function ProductTable({ products, isAdmin, onView, onEdit, onDele
                 return <Cell key={col.key} column={col} product={product} />
               })}
             </tr>
-          ))}
+            )
+          })}
         </tbody>
       </table>
       <Pagination
