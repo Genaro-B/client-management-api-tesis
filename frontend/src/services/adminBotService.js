@@ -5,6 +5,15 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
+// Adjunta el JWT a cada request (misma clave que authService).
+api.interceptors.request.use((config) => {
+  const token = sessionStorage.getItem('crm_token')
+  if (token) {
+    config.headers = { ...config.headers, Authorization: `Bearer ${token}` }
+  }
+  return config
+})
+
 api.interceptors.response.use(
   (res) => res,
   (error) => {
