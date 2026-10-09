@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import LoginPage from './LoginPage.jsx'
+import { BRAND } from '../config/brand.js'
 
 // D4: se mockea el hook directamente — la página se prueba aislada,
 // sin AuthProvider real (su cobertura vive en AuthContext.test.jsx).
@@ -52,6 +53,17 @@ beforeEach(() => {
 })
 
 describe('LoginPage', () => {
+  it('renderiza el panel de marca junto con el panel del formulario', () => {
+    renderLoginPage()
+
+    // Panel izquierdo de marca (tagline + beneficio) y panel derecho (form).
+    expect(screen.getByText(BRAND.tagline)).toBeInTheDocument()
+    expect(screen.getByText('Conexión segura y datos protegidos')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Ingrese su email institucional')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Ingrese su contraseña')).toBeInTheDocument()
+    expect(screen.getAllByText(BRAND.name).length).toBeGreaterThan(0)
+  })
+
   it('renderiza el formulario con título, email y contraseña', () => {
     renderLoginPage()
 

@@ -45,6 +45,7 @@ export default function ClientsPage() {
           isAdmin={isAdmin}
           onNewClient={() => { setEditingClient(null); setShowFormModal(true) }}
           onLogout={logout}
+          title="Clientes"
         />
         <div className="flex-1 overflow-y-auto p-8">
           <ClientFilters
