@@ -39,3 +39,9 @@ desktop.ini
 backend/*.log
 frontend/*.log
 *.err
+
+# ─── Backups y temporales locales (no versionar) ───
+~$*
+*.bak-*
+tmp_*
+*BACKUP*.docx
