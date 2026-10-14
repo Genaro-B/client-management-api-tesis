@@ -120,3 +120,52 @@ def test_create_duplicate_idempotency_key(session):
             payload='{"event": "second"}',
             idempotency_key="tg-12345",
         )
+
+
+# ---------------------------------------------------------------------------
+# clientLookup por telegram_user_id (v5-ventas-tickets)
+# ---------------------------------------------------------------------------
+
+
+def test_create_links_client_by_telegram_user_id(session):
+    client_repo = ClientRepository(session)
+    cliente = client_repo.create(Client(
+        nombre="Telegram", apellido="User", email="tg1@x.com",
+        telegram_user_id="12345",
+    ))
+
+    svc = InteractionService(session)
+    interaction = svc.create(
+        source="telegram",
+        payload='{"msg": "hola"}',
+        clientLookup={"telegram_user_id": "12345"},
+    )
+    assert interaction.clientId == cliente.id
+
+
+def test_telegram_user_id_tiene_prioridad_sobre_email(session):
+    """Cuando telegram_user_id y email resuelven clientes distintos, gana telegram."""
+    client_repo = ClientRepository(session)
+    tg_client = client_repo.create(Client(
+        nombre="PorTelegram", apellido="X", email="tg2@x.com",
+        telegram_user_id="555",
+    ))
+    client_repo.create(Client(nombre="PorEmail", apellido="Y", email="otro@x.com"))
+
+    svc = InteractionService(session)
+    interaction = svc.create(
+        source="telegram",
+        payload='{"msg": "hola"}',
+        clientLookup={"telegram_user_id": "555", "email": "otro@x.com"},
+    )
+    assert interaction.clientId == tg_client.id
+
+
+def test_telegram_user_id_inexistente_mantiene_comportamiento(session):
+    svc = InteractionService(session)
+    interaction = svc.create(
+        source="telegram",
+        payload='{"msg": "hola"}',
+        clientLookup={"telegram_user_id": "no-existe"},
+    )
+    assert interaction.clientId is None

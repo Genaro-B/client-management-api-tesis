@@ -19,6 +19,35 @@ class CreateClient(BaseModel):
     email: EmailStr
 
 
+class RegisterBotRequest(BaseModel):
+    """Registro de prospecto desde el bot (sin password ni email del usuario)."""
+    telegram_user_id: str = Field(..., min_length=1)
+    nombre: str = Field(..., min_length=1)
+    # El bot separa "nombre y apellido" en el primer espacio; si hay una sola
+    # palabra, envía apellido "" (la columna NOT NULL lo admite).
+    apellido: str = ""
+    telefono: Optional[str] = None
+
+
+class RegisterBotResponse(BaseModel):
+    """Respuesta del registro de prospecto.
+
+    `email` es `str` (no EmailStr) a propósito: el placeholder
+    `tg{id}@telegram.local` usa un dominio reservado que email-validator
+    rechazaría, pero es válido para el `NOT NULL + UNIQUE` de la columna.
+    """
+    id: int
+    nombre: str
+    apellido: str
+    telefono: Optional[str]
+    email: str
+    telegram_user_id: Optional[str]
+    role: str
+    activo: bool
+
+    model_config = {"from_attributes": True}
+
+
 class UpdateClient(BaseModel):
     """Schema for partial updates to a client record."""
     nombre: Optional[str] = None

@@ -32,6 +32,10 @@ class ClientRepository:
         """Return a client matching the given phone number or None."""
         return self.db.query(Client).filter(Client.telefono == telefono).first()
 
+    def get_by_telegram_user_id(self, valor: str) -> Optional[Client]:
+        """Return a client matching the given Telegram user id or None."""
+        return self.db.query(Client).filter(Client.telegram_user_id == valor).first()
+
     def list(self, limit: int = 10, offset: int = 0, nombre: Optional[str] = None) -> Tuple[List[Client], int]:
         """List active non-admin clients with optional text query over nombre."""
         q = self.db.query(Client).filter(Client.activo == True, Client.role != 'admin')

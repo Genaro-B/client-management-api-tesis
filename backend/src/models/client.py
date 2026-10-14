@@ -19,6 +19,9 @@ class Client(Base):
     # True obliga al cambio de password en el primer login (migración default).
     password_change_required = Column(Boolean, nullable=False, server_default="1", default=True)
     productos_asignados = Column(JSON, default=list, server_default="[]")
+    # Identidad durable del bot de Telegram: única e indexada; NULL para los
+    # clientes creados antes de la migración 0008 (se vinculan luego).
+    telegram_user_id = Column(String(32), nullable=True, unique=True, index=True)
 
     __table_args__ = (
         Index("ix_clients_email_unique", "email", unique=True),

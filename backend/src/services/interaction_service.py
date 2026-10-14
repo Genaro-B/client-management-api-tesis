@@ -79,15 +79,23 @@ class InteractionService:
                 )
 
         # --- resolve clientLookup ---
+        # Prioridad: telegram_user_id (identidad durable del bot) > email > telefono.
+        # Si telegram_user_id no coincide, se conserva el comportamiento actual
+        # de email/telefono.
         client_id = None
         if clientLookup:
+            telegram_user_id = clientLookup.get("telegram_user_id")
             email = clientLookup.get("email")
             telefono = clientLookup.get("telefono")
-            if email:
+            if telegram_user_id:
+                client = self.client_repo.get_by_telegram_user_id(telegram_user_id)
+                if client:
+                    client_id = client.id
+            if client_id is None and email:
                 client = self.client_repo.get_by_email(email)
                 if client:
                     client_id = client.id
-            elif telefono:
+            if client_id is None and telefono:
                 client = self.client_repo.get_by_telefono(telefono)
                 if client:
                     client_id = client.id

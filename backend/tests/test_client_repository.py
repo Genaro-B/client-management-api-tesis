@@ -88,3 +88,18 @@ def test_get_by_telefono(session):
 
     not_found = repo.get_by_telefono("+999999999")
     assert not_found is None
+
+
+def test_get_by_telegram_user_id(session):
+    repo = ClientRepository(session)
+    c = Client(
+        nombre="Telegram", apellido="User", email="tg@x.com",
+        telegram_user_id="12345",
+    )
+    repo.create(c)
+
+    found = repo.get_by_telegram_user_id("12345")
+    assert found is not None
+    assert found.id == c.id
+
+    assert repo.get_by_telegram_user_id("99999") is None

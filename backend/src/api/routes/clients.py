@@ -4,13 +4,22 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
-from src.schemas.client import CreateClient, UpdateClient, ClientResponse, ProductoAsignado
+from src.schemas.client import (
+    CreateClient,
+    UpdateClient,
+    ClientResponse,
+    ProductoAsignado,
+    RegisterBotRequest,
+    RegisterBotResponse,
+)
 from typing import List
 from src.models.client import Client
 from src.repositories.client_repo import ClientRepository
 from src.repositories.product_repo import ProductRepository
 from src.services.client_service import ClientService, EmailAlreadyExists
+from src.services.registration_service import RegistrationService
 from src.database.session import get_db
+from src.core.auth import verify_api_key
 from src.core.exceptions import to_http_exception
 from src.core.deps import get_current_user, require_admin
 
@@ -91,6 +100,32 @@ def export_clients(db: Session = Depends(get_db), _user: Client = Depends(get_cu
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": "attachment; filename=clientes.xlsx"},
     )
+
+
+@router.post("/register-bot", response_model=RegisterBotResponse)
+def register_bot_client(
+    payload: RegisterBotRequest,
+    response: Response,
+    db: Session = Depends(get_db),
+    _auth_ok: str = Depends(verify_api_key),
+):
+    """Registrar (o vincular) un prospecto desde el bot de Telegram.
+
+    Sin login: crea un Client con `password_hash = NULL` y email placeholder.
+    Idempotente por `telegram_user_id`: 201 en el alta, 200 si ya existía.
+    Requiere `X-Api-Key` (flujo n8n), no JWT.
+    """
+    service = RegistrationService(db)
+    client, created = service.register_bot(
+        telegram_user_id=payload.telegram_user_id,
+        nombre=payload.nombre,
+        apellido=payload.apellido,
+        telefono=payload.telefono,
+    )
+    response.status_code = (
+        status.HTTP_201_CREATED if created else status.HTTP_200_OK
+    )
+    return client
 
 
 @router.post("/", response_model=ClientResponse, status_code=201)

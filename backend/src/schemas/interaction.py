@@ -5,6 +5,7 @@ from datetime import datetime
 
 class ClientLookup(BaseModel):
     """Optional lookup to link an interaction to an existing client."""
+    telegram_user_id: Optional[str] = None
     email: Optional[str] = None
     telefono: Optional[str] = None
 
