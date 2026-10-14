@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Users, BarChart3, Settings, UserCircle,
-  RotateCcw, MessageSquare, Package, Boxes,
+  RotateCcw, MessageSquare, Package, Boxes, ShoppingCart,
 } from 'lucide-react'
 
 // Fuente única de verdad de la navegación: la consumen el Sidebar (menú),
@@ -9,6 +9,7 @@ export const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: Package, label: 'Productos', path: '/products' },
   { icon: Boxes, label: 'Stock', path: '/stock' },
+  { icon: ShoppingCart, label: 'Ventas', path: '/sales' },
   { icon: BarChart3, label: 'Métricas', path: '/metrics' },
   { icon: MessageSquare, label: 'Interacciones', path: '/interactions' },
   { icon: Users, label: 'Clientes', path: '/dashboard' },

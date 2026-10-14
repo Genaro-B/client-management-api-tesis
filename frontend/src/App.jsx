@@ -4,6 +4,7 @@ import ChangePasswordPage from './pages/ChangePasswordPage.jsx'
 import ClientsPage from './pages/ClientsPage.jsx'
 import ProductsPage from './pages/ProductsPage.jsx'
 import StockPage from './pages/StockPage.jsx'
+import VentasPage from './pages/VentasPage.jsx'
 import MetricsPage from './pages/MetricsPage.jsx'
 import InactiveClientsPage from './pages/InactiveClientsPage.jsx'
 import InteractionsPage from './pages/InteractionsPage.jsx'
@@ -76,6 +77,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <StockPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/sales"
+            element={
+              <ProtectedRoute>
+                <VentasPage />
               </ProtectedRoute>
             }
           />
