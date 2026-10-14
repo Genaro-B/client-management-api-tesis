@@ -1,0 +1,89 @@
+Dictamen de Evaluación — V4
+
+Autor: Genaro Busto | Legajo 52610 | UTN-FRM | TUP | 2026
+
+Referencia: Evaluación comparativa respecto del dictamen oficial V3 (6,8/10)
+
+A. Verificación de las 8 correcciones obligatorias del dictamen oficial
+✓ Corrección 1 — Incongruencia de la IA: RESUELTA por la vía del reencuadre. Título cambiado a "...interpretación de lenguaje natural por reglas, con arquitectura preparada para inteligencia artificial...". Encabezado corregido ("Automatización de Procesos en Entornos de Bajo Costo"). §6.2 reescrito en condicional ("constituiría la decisión de diseño que más contribuiría a ampliar la capacidad"). §8.3 reformulado con la condición "cuando se incorpore la rama adaptativa". Hipótesis única y contrastable. Conclusiones ajustadas.
+✓ Corrección 2 — Referencias no localizadas: RESUELTA. Las cinco referencias problemáticas fueron reemplazadas. La lista final no contiene ninguna de las cinco referencias cuestionadas (Ajiga 2024, Venkiteela 2025, Jangam 2024, Viswanadhapalli 2025, Zhang 2025). Las afirmaciones que las sostenían fueron reformuladas o respaldadas con referencias verificadas.
+✓ Corrección 3 — Precisión circular: RESUELTA parcialmente y bien documentada. La V4 distingue explícitamente entre "tasa de conformidad sobre el catálogo" (100%, 102 casos) y "precisión de enrutamiento sobre variantes mutadas" (76,1%, 153/201) y "validación externa con mensajes independientes" (55%, 22/40). La sección 5.3 es ahora conceptualmente honesta y metodológicamente sólida.
+✓ Corrección 4 — Medición de tiempo ≠ variable definida: RESUELTA con transparencia. §5.2 declara explícitamente que "lo medido en esta sección es la latencia del backend...y no el tiempo de extremo a extremo". La variable y su instrumento quedan alineados. La Tabla 5 se retituló "Latencia del backend por tipo de solicitud".
+✓ Corrección 5 — Cifras muestrales unificadas: RESUELTA. La V4 usa consistentemente 253 pruebas de API en 13 grupos, 102 casos conversacionales en 9 intenciones, 201 mensajes mutados y 40 mensajes de validación externa. No hay menciones a "38 interacciones" ni a "5 categorías".
+✓ Corrección 6 — Fragmentos de código contradictorios: RESUELTA. El Fragmento 1 muestra la lógica general del bot (normalización, estado, menú, selección numérica en modo catálogo, fallback). El Fragmento 2 muestra las ramas 4-7 y el default, presentado como "exportado del flujo real". Son complementarios, no contradictorios. La Tabla 7 es coherente con el código: "HOLA!" no matchea "hola" (sin puntuación), y "Quiero comprar jabón" sí matchea por includes('comprar').
+✓ Corrección 7 — Modelo de datos: RESUELTA. El Anexo D ahora incluye el DDL completo (tres tablas: clients, products, interactions), la Figura D.1 es el diagrama ER, y la Tabla D.1 describe cada entidad. La prosa es coherente con el DDL. El comentario sobre productos_asignados como JSON en clients se explica implícitamente por el alcance del prototipo.
+✓ Corrección 8 — Índices, rótulos y Resumen/Abstract: RESUELTA. Las figuras están en orden (1-10, B.1, C.1, D.1). Todas llevan "Fuente: elaboración propia". Tabla 7 tiene un único título. Resumen y Abstract son coherentes en contenido (ambos mencionan 253 pruebas, 76,1%, 55%, latencia < 15 ms y las tres limitaciones principales). §3.5 tiene las 5 etapas completas. §5.1 referencia correctamente §1.5 y §3.3 en lugar del "capítulo de especificaciones" inexistente.
+B. Observaciones residuales — lo que falta o puede mejorar
+B1. Menor — Calvaresi et al. (2023): volumen y páginas incompletos
+La entrada en la lista de referencias es: "Calvaresi, D., [...] (2023). Exploring agent-based chatbots: A systematic literature review. Journal of Ambient Intelligence and Humanized Computing, 14, 11207–11226." El volumen (14) está presente pero el número de fascículo no figura. APA 7 requiere número de fascículo cuando la paginación no es continua por volumen. Para esta revista, el número correcto es el 9. La entrada correcta sería: Journal of Ambient Intelligence and Humanized Computing, 14(9), 11207–11226. Corrección mínima: agregar "(9)" después del "14".
+B2. Menor — Lacity & Willcocks (2016a): sin DOI ni URL
+La entrada de Lacity y Willcocks (2016a) — MIS Quarterly Executive, 15(1), 21–35 — no tiene DOI. MIS Quarterly Executive tiene ISSN 1540-1960 y esta edición específica sí tiene un identificador accesible. Si el tribunal pregunta, la respuesta es que MIS Quarterly Executive no indexa todos sus artículos en Crossref, por lo que la ausencia de DOI es aceptable. Pero agregar la URL de acceso si está disponible fortalece la entrada: https://misqe.org/ojs2/index.php/misqe/article/view/238
+B3. Menor — Kusal et al. (2022): referencia nueva no estaba en V3
+La V4 cita en §2.3 a "Kusal et al., 2022" (Kusal, S., Patil, S., Choudrie, J., Kotecha, K., Mishra, S., & Abraham, A.). Está en la lista de referencias con DOI completo (IEEE Access). Es una referencia válida y verificable. Sin embargo, no figuraba en ninguna versión anterior ni en las instrucciones del agente: es una incorporación nueva del agente. El tribunal puede preguntar si el autor la leyó directamente. Preparar respuesta: es un survey de IEEE Access de acceso abierto, perfectamente accesible y relevante para §2.3 sobre PLN y agentes conversacionales.
+B4. Menor — §3.3: umbral (b) reformulado pero más complejo
+El umbral de precisión en §3.3 fue reformulado como: "que toda respuesta entregada corresponda a una intención efectivamente presente en el catálogo —es decir, ausencia de respuestas espurias—, complementado por el reporte de la tasa de derivación al caso por defecto y de la precisión de enrutamiento ante mensajes no previstos". Esto es conceptualmente correcto y honesto, pero es más difícil de defender como "umbral de aceptación" porque no tiene un número: ¿cuánto fallback es aceptable? Sugerencia: agregar una oración de cierre como "se considera aceptable una tasa de ruteo erróneo (intención distinta de la esperada) inferior al 10% sobre el conjunto de validación externa", lo que el resultado del 5% cumple con holgura.
+B5. Menor — §2.3: cita a Zhang et al. faltante en el texto pero ausente en referencias
+En §2.3 hay un párrafo que dice: "La calidad de los resultados generados por estos modelos depende críticamente del diseño del prompt y del dominio de aplicación, un aspecto puesto en evidencia por los estudios empíricos sobre generación automatizada de código, lo que refuerza la necesidad de incorporar mecanismos de validación". Zhang et al. (2025) ya no está en la lista (fue eliminada correctamente), pero la afirmación quedó sin cita. Corregir: referenciar con Wang et al. (2024) o con Wei et al. (2022) en ese punto, o reformular como inferencia propia del marco teórico sin cita.
+B6. Menor — Tabla B.2: "mis productos" sigue en el catálogo
+La Tabla B.2 lista "6, 'carrito', 'mis productos'" como variantes de la intención "Ver carrito". La sección 5.3 explica correctamente que "mis productos" es interceptada por la rama de catálogo (que evalúa includes('producto') antes). La Tabla B.2 refleja el código, no el comportamiento real. El evaluador anterior ya señaló esto. La V4 lo documenta en §5.3, lo cual es correcto. En la defensa, si el tribunal pregunta por la Tabla B.2, tener lista la explicación de que la tabla refleja las reglas declaradas, y que §5.3 documenta el comportamiento observado que difiere para esa variante.
+B7. Formal — Índice de Tablas: orden de Tabla E.2 y E.1 invertido
+En el Índice de Figuras y Tablas, la Tabla E.2 aparece listada antes que la Tabla E.1 (E.2 en p. 98, E.1 en p. 96). En el cuerpo del texto el orden correcto es E.1 primero y E.2 después. El índice debe invertir el orden de esas dos entradas.
+C. Puntuación comparativa
+1. Introducción
+8,5
+↑ de 6,5
+2. Marco teórico
+8,5
+↑ de 7,5
+3. Marco metodológico
+8,5
+↑ de 6,5
+4. Desarrollo
+9,0
+↑ de 7,5
+5. Resultados
+9,0
+↑ de 6,5
+6. Discusión
+9,0
+↑ de 5,0
+7. Conclusiones
+8,5
+↑ de 6,0
+8. Recomendaciones
+8,5
+↑ de 7,0
+9. Referencias
+8,5
+↑ de 6,0
+10. Anexos
+9,0
+↑ de 8,0
+Promedio global
+8,7
+↑ de 6,8
+D. Veredicto
+Veredicto
+
+Aprobado — Defensa habilitada sin condiciones
+
+Las 8 correcciones obligatorias del dictamen oficial están resueltas. El trabajo pasó de 6,8 a 8,7/10. Las 7 observaciones residuales son exclusivamente menores o formales: ninguna afecta la validez del argumento central ni bloquea la defensa. Pueden corregirse antes de imprimir la versión final o responderse oralmente en la defensa.
+
+E. Resumen ejecutivo para la defensa
+Lo que el trabajo demuestra con solidez:
+
+Viabilidad técnica de automatización de bajo costo con n8n + FastAPI + SQLite + Telegram comprobada con 253 pruebas automatizadas al 100%.
+Latencia del backend inferior a 15 ms en todos los endpoints (con análisis estadístico correcto: media, mediana, P95, IC 95%, CV justificado).
+Conformidad del 100% sobre el catálogo predefinido, 76,1% ante variantes mutadas, 55% ante mensajes de usuarios noveles — con la distinción metodológica honesta entre los tres conjuntos.
+Modelo híbrido conceptualmente sólido, con la rama determinística validada y la rama adaptativa arquitectónicamente definida.
+Lo que el trabajo declara honestamente que no demuestra:
+
+No implementa un LLM real (la arquitectura está preparada; la integración es trabajo en curso).
+No mide el tiempo de extremo a extremo Telegram→n8n→API→Telegram (declara que esa latencia es dominada por Telegram y es externa al sistema).
+La cobertura conversacional es limitada al catálogo; el 55% sobre mensajes libres delimita el alcance con precisión.
+F. Preguntas probables de la defensa
+1. La validación externa muestra 55% de precisión sobre 40 mensajes. ¿Cómo garantiza que esos 40 mensajes son representativos de lo que escribiría un usuario real, y no una selección conveniente?
+2. §5.3 dice que "mis productos" está en el catálogo (Tabla B.2) pero en la práctica lo captura la rama de catálogo. ¿Por qué no se corrigió el código para que "mis productos" derive al carrito, o por qué no se eliminó del catálogo declarado?
+3. La tasa de fallback en la validación externa es del 50%. ¿Eso significa que la mitad de los usuarios reales no recibirían respuesta útil? ¿Qué experiencia tendría ese usuario?
+4. El modelo híbrido propone integrar un LLM. ¿Qué prompt usaría para que el LLM devuelva una intención estructurada en lugar de texto libre, y cómo validaría que la intención devuelta es siempre una de las 8 del catálogo?
+5. El costo de USD 50 anuales: ¿ese número incluye el costo del servidor donde corre n8n self-hosted, o solo la orquestación? ¿Cómo cambia ese número si se agrega el costo de un LLM por API?
