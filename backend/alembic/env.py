@@ -28,6 +28,8 @@ if config.config_file_name:
 from src.database.base import Base
 from src.models.client import Client
 from src.models.product import Product
+from src.models.interaction import Interaction
+from src.models.sale import Sale, SaleItem
 
 target_metadata = Base.metadata
 
