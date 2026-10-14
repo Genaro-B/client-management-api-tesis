@@ -98,6 +98,31 @@ describe('VentasPage', () => {
     expect(screen.getByText('Ana')).toBeInTheDocument()
   })
 
+  it('muestra quién confirmó la venta en la tabla', async () => {
+    salesMocks.listSales.mockResolvedValue({
+      items: [
+        {
+          id: 2, cliente_nombre: 'Ana', fecha: '2026-10-01T11:00:00',
+          total: 300, estado: 'CONFIRMADO', confirmado_por_nombre: 'Ana Gomez',
+          items: [{ producto_nombre: 'Gadget', cantidad: 2, precio_unitario: 150 }],
+        },
+      ],
+      total: 1,
+    })
+
+    renderPage()
+
+    expect(await screen.findByText('Ana Gomez')).toBeInTheDocument()
+  })
+
+  it('muestra un guion cuando la venta no tiene confirmador', async () => {
+    renderPage()
+
+    await screen.findByText('Juan')
+
+    expect(screen.getAllByText('—').length).toBeGreaterThan(0)
+  })
+
   it('confirma una venta PENDIENTE y refresca', async () => {
     salesMocks.confirmSale.mockResolvedValue({ id: 1, estado: 'CONFIRMADO' })
     const user = userEvent.setup()
@@ -131,6 +156,7 @@ describe('VentasPage', () => {
       ventas: [
         {
           id: 1, estado: 'CONFIRMADO', total: 100, fecha: '2026-10-01T10:00:00',
+          confirmado_por_nombre: 'Ana Gomez',
           items: [{ producto_nombre: 'Widget', cantidad: 2, precio_unitario: 50 }],
         },
       ],
@@ -145,6 +171,7 @@ describe('VentasPage', () => {
     await user.click(screen.getByRole('button', { name: 'Buscar' }))
 
     expect(await screen.findByText(/Widget/)).toBeInTheDocument()
+    expect(screen.getByText('Confirmado por: Ana Gomez')).toBeInTheDocument()
     expect(salesMocks.searchTicket).toHaveBeenCalledWith({ cliente: 'Juan', fecha: '2026-10-01' })
   })
 })

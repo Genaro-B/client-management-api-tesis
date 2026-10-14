@@ -94,6 +94,28 @@ def test_confirm_sale_admin(client, db_session, auth_headers, admin_headers_bear
     assert resp.json()["confirmado_por"] is not None
 
 
+def test_confirmado_por_nombre_expone_admin(client, db_session, auth_headers, admin_headers_bearer):
+    _cliente(db_session)
+    p = _producto(db_session)
+    created = client.post(
+        f"{PREFIX}/", json=_payload([{"product_id": p.id, "cantidad": 1}]),
+        headers=auth_headers,
+    ).json()
+    assert created["confirmado_por_nombre"] is None
+
+    confirm = client.post(
+        f"{PREFIX}/{created['id']}/confirm", headers=admin_headers_bearer
+    ).json()
+    assert confirm["confirmado_por_nombre"] == "Admin Test"
+
+    detalle = client.get(f"{PREFIX}/{created['id']}", headers=admin_headers_bearer).json()
+    assert detalle["confirmado_por_nombre"] == "Admin Test"
+
+    listado = client.get(f"{PREFIX}/", headers=admin_headers_bearer).json()
+    nombres = [s["confirmado_por_nombre"] for s in listado["items"] if s["id"] == created["id"]]
+    assert nombres == ["Admin Test"]
+
+
 def test_transicion_invalida_409(client, db_session, auth_headers, admin_headers_bearer):
     _cliente(db_session)
     p = _producto(db_session)

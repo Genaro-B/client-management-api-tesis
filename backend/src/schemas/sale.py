@@ -39,6 +39,7 @@ class SaleResponse(BaseModel):
     estado: str
     idempotency_key: Optional[str] = None
     confirmado_por: Optional[int] = None
+    confirmado_por_nombre: Optional[str] = None
     items: List[SaleItemResponse] = []
 
 

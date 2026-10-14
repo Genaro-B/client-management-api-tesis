@@ -276,6 +276,11 @@ export default function VentasPage() {
                                 </li>
                               ))}
                             </ul>
+                            {v.confirmado_por_nombre && (
+                              <p className="text-[12px] text-muted-foreground mt-2">
+                                Confirmado por: {v.confirmado_por_nombre}
+                              </p>
+                            )}
                             <p className="text-right text-[13px] font-bold text-foreground mt-2">
                               Total: {fmtMoney(v.total)}
                             </p>
@@ -309,6 +314,7 @@ export default function VentasPage() {
                         <th className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground py-3 px-5 text-left">Fecha</th>
                         <th className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground py-3 px-5 text-left">Total</th>
                         <th className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground py-3 px-5 text-left">Estado</th>
+                        <th className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground py-3 px-5 text-left">Confirmado por</th>
                         {isAdmin && (
                           <th className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground py-3 px-5 text-right">Acciones</th>
                         )}
@@ -323,6 +329,9 @@ export default function VentasPage() {
                           <td className="py-3 px-5 text-[13px] text-muted-foreground">{fmtFecha(s.fecha)}</td>
                           <td className="py-3 px-5 text-[13px] font-mono font-semibold text-foreground">{fmtMoney(s.total)}</td>
                           <td className="py-3 px-5"><EstadoBadge estado={s.estado} /></td>
+                          <td className="py-3 px-5 text-[13px] text-muted-foreground">
+                            {s.confirmado_por_nombre || '—'}
+                          </td>
                           {isAdmin && (
                             <td className="py-3 px-5">
                               <div className="flex justify-end gap-2">

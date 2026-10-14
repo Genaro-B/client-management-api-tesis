@@ -45,6 +45,13 @@ def _serialize(db: Session, sale: Sale) -> dict:
         for p in db.query(Product).filter(Product.id.in_(product_ids)).all():
             nombres[p.id] = p.nombre
     cliente = db.query(Client).filter(Client.id == sale.cliente_id).first()
+    confirmado_por_nombre = None
+    if sale.confirmado_por is not None:
+        c = db.query(Client).filter(Client.id == sale.confirmado_por).first()
+        if c is not None:
+            nombre = (c.nombre or "").strip()
+            apellido = (c.apellido or "").strip()
+            confirmado_por_nombre = f"{nombre} {apellido}".strip() or None
     return {
         "id": sale.id,
         "cliente_id": sale.cliente_id,
@@ -54,6 +61,7 @@ def _serialize(db: Session, sale: Sale) -> dict:
         "estado": sale.estado,
         "idempotency_key": sale.idempotency_key,
         "confirmado_por": sale.confirmado_por,
+        "confirmado_por_nombre": confirmado_por_nombre,
         "items": [
             {
                 "id": i.id,
