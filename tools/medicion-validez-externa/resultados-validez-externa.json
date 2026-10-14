@@ -1,0 +1,456 @@
+{
+  "generado": "2026-10-07T21:17:03.469Z",
+  "nota_metodologica": "Conjunto independiente, mensajes redactados sin conocer el catalogo. Cada mensaje con runner FRESH. Deteccion por huellas.",
+  "total": 40,
+  "precision": 55,
+  "tasa_fallback": 50,
+  "cobertura": 88.9,
+  "detalle": [
+    {
+      "id": "I1",
+      "intencion_esperada": "menu",
+      "mensaje": "Hola, ¿qué tal?",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I2",
+      "intencion_esperada": "menu",
+      "mensaje": "Hola buenas tardes",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I3",
+      "intencion_esperada": "menu",
+      "mensaje": "Buenas, ¿cómo va?",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I4",
+      "intencion_esperada": "menu",
+      "mensaje": "¿Qué opciones tengo?",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I5",
+      "intencion_esperada": "comprar",
+      "mensaje": "Quiero comprar",
+      "detectado": "comprar",
+      "conforme": true
+    },
+    {
+      "id": "I6",
+      "intencion_esperada": "comprar",
+      "mensaje": "Me gustaría comprar algo para el finde",
+      "detectado": "comprar",
+      "conforme": true
+    },
+    {
+      "id": "I7",
+      "intencion_esperada": "comprar",
+      "mensaje": "Tengo ganas de hacer una compra",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I8",
+      "intencion_esperada": "comprar",
+      "mensaje": "¿Puedo llevarme dos kilos de pan?",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I9",
+      "intencion_esperada": "catalogo",
+      "mensaje": "Quiero ver el catálogo por favor",
+      "detectado": "catalogo",
+      "conforme": true
+    },
+    {
+      "id": "I10",
+      "intencion_esperada": "catalogo",
+      "mensaje": "¿Qué productos tienen?",
+      "detectado": "catalogo",
+      "conforme": true
+    },
+    {
+      "id": "I11",
+      "intencion_esperada": "catalogo",
+      "mensaje": "Me pasás la lista de productos?",
+      "detectado": "catalogo",
+      "conforme": true
+    },
+    {
+      "id": "I12",
+      "intencion_esperada": "catalogo",
+      "mensaje": "¿Qué vendés?",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I13",
+      "intencion_esperada": "precios",
+      "mensaje": "¿Cuánto cuesta el queso?",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I14",
+      "intencion_esperada": "precios",
+      "mensaje": "Quiero saber el precio del jamón",
+      "detectado": "precios",
+      "conforme": true
+    },
+    {
+      "id": "I15",
+      "intencion_esperada": "precios",
+      "mensaje": "¿A cuánto está el vino?",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I16",
+      "intencion_esperada": "precios",
+      "mensaje": "Precío por favor",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I17",
+      "intencion_esperada": "asesor",
+      "mensaje": "Necesito hablar con una persona",
+      "detectado": "asesor",
+      "conforme": true
+    },
+    {
+      "id": "I18",
+      "intencion_esperada": "asesor",
+      "mensaje": "Quiero un asesor humano",
+      "detectado": "asesor",
+      "conforme": true
+    },
+    {
+      "id": "I19",
+      "intencion_esperada": "asesor",
+      "mensaje": "Me pueden atender?",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I20",
+      "intencion_esperada": "otra",
+      "mensaje": "Quiero hacer una consulta sobre mi pedido",
+      "detectado": "otra",
+      "conforme": true
+    },
+    {
+      "id": "I21",
+      "intencion_esperada": "otra",
+      "mensaje": "Tengo una duda",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I22",
+      "intencion_esperada": "otra",
+      "mensaje": "Algo más",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I23",
+      "intencion_esperada": "carrito",
+      "mensaje": "Mi carrito está vacío?",
+      "detectado": "carrito",
+      "conforme": true
+    },
+    {
+      "id": "I24",
+      "intencion_esperada": "carrito",
+      "mensaje": "¿Qué tengo en el carrito?",
+      "detectado": "carrito",
+      "conforme": true
+    },
+    {
+      "id": "I25",
+      "intencion_esperada": "finalizar",
+      "mensaje": "Quiero cerrar la compra",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I26",
+      "intencion_esperada": "finalizar",
+      "mensaje": "Terminamos",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I27",
+      "intencion_esperada": "fallback",
+      "mensaje": "Listo, chau",
+      "detectado": "fallback",
+      "conforme": true
+    },
+    {
+      "id": "I28",
+      "intencion_esperada": "fallback",
+      "mensaje": "Qué hora es?",
+      "detectado": "fallback",
+      "conforme": true
+    },
+    {
+      "id": "I29",
+      "intencion_esperada": "fallback",
+      "mensaje": "jshdjshd",
+      "detectado": "fallback",
+      "conforme": true
+    },
+    {
+      "id": "I30",
+      "intencion_esperada": "fallback",
+      "mensaje": "Mamá",
+      "detectado": "fallback",
+      "conforme": true
+    },
+    {
+      "id": "I31",
+      "intencion_esperada": "comprar",
+      "mensaje": "Hola, quiero comprar vino",
+      "detectado": "comprar",
+      "conforme": true
+    },
+    {
+      "id": "I32",
+      "intencion_esperada": "precios",
+      "mensaje": "Quiero ver precios",
+      "detectado": "catalogo",
+      "conforme": false
+    },
+    {
+      "id": "I33",
+      "intencion_esperada": "carrito",
+      "mensaje": "Estoy mirando mi carrito",
+      "detectado": "carrito",
+      "conforme": true
+    },
+    {
+      "id": "I34",
+      "intencion_esperada": "carrito",
+      "mensaje": "Borra el carrito",
+      "detectado": "carrito",
+      "conforme": true
+    },
+    {
+      "id": "I35",
+      "intencion_esperada": "carrito",
+      "mensaje": "Cómo agrego un producto al carrito?",
+      "detectado": "catalogo",
+      "conforme": false
+    },
+    {
+      "id": "I36",
+      "intencion_esperada": "precios",
+      "mensaje": "Precio de todo",
+      "detectado": "precios",
+      "conforme": true
+    },
+    {
+      "id": "I37",
+      "intencion_esperada": "finalizar",
+      "mensaje": "Necesito terminar de una vez",
+      "detectado": "finalizar",
+      "conforme": true
+    },
+    {
+      "id": "I38",
+      "intencion_esperada": "finalizar",
+      "mensaje": "Finalizar compra",
+      "detectado": "finalizar",
+      "conforme": true
+    },
+    {
+      "id": "I39",
+      "intencion_esperada": "catalogo",
+      "mensaje": "Ver el detalle de un producto",
+      "detectado": "catalogo",
+      "conforme": true
+    },
+    {
+      "id": "I40",
+      "intencion_esperada": "menu",
+      "mensaje": "Hola!",
+      "detectado": "fallback",
+      "conforme": false
+    }
+  ],
+  "por_intencion": {
+    "menu": {
+      "total": 5,
+      "conformes": 0
+    },
+    "comprar": {
+      "total": 5,
+      "conformes": 3
+    },
+    "catalogo": {
+      "total": 5,
+      "conformes": 4
+    },
+    "precios": {
+      "total": 6,
+      "conformes": 2
+    },
+    "asesor": {
+      "total": 3,
+      "conformes": 2
+    },
+    "otra": {
+      "total": 3,
+      "conformes": 1
+    },
+    "carrito": {
+      "total": 5,
+      "conformes": 4
+    },
+    "finalizar": {
+      "total": 4,
+      "conformes": 2
+    },
+    "fallback": {
+      "total": 4,
+      "conformes": 4
+    }
+  },
+  "fallos": [
+    {
+      "id": "I1",
+      "intencion_esperada": "menu",
+      "mensaje": "Hola, ¿qué tal?",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I2",
+      "intencion_esperada": "menu",
+      "mensaje": "Hola buenas tardes",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I3",
+      "intencion_esperada": "menu",
+      "mensaje": "Buenas, ¿cómo va?",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I4",
+      "intencion_esperada": "menu",
+      "mensaje": "¿Qué opciones tengo?",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I7",
+      "intencion_esperada": "comprar",
+      "mensaje": "Tengo ganas de hacer una compra",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I8",
+      "intencion_esperada": "comprar",
+      "mensaje": "¿Puedo llevarme dos kilos de pan?",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I12",
+      "intencion_esperada": "catalogo",
+      "mensaje": "¿Qué vendés?",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I13",
+      "intencion_esperada": "precios",
+      "mensaje": "¿Cuánto cuesta el queso?",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I15",
+      "intencion_esperada": "precios",
+      "mensaje": "¿A cuánto está el vino?",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I16",
+      "intencion_esperada": "precios",
+      "mensaje": "Precío por favor",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I19",
+      "intencion_esperada": "asesor",
+      "mensaje": "Me pueden atender?",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I21",
+      "intencion_esperada": "otra",
+      "mensaje": "Tengo una duda",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I22",
+      "intencion_esperada": "otra",
+      "mensaje": "Algo más",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I25",
+      "intencion_esperada": "finalizar",
+      "mensaje": "Quiero cerrar la compra",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I26",
+      "intencion_esperada": "finalizar",
+      "mensaje": "Terminamos",
+      "detectado": "fallback",
+      "conforme": false
+    },
+    {
+      "id": "I32",
+      "intencion_esperada": "precios",
+      "mensaje": "Quiero ver precios",
+      "detectado": "catalogo",
+      "conforme": false
+    },
+    {
+      "id": "I35",
+      "intencion_esperada": "carrito",
+      "mensaje": "Cómo agrego un producto al carrito?",
+      "detectado": "catalogo",
+      "conforme": false
+    },
+    {
+      "id": "I40",
+      "intencion_esperada": "menu",
+      "mensaje": "Hola!",
+      "detectado": "fallback",
+      "conforme": false
+    }
+  ]
+}
