@@ -3,9 +3,10 @@
 Expone GET /dashboard con datos agregados de clientes e interacciones.
 Sin autenticación (como otros endpoints GET del sistema).
 """
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, time, timedelta, timezone
+from typing import Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -13,8 +14,126 @@ from src.database.session import get_db
 from src.core.deps import get_current_user
 from src.models.client import Client
 from src.models.interaction import Interaction
+from src.models.product import Product
+from src.models.sale import Sale, SaleItem
+from src.repositories.sale_repo import BASE_CONTABLE
 
 router = APIRouter()
+
+
+def _parse_fecha(valor: Optional[str], default: date) -> date:
+    if not valor:
+        return default
+    return date.fromisoformat(valor)
+
+
+def _sum_ventas(db: Session, desde: datetime, hasta: datetime):
+    """Devuelve (cantidad, ingresos) de la base contable en [desde, hasta)."""
+    row = (
+        db.query(func.count(Sale.id), func.coalesce(func.sum(Sale.total), 0.0))
+        .filter(Sale.estado.in_(BASE_CONTABLE), Sale.fecha >= desde, Sale.fecha < hasta)
+        .one()
+    )
+    return int(row[0] or 0), float(row[1] or 0.0)
+
+
+def _variacion(actual, anterior) -> float:
+    """Variación porcentual del actual respecto del anterior (0 si no hay base)."""
+    if anterior == 0:
+        return 100.0 if actual > 0 else 0.0
+    return round((actual - anterior) / anterior * 100, 2)
+
+
+@router.get("/ventas")
+def get_ventas_metrics(
+    desde: Optional[str] = Query(None),
+    hasta: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    _user: Client = Depends(get_current_user),
+):
+    """Métricas de ventas (base contable). Default: últimos 30 días."""
+    hoy = datetime.now(timezone.utc).date()
+    f_hasta = _parse_fecha(hasta, hoy)
+    f_desde = _parse_fecha(desde, f_hasta - timedelta(days=29))
+
+    desde_dt = datetime.combine(f_desde, time.min)
+    hasta_dt = datetime.combine(f_hasta, time.max)
+
+    ventas_n, ingresos = _sum_ventas(db, desde_dt, hasta_dt)
+    ticket_promedio = ingresos / ventas_n if ventas_n else 0
+
+    # Período anterior de igual duración (inmediatamente anterior).
+    dias = (f_hasta - f_desde).days + 1
+    prev_hasta_dt = desde_dt
+    prev_desde_dt = desde_dt - timedelta(days=dias)
+    prev_n, prev_ingresos = _sum_ventas(db, prev_desde_dt, prev_hasta_dt)
+
+    # Serie diaria con 0-fill.
+    serie_rows = (
+        db.query(
+            func.date(Sale.fecha).label("fecha"),
+            func.count(Sale.id).label("ventas"),
+            func.coalesce(func.sum(Sale.total), 0.0).label("ingresos"),
+        )
+        .filter(Sale.estado.in_(BASE_CONTABLE), Sale.fecha >= desde_dt, Sale.fecha < hasta_dt)
+        .group_by(func.date(Sale.fecha))
+        .all()
+    )
+    serie_map = {r.fecha: (r.ventas, float(r.ingresos)) for r in serie_rows}
+    serie_diaria = []
+    for i in range(dias):
+        dia = f_desde + timedelta(days=i)
+        key = dia.strftime("%Y-%m-%d")
+        v, ing = serie_map.get(key, (0, 0.0))
+        serie_diaria.append({"fecha": key, "ventas": v, "ingresos": ing})
+
+    # Top 5 productos de la base contable por cantidad vendida.
+    top_rows = (
+        db.query(
+            Product.nombre.label("producto"),
+            func.sum(SaleItem.cantidad).label("cantidad"),
+            func.sum(SaleItem.cantidad * SaleItem.precio_unitario).label("ingresos"),
+        )
+        .join(Sale, Sale.id == SaleItem.sale_id)
+        .join(Product, Product.id == SaleItem.product_id)
+        .filter(Sale.estado.in_(BASE_CONTABLE), Sale.fecha >= desde_dt, Sale.fecha < hasta_dt)
+        .group_by(Product.id, Product.nombre)
+        .order_by(func.sum(SaleItem.cantidad).desc())
+        .limit(5)
+        .all()
+    )
+    top_productos = [
+        {"producto": r.producto, "cantidad": int(r.cantidad), "ingresos": float(r.ingresos or 0)}
+        for r in top_rows
+    ]
+
+    # Conteo por hora (0..23, con 0-fill).
+    hora_rows = (
+        db.query(
+            func.strftime("%H", Sale.fecha).label("hora"),
+            func.count(Sale.id).label("ventas"),
+        )
+        .filter(Sale.estado.in_(BASE_CONTABLE), Sale.fecha >= desde_dt, Sale.fecha < hasta_dt)
+        .group_by(func.strftime("%H", Sale.fecha))
+        .all()
+    )
+    hora_map = {int(r.hora): r.ventas for r in hora_rows if r.hora is not None}
+    por_horario = [{"hora": h, "ventas": hora_map.get(h, 0)} for h in range(24)]
+
+    return {
+        "summary": {
+            "ventas": ventas_n,
+            "ingresos": ingresos,
+            "ticketPromedio": ticket_promedio,
+            "vsPeriodoAnterior": {
+                "ventas": _variacion(ventas_n, prev_n),
+                "ingresos": _variacion(ingresos, prev_ingresos),
+            },
+        },
+        "serieDiaria": serie_diaria,
+        "topProductos": top_productos,
+        "porHorario": por_horario,
+    }
 
 
 @router.get("/dashboard")

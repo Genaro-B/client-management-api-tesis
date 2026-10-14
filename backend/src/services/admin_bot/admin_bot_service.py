@@ -6,6 +6,7 @@ garantizando por construcción que las respuestas reflejan el estado real
 de la base de datos — nunca datos inventados.
 """
 import json
+import re
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from typing import Tuple
@@ -18,7 +19,8 @@ from src.models.interaction import Interaction
 from src.models.product import Product
 from src.repositories.client_repo import ClientRepository
 from src.repositories.product_repo import ProductRepository
-from src.services.admin_bot.admin_intent_router import INTENT_NO_ENTENDIDO
+from src.services.admin_bot.admin_intent_router import INTENT_NO_ENTENDIDO, normalizar
+from src.services.sale_service import SaleService
 
 # Cantidad máxima de ítems detallados que se listan en una respuesta.
 MAX_DETALLE = 5
@@ -42,18 +44,26 @@ class AdminBotService:
     # Punto de entrada
     # ------------------------------------------------------------------
 
-    def respond(self, intent: str) -> str:
-        """Devuelve la respuesta textual para la intención dada."""
+    def respond(self, intent: str, texto: str = "") -> str:
+        """Devuelve la respuesta textual para la intención dada.
+
+        `texto` es el mensaje original: lo necesitan las intenciones que
+        extraen parámetros (p. ej. `ticket-cliente`: fecha + nombre).
+        """
         handlers = {
             "clientes-nuevos-mes": self._clientes_nuevos_mes,
             "stock-bajo": self._stock_bajo,
             "interacciones-hoy": self._interacciones_hoy,
             "producto-top": self._producto_top,
             "metricas-generales": self._metricas_generales,
+            "ventas-hoy": self._ventas_hoy,
+            "ticket-cliente": self._ticket_cliente,
         }
         handler = handlers.get(intent)
         if handler is None:
             return self._no_entendido()
+        if intent in ("ventas-hoy", "ticket-cliente"):
+            return handler(texto)
         return handler()
 
     # ------------------------------------------------------------------
@@ -219,5 +229,86 @@ class AdminBotService:
             "• \"productos con stock bajo\"\n"
             "• \"interacciones de hoy\"\n"
             "• \"producto más vendido\"\n"
+            "• \"cuántas ventas hubo hoy\"\n"
+            "• \"qué compró Juan ayer\"\n"
             "• \"resumen de métricas\""
+        )
+
+    # ------------------------------------------------------------------
+    # Intenciones de ventas
+    # ------------------------------------------------------------------
+
+    def _ventas_hoy(self, texto: str = "") -> str:
+        """Cantidad e ingresos de las ventas de HOY (solo base contable)."""
+        hoy = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        ventas = SaleService(self.db).ventas_del_dia(hoy)
+        if not ventas:
+            return "Hoy no hubo ventas registradas."
+        ingresos = sum(v.total for v in ventas)
+        plural = "s" if len(ventas) != 1 else ""
+        return (
+            f"Hoy hubo {len(ventas)} venta{plural} por un total de "
+            f"${ingresos:.2f}."
+        )
+
+    def _extraer_fecha(self, texto: str) -> str:
+        """Extrae `YYYY-MM-DD` de 'hoy'/'ayer'/'dd-mm-yyyy'; default hoy."""
+        hoy = datetime.now(timezone.utc).date()
+        norm = normalizar(texto or "")
+        if "ayer" in norm:
+            return (hoy - timedelta(days=1)).strftime("%Y-%m-%d")
+        m = re.search(r"\b(\d{2})-(\d{2})-(\d{4})\b", norm)
+        if m:
+            return f"{m.group(3)}-{m.group(2)}-{m.group(1)}"
+        return hoy.strftime("%Y-%m-%d")
+
+    def _extraer_nombre(self, texto: str) -> str:
+        """Quita palabras-consulta y fechas para quedarse con el nombre cliente."""
+        norm = normalizar(texto or "")
+        norm = re.sub(r"\b\d{1,2}-\d{1,2}-\d{4}\b", " ", norm)
+        for kw in (
+            "que se compro", "que compro", "ticket cliente",
+            "ticket de", "ticket del", "compra de",
+        ):
+            norm = norm.replace(kw, " ")
+        for w in (
+            "hoy", "ayer", "ticket", "que", "compro", "compra",
+            "el", "la", "los", "las", "de", "del", "un", "una",
+        ):
+            norm = re.sub(rf"\b{w}\b", " ", norm)
+        return " ".join(norm.split())
+
+    def _ticket_cliente(self, texto: str = "") -> str:
+        """Detalle del ticket de un cliente (ILIKE) en la fecha indicada."""
+        fecha = self._extraer_fecha(texto)
+        nombre = self._extraer_nombre(texto)
+        if not nombre:
+            return "Decime el nombre del cliente para buscar su ticket."
+
+        cliente, ventas = SaleService(self.db).ticket(nombre, fecha)
+        if cliente is None or not ventas:
+            return "No se encontraron ventas para ese cliente en esa fecha."
+
+        nombres = {}
+        ids = {item.product_id for v in ventas for item in v.items}
+        if ids:
+            filas = (
+                self.db.query(Product.id, Product.nombre)
+                .filter(Product.id.in_(ids))
+                .all()
+            )
+            nombres = {pid: nombre for pid, nombre in filas}
+
+        lineas = []
+        for venta in ventas:
+            for item in venta.items:
+                pnombre = nombres.get(item.product_id, f"ID {item.product_id}")
+                subtotal = item.cantidad * item.precio_unitario
+                lineas.append(f"• {item.cantidad} x {pnombre} — ${subtotal:.2f}")
+
+        total = sum(v.total for v in ventas)
+        return (
+            f"Ticket de {cliente.nombre} {cliente.apellido} ({fecha}):\n"
+            + "\n".join(lineas)
+            + f"\nTotal: ${total:.2f}"
         )

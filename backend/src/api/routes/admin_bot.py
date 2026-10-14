@@ -43,7 +43,7 @@ def consult(payload: ConsultRequest, db: Session = Depends(get_db), _user: Clien
     intent = router.match(mensaje)
 
     service = AdminBotService(db)
-    respuesta = service.respond(intent)
+    respuesta = service.respond(intent, texto=mensaje)
 
     # Registrar la consulta como interacción (source admin-bot, intent detectado).
     # result se trunca a 200 chars: el campo es String(255) en el modelo.

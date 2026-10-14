@@ -46,7 +46,25 @@ class AdminIntentRouter:
     # Mapa intención -> lista de patrones (keywords en español, sin tildes).
     # El orden del diccionario define la prioridad: los patrones más
     # específicos se evalúan primero para evitar falsos positivos.
+    # "ventas-hoy" y "ticket-cliente" van primero: "cuántas ventas hubo hoy"
+    # contiene "hubo hoy" (interacciones-hoy) y debe ganar la intención de ventas.
     PATTERNS: Dict[str, List[str]] = {
+        "ventas-hoy": [
+            "cuantas ventas",
+            "ventas hoy",
+            "ventas de hoy",
+            "ventas del dia",
+            "ventas hubo hoy",
+            "cuantas ventas hubo",
+        ],
+        "ticket-cliente": [
+            "que compro",
+            "que se compro",
+            "ticket de",
+            "ticket del",
+            "ticket cliente",
+            "compra de",
+        ],
         "clientes-nuevos-mes": [
             "clientes nuevos",
             "nuevos clientes",
