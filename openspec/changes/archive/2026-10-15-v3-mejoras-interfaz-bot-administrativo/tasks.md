@@ -45,4 +45,4 @@
 
 - [x] 8.1 Correr toda la suite de tests del backend (`pytest`) — todos verdes
 - [x] 8.2 Correr `npm run build` en `frontend/` — build sin errores
-- [ ] 8.3 Smoke test manual: exportar Excel, paginar clientes/productos, abrir timeline en modal de detalle, y probar cada chip del asistente respondiendo con datos reales
+- [x] 8.3 Smoke test manual: exportar Excel, paginar clientes/productos, abrir timeline en modal de detalle, y probar cada chip del asistente respondiendo con datos reales
