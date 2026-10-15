@@ -40,6 +40,10 @@ backend/*.log
 frontend/*.log
 *.err
 
+# ─── Asistente admin: artefactos locales del modelo NLU (opcional) ───
+*.joblib
+backend/src/services/admin_bot/**/*.joblib
+
 # ─── Backups y temporales locales (no versionar) ───
 ~$*
 *.bak-*

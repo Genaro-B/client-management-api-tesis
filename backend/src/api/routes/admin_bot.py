@@ -1,8 +1,8 @@
 """Router del asistente administrativo (admin bot).
 
-Expone POST /consult: recibe texto libre en español, detecta la intención
-con el matcher determinístico (misma filosofía que el Bot Router de la
-tesis) y responde con datos reales de la base de datos.
+Expone POST /consult: recibe texto libre en español, resuelve la intención
+con la cascada de cerebros (matcher determinístico primero, clasificador local
+como fallback según `ADMIN_BOT_BRAIN`) y responde con datos reales de la BD.
 
 Cada consulta se registra como una interacción con source="admin-bot",
 alimentando las métricas de intenciones del dashboard.
@@ -14,7 +14,6 @@ from sqlalchemy.orm import Session
 from src.database.session import get_db
 from src.core.deps import get_current_user
 from src.models.client import Client
-from src.services.admin_bot.admin_intent_router import AdminIntentRouter
 from src.services.admin_bot.admin_bot_service import AdminBotService
 from src.services.interaction_service import InteractionService
 
@@ -30,7 +29,8 @@ class ConsultRequest(BaseModel):
 def consult(payload: ConsultRequest, db: Session = Depends(get_db), _user: Client = Depends(get_current_user)):
     """Procesa una consulta en lenguaje natural y responde con datos reales.
 
-    - Detecta la intención con AdminIntentRouter (pattern matching determinístico).
+    - Resuelve la intención con la cascada (matcher determinístico primero,
+      clasificador local como fallback según ADMIN_BOT_BRAIN).
     - Compone la respuesta con AdminBotService (datos reales de repositories).
     - Registra la consulta como interacción con source="admin-bot" e intent.
     Devuelve {"intent": ..., "respuesta": ...} con status 200.
@@ -39,11 +39,8 @@ def consult(payload: ConsultRequest, db: Session = Depends(get_db), _user: Clien
     if not mensaje:
         raise HTTPException(status_code=422, detail="El mensaje no puede estar vacío")
 
-    router = AdminIntentRouter()
-    intent = router.match(mensaje)
-
     service = AdminBotService(db)
-    respuesta = service.respond(intent, texto=mensaje)
+    intent, respuesta = service.resolver(mensaje)
 
     # Registrar la consulta como interacción (source admin-bot, intent detectado).
     # result se trunca a 200 chars: el campo es String(255) en el modelo.

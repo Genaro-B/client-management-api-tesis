@@ -13,13 +13,17 @@ from typing import Tuple
 
 from sqlalchemy.orm import Session
 
-from src.core.config import LOW_STOCK_THRESHOLD
+from src.core.config import LOW_STOCK_THRESHOLD, get_admin_bot_brain, get_admin_bot_nlu_threshold
 from src.models.client import Client
 from src.models.interaction import Interaction
 from src.models.product import Product
 from src.repositories.client_repo import ClientRepository
 from src.repositories.product_repo import ProductRepository
-from src.services.admin_bot.admin_intent_router import INTENT_NO_ENTENDIDO, normalizar
+from src.services.admin_bot.admin_intent_router import (
+    INTENT_NO_ENTENDIDO,
+    AdminIntentRouter,
+    normalizar,
+)
 from src.services.sale_service import SaleService
 
 # Cantidad máxima de ítems detallados que se listan en una respuesta.
@@ -39,10 +43,54 @@ class AdminBotService:
         self.db = db
         self.client_repo = ClientRepository(db)
         self.product_repo = ProductRepository(db)
+        self.router = AdminIntentRouter()
 
     # ------------------------------------------------------------------
     # Punto de entrada
     # ------------------------------------------------------------------
+
+    def resolver(self, texto: str) -> Tuple[str, str]:
+        """Resuelve una consulta en lenguaje natural: `(intent, respuesta)`.
+
+        Implementa la **cascada de cerebros** seleccionable por
+        `ADMIN_BOT_BRAIN`:
+
+        - `deterministic`: SOLO el matcher determinístico (idéntico al actual).
+        - `classifier` (default): matcher primero; si devuelve `no-entendido`,
+          consulta el clasificador local (umbral configurable). Sigue siendo
+          `no-entendido` si la confianza no alcanza.
+        - `ollama`: intenta el cerebro Ollama (si está implementado); ante
+          error o falta de comprensión cae de vuelta al matcher determinístico.
+
+        El matcher determinístico SIEMPRE corre primero (excepto en modo
+        `ollama`), garantizando que no se rompe ningún comportamiento probado.
+        """
+        texto = (texto or "").strip()
+        brain = get_admin_bot_brain()
+
+        if brain == "ollama":
+            return self._resolver_ollama(texto)
+
+        intent = self.router.match(texto)
+
+        if brain == "classifier" and intent == INTENT_NO_ENTENDIDO:
+            intent = self._clasificar_fallback(texto)
+
+        return intent, self.respond(intent, texto=texto)
+
+    def _clasificar_fallback(self, texto: str) -> str:
+        """Consulta el clasificador local y devuelve la intención (o no-entendido)."""
+        # Import diferido: evita cargar scikit-learn si el cerebro es determinístico.
+        from src.services.admin_bot.nlu.classifier import clasificar
+
+        intent, _confianza = clasificar(texto, get_admin_bot_nlu_threshold())
+        return intent
+
+    def _resolver_ollama(self, texto: str) -> Tuple[str, str]:
+        """Cerebro Ollama con fallback determinístico (ver grupo 4)."""
+        from src.services.admin_bot.ollama.brain import resolver_con_ollama
+
+        return resolver_con_ollama(self, texto)
 
     def respond(self, intent: str, texto: str = "") -> str:
         """Devuelve la respuesta textual para la intención dada.

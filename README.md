@@ -408,6 +408,11 @@ npm run test:watch # modo watch
 | `API_KEY` | `dev-api-key-123` | Clave para endpoints de ingesta n8n (`X-Api-Key`) |
 | `JWT_SECRET_KEY` | `dev-secret-key-change-me` | Clave secreta para firmar tokens JWT (HS256) |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | `480` | Expiración del token en minutos (8 h) |
+| `ADMIN_BOT_BRAIN` | `classifier` | Cerebro del asistente: `classifier` / `deterministic` / `ollama` |
+| `ADMIN_BOT_NLU_THRESHOLD` | `0.55` | Confianza mínima del clasificador local (NLU) |
+| `OLLAMA_URL` | `http://localhost:11434` | URL base de Ollama (opcional, solo `brain=ollama`) |
+| `OLLAMA_MODEL` | `qwen2.5:3b` | Modelo de Ollama (opcional) |
+| `OLLAMA_TIMEOUT_SECONDS` | `30` | Timeout de las llamadas a Ollama (opcional) |
 
 > En producción, cambiar `API_KEY` por un valor seguro, setear `JWT_SECRET_KEY` a una clave aleatoria larga
 > (≥32 bytes) y configurar `DATABASE_URL` para usar MySQL.
@@ -428,11 +433,78 @@ npm run test:watch # modo watch
 
 ---
 
+## 🤖 Asistente administrativo: cómo funciona y cómo activarlo con Ollama
+
+El asistente administrativo (`POST /api/v1/admin-bot/consult`) entiende consultas en
+lenguaje natural en español y responde con **datos reales** de la base de datos.
+Funciona como una **cascada de cerebros** seleccionable por la variable de entorno
+`ADMIN_BOT_BRAIN` (`classifier` | `deterministic` | `ollama`). Por defecto: `classifier`.
+
+### Cómo funciona la cascada
+
+1. **Matcher determinístico PRIMERO (siempre).** El `AdminIntentRouter` busca patrones
+   exactos (palabras clave y regex). Es la capa de seguridad: si reconoce la intención,
+   esa gana y no se consulta nada más. Así se preserva el comportamiento probado.
+2. **Clasificador local como fallback (`classifier`).** Solo si el matcher devuelve
+   `no-entendido`, se consulta un clasificador NLU local (scikit-learn: TF-IDF de n-gramas
+   de palabra y de carácter + regresión logística), entrenado con un dataset en español
+   rioplatense (`backend/src/services/admin_bot/nlu/dataset.json`). Si su confianza
+   alcanza el umbral `ADMIN_BOT_NLU_THRESHOLD` (default `0.55`), se usa esa intención;
+   si no, queda en `no-entendido`. **100 % local, sin LLM externo.**
+3. **Ollama opcional (`ollama`).** Solo si lo activás explícitamente, el asistente intenta
+   responder con un LLM local (Ollama) usando un contexto con datos reales. Ante cualquier
+   error/timeout, cae de vuelta al matcher determinístico. **Nunca es obligatorio.**
+
+> Modo `deterministic`: usa **únicamente** el matcher, igual que antes (útil para depurar
+> o para garantizar cero cambios de comportamiento).
+
+### Variables de configuración
+
+| Variable | Valor por defecto | Descripción |
+|----------|-------------------|-------------|
+| `ADMIN_BOT_BRAIN` | `classifier` | Cerebro del asistente: `classifier`, `deterministic` u `ollama` |
+| `ADMIN_BOT_NLU_THRESHOLD` | `0.55` | Confianza mínima del clasificador local para aceptar una intención |
+| `OLLAMA_URL` | `http://localhost:11434` | URL base del servidor Ollama (solo si `brain=ollama`) |
+| `OLLAMA_MODEL` | `qwen2.5:3b` | Modelo de Ollama a usar |
+| `OLLAMA_TIMEOUT_SECONDS` | `30` | Timeout de las llamadas a Ollama |
+
+Mirá `.env.example` (en la raíz) para ver todas las variables documentadas.
+
+### Cómo activar Ollama paso a paso (opcional)
+
+Ollama está **deshabilitado por defecto**: la app y los tests corren sin él.
+
+1. **Instalá Ollama** desde <https://ollama.com/download> y verificalo con `ollama --version`.
+2. **Descargá el modelo** que vas a usar:
+   ```bash
+   ollama pull qwen2.5:3b
+   ```
+3. **Dejá Ollama corriendo** (arranca como servicio; si no, `ollama serve`).
+4. **Activá el cerebro en tu `.env`:**
+   ```bash
+   ADMIN_BOT_BRAIN=ollama
+   # opcional: OLLAMA_URL=http://localhost:11434
+   # opcional: OLLAMA_MODEL=qwen2.5:3b
+   ```
+5. **Verificá** que el endpoint siga respondiendo `{intent, respuesta}`:
+   ```bash
+   curl -X POST http://localhost:8000/api/v1/admin-bot/consult \
+     -H "Authorization: Bearer <token>" -H "Content-Type: application/json" \
+     -d '{"mensaje": "¿cuántas ventas hubo hoy?"}'
+   ```
+6. Si Ollama no está disponible o se cuelga, el asistente **no rompe**: hace fallback
+   automático al matcher determinístico.
+
+> Para volver al clasificador local, poné `ADMIN_BOT_BRAIN=classifier` (o borrá la variable).
+
+---
+
 ## 🔮 Próximas Implementaciones
 
 | Feature | Estado | Descripción |
 |---------|--------|-------------|
-| **Ollama / AI** | ⏳ Pendiente | Integración con modelos locales (Llama 3, Mistral, Phi) para respuestas inteligentes en Telegram. Requiere instalar [Ollama](https://ollama.com/download) y descargar un modelo (`ollama pull llama3.2:1b`). |
+| **Ollama / AI** | ✅ Implementado (opcional) | Cerebro local opcional (`ADMIN_BOT_BRAIN=ollama`) con contexto de datos reales y fallback determinístico. Ver sección "Asistente administrativo". |
+| **NLU local (clasificador)** | ✅ Implementado | Clasificador scikit-learn (TF-IDF + regresión logística) como fallback del matcher; deshabilitable con `ADMIN_BOT_BRAIN=deterministic`. |
 | **Autenticación con password** | ✅ Implementado | Login email + password (bcrypt), JWT HS256, protección de endpoints del panel, cambio obligatorio de la password provisoria. |
 | **Migración a MySQL** | ⏳ Pendiente | Base de datos definitiva para producción con migraciones desde SQLite. |
 | **Docker** | ⏳ Pendiente | `Dockerfile` + `docker-compose` para backend, frontend y base de datos. |
