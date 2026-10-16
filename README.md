@@ -228,7 +228,7 @@ n8n configura automáticamente el webhook de Telegram.
 | `GET` | `/api/v1/interactions/` | Listar interacciones | `Bearer` |
 | `POST` | `/api/v1/interactions/` | Crear interacción (flujos n8n) | `X-Api-Key` |
 | `GET` | `/api/v1/metrics/dashboard` | Métricas agregadas del panel | `Bearer` |
-| `POST` | `/api/v1/admin-bot/consult` | Asistente administrativo | `Bearer` |
+| `POST` | `/api/v1/admin-bot/consult` | Asistente administrativo | `Bearer + Admin` |
 
 > **`Bearer`** = header `Authorization: Bearer <token>` obtenido de `POST /auth/login` (JWT HS256).
 > Solo cuentas con `role="admin"` pueden loguearse; el token expira a las 8 h.
@@ -289,7 +289,7 @@ La suite de tests está organizada en **tres capas** que reflejan la arquitectur
 | **API** | `test_products_api.py` | 33 | CRUD productos, imágenes, JWT 401 |
 | **API** | `test_auth_api.py` | 13 | Login bcrypt+JWT, solo admin, change-password (flag) |
 | **API** | `test_metrics_api.py` | 5 | Dashboard métricas + JWT 401 |
-| **API** | `test_admin_bot_api.py` | 14 | Consultas por intención con datos reales, registro como interacción |
+| **API** | `test_admin_bot_api.py` | 15 | Consultas por intención con datos reales, registro como interacción, protección role admin (403) |
 | **API** | `test_interaction_api.py` | 15 | POST con X-Api-Key (n8n), idempotencia, GET listado con JWT |
 | **API** | `test_client_productos_api.py` | 20 | Productos asignados (POST/PUT/DELETE, stock) |
 | **API** | `test_integration_post.py` | 4 | Smoke test creación de cliente + JWT 401 |
@@ -437,6 +437,7 @@ npm run test:watch # modo watch
 
 El asistente administrativo (`POST /api/v1/admin-bot/consult`) entiende consultas en
 lenguaje natural en español y responde con **datos reales** de la base de datos.
+**Requiere token JWT válido con `role="admin"`** (usuarios con `role="user"` reciben `403`).
 Funciona como una **cascada de cerebros** seleccionable por la variable de entorno
 `ADMIN_BOT_BRAIN` (`classifier` | `deterministic` | `ollama`). Por defecto: `classifier`.
 

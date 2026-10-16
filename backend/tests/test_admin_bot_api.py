@@ -24,6 +24,14 @@ def test_consult_without_token_returns_401(client):
     assert resp.status_code == 401
 
 
+def test_consult_con_token_role_user_devuelve_403(client, db_session, sample_client):
+    from src.core.security import create_access_token
+    token = create_access_token(client_id=sample_client.id)
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = client.post(f"{PREFIX}/consult", json={"mensaje": "cómo vamos"}, headers=headers)
+    assert resp.status_code == 403
+
+
 def _now_utc():
     return datetime.now(timezone.utc)
 

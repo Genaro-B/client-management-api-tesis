@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from src.database.session import get_db
-from src.core.deps import get_current_user
+from src.core.deps import require_admin
 from src.models.client import Client
 from src.services.admin_bot.admin_bot_service import AdminBotService
 from src.services.interaction_service import InteractionService
@@ -26,7 +26,7 @@ class ConsultRequest(BaseModel):
 
 
 @router.post("/consult")
-def consult(payload: ConsultRequest, db: Session = Depends(get_db), _user: Client = Depends(get_current_user)):
+def consult(payload: ConsultRequest, db: Session = Depends(get_db), _user: Client = Depends(require_admin)):
     """Procesa una consulta en lenguaje natural y responde con datos reales.
 
     - Resuelve la intención con la cascada (matcher determinístico primero,
