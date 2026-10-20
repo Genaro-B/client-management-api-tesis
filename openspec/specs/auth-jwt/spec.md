@@ -3,9 +3,7 @@
 ## Purpose
 
 Autenticación de usuarios del panel con email + password (bcrypt), emisión/validación de tokens JWT (HS256) y protección de los endpoints de administración. Define también el cambio de password obligatorio tras la migración de usuarios existentes.
-
 ## Requirements
-
 ### Requirement: Login con email y password
 
 El sistema MUST autenticar usuarios vía `POST /api/v1/auth/login` aceptando `{email, password}`. La password MUST verificarse contra el hash bcrypt almacenado. Si el email no existe, la cuenta está inactiva o la password es incorrecta, el sistema MUST responder `401`. El login SHOULD admitir únicamente cuentas con `role = "admin"` (los `clientes` con role `user` son prospectos del negocio, no usuarios del panel); un role no admin MUST recibir `401` con mensaje genérico (no revelar existencia de la cuenta).
@@ -53,7 +51,7 @@ El sistema MUST emitir un JWT HS256 firmado con `JWT_SECRET_KEY` (env, default d
 
 ### Requirement: Protección de endpoints del panel con Bearer
 
-Los routers `clients` (todos los endpoints), `products`, `metrics/dashboard`, `admin_bot/consult` y `GET /interactions` MUST exigir header `Authorization: Bearer <token>` via dependencia `get_current_user`. Un request sin header, con token inválido, vencido o de un usuario inexistente MUST responder `401` y NO ejecutar el handler. `POST /api/v1/interactions` (usado por n8n/Telegram) MUST seguir autenticándose SOLO con `X-Api-Key` y no debe exigir JWT. `POST /auth/login` y `POST /auth/change-password`... el cambio de password debe exigir JWT.
+Los routers `clients` (todos los endpoints), `products`, `metrics/dashboard` y `GET /interactions` MUST exigir header `Authorization: Bearer <token>` via dependencia `get_current_user`. El endpoint `admin_bot/consult` MUST exigir header `Authorization: Bearer <token>` via dependencia `require_admin` (compuesta sobre `get_current_user`): un request sin header, con token inválido, vencido o de un usuario inexistente MUST responder `401` y NO ejecutar el handler, y un usuario autenticado con `role` distinto de `admin` MUST responder `403` y NO ejecutar el handler. `POST /api/v1/interactions` (usado por n8n/Telegram) MUST seguir autenticándose SOLO con `X-Api-Key` y no debe exigir JWT. `POST /auth/login` y `POST/auth/change-password`... el cambio de password debe exigir JWT.
 
 #### Scenario: Endpoint protegido sin token
 
@@ -76,6 +74,16 @@ Los routers `clients` (todos los endpoints), `products`, `metrics/dashboard`, `a
 
 - GIVEN un request a `POST /api/v1/interactions/` con `X-Api-Key` correcta y sin Bearer
 - THEN responde `201` (comportamiento actual intacto)
+
+#### Scenario: Consulta del asistente sin token responde 401
+
+- **WHEN** se hace `POST /api/v1/admin-bot/consult` sin header Authorization
+- **THEN** responde `401` y no procesa la consulta
+
+#### Scenario: Consulta del asistente con usuario no admin responde 403
+
+- **WHEN** un usuario autenticado con `role="user"` hace `POST /api/v1/admin-bot/consult` con un token válido
+- **THEN** responde `403` y no procesa la consulta
 
 ### Requirement: Migración de usuarios existentes con password por defecto
 
@@ -114,3 +122,4 @@ El sistema MUST exponer `POST /api/v1/auth/change-password` exigiendo JWT válid
 
 - GIVEN un request con `new_password` de menos de 6 caracteres
 - THEN responde `422`
+
