@@ -1,0 +1,15 @@
+Revisé el último archivo y **casi no cambió**: solo se corrigieron «intencional» (2 lugares) e «intenciones» (2 lugares). Los demás «?» siguen ahí.
+
+**Siguen mal**
+- **Letras con «?»:** unos 40 casos, por ejemplo «gesti?n», «evaluaci?n», «cat?logo», «Telef?nica», «H?st» y «Wessl?n». Son los de la tabla de reemplazos que te pasé.
+- **Tabla de resultados (Anexo E):** «Validaci?n externa» (4 filas) y «Precisin de enrutamiento» (2 filas). A esas dos filas les falta la «ó» del todo. Hay que buscar `Precisin` y reemplazar por `Precisión`.
+- **Tabla de resultados, otros «?»:** «err?neo» e «intenci?n» en la última fila (ruteo erróneo).
+- **2.5:** la oración «En particular, el análisis de las soluciones RPA de bajo costo…» sigue ahí.
+
+**Sin problema**
+Los «?» que aparecen dentro de la tabla de los 40 mensajes y `?limit=3` son legítimos, así que no los toques.
+
+**Qué te conviene hacer**
+Ejecutá los reemplazos de Ctrl+H de la tabla, **empezando por `ci?n`, `si?n`, `ti?n`**, que arreglan la mayoría de golpe. Después los de palabras sueltas y `Precisin` → `Precisión`. Al terminar, buscá `?` y revisá que solo queden los de la tabla de mensajes, `?limit` y los signos de pregunta reales.
+
+Con lo ya corregido (latencia, 91,7 %, 4.6, 5.1, 5.6, Kleppmann) no hay que volver a tocar nada. Cuando termines, pasame el archivo otra vez.

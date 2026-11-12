@@ -1,0 +1,18 @@
+Para esta iteración, estos son los pasos de **solo redacción**. No necesitan datos tuyos ni decisiones. Pegale este pedido al agente:
+
+> **Hacé solo estos cambios. No modifiques nada más del documento, no hagas reemplazos globales y no toques tildes, signos «¿?» ni otros caracteres que no estén en la lista. Al terminar, mostrame cada párrafo modificado con el texto antes y después.**
+>
+> 1. **Letras perdidas:** restituí las letras que faltan, palabra por palabra y en contexto: anlisis→análisis, asignacin→asignación, atencin→atención, autenticacin→autenticación, automatizacin→automatización, automticos→automáticos, categoras→categorías, catlogo→catálogo, diseadas→diseñadas, duracin→duración, ejecucin→ejecución, eliminacin→eliminación, errneo→erróneo, especfica→específica, evaluacin→evaluación, explcitos→explícitos, gestin→gestión, imgenes→imágenes, implementacin→implementación, integracin→integración, intencin→intención, interpretacin→interpretación, inyeccin→inyección, lgica→lógica, mensajera→mensajería, modificacin→modificación, mtricas→métricas, ningn→ningún, obtencin→obtención, orquestacin→orquestación, precisin→precisión, seccin→sección, sistemtico→sistemático, validacin→validación. También: «intencinal» y «intencines»→«intencional» y «intenciones», «Telefnica»→«Telefónica», «Hst»→«Höst», «Wessln»→«Wesslén».
+> 2. **Tabla 6, fila «Ver carrito»:** cambiá «99,0 % (11/12)» por «91,7 % (11/12)».
+> 3. **Frases rotas:** «el latencia» → «la latencia» en 5.2 y en el capítulo 7. En 6.3, la frase «…y de validación empírica y pendiente de validación empírica» tiene una repetición: dejá una sola versión, «pendiente de validación empírica».
+> 4. **Párrafo duplicado:** en 4.6, los dos primeros párrafos son casi iguales. Dejá solo el mejor redactado.
+> 5. **Remisión en 5.1:** cambiá «sección 3.5» por «sección 3.4».
+> 6. **Inicio de 5.6:** reemplazá «La síntesis de los resultados debe incluir las tres cifras…» por una síntesis real: «En síntesis, la conformidad con el catálogo fue de 99,0 % (101/102) y, en las variantes comparables, de 95,8 % (23/24); la robustez ante mutaciones fue de 76,1 % (153/201); y la precisión sobre el conjunto independiente fue de 55,0 % (22/40).»
+> 7. **Sección 2.5:** eliminá las dos afirmaciones sin fuente: la que empieza «En el contexto de las PyMEs, la integración de clasificadores de intención se destaca…» y la que empieza «el análisis de las soluciones RPA de bajo costo…».
+> 8. **Referencias:** eliminá Kleppmann et al. (2019), que no se cita en el texto.
+
+**Antes de pegarlo, dos cosas:**
+- En el punto 7, si preferís **conservar** esas ideas, no las borres: pedile al agente que las cite con una fuente real que vos tengas. Borrarlas es lo más seguro.
+- Si en el punto 4 no estás seguro de cuál párrafo dejar, mandame los dos y te digo.
+
+**Cuando termines:** pasame el archivo y lo reviso contra esta lista y contra regresiones nuevas. Después seguimos con lo que necesita tus datos (hipótesis, 40 mensajes, Anexo F, tabla de mutaciones).
