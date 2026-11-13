@@ -33,4 +33,13 @@ ejecución real el Bot Router lo deriva a **catálogo** porque la subcadena `ver
 "devol-ve-r") dispara la rama de catálogo antes que el caso por defecto. Por coherencia con el
 comportamiento observable, se registró como **CAT6-21** de la categoría *catálogo*, y la categoría
 *entrada no reconocida* quedó con 9 casos (NR6-01..NR6-05, NR6-07..NR6-10). El total sigue siendo
-102 casos y la conformidad es 102/102 (100 %).
+102 casos.
+
+## Nota de transparencia (caso de precedencia)
+
+El mensaje `"mis productos"` (CAR6-12) se computa dentro de la categoría *carrito* con intención
+esperada *carrito*, porque la Tabla 6 lo lista como variante de "Ver carrito". En la ejecución real el
+Bot Router lo deriva a **catálogo** —la subcadena `producto` dispara la rama de catálogo, que tiene
+precedencia sobre la de carrito—, por lo que se registra como **no conforme**. Es el único fallo del
+conjunto: la conformidad es **101/102 (99,0 %)** y la categoría *carrito* queda en **11/12 (91,7 %)**,
+coincidente con la Tabla 6 y con la sección 5.3 de la tesis.

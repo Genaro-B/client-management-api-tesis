@@ -1,5 +1,5 @@
 {
-  "generado": "2026-10-07T21:29:01.361Z",
+  "generado": "2026-11-13T22:03:32.908Z",
   "nota_metodologica": "Cada mensaje se evalua con estado conversacional limpio (modo=menu, carrito vacio). Deteccion por huellas del Bot Router.",
   "casos": [
     {
@@ -646,9 +646,9 @@
       "id": "CAR6-12",
       "categoria": "carrito",
       "intencion": "carrito",
-      "mensaje": "donde esta mi carrito",
-      "detectado": "carrito",
-      "conforme": true
+      "mensaje": "mis productos",
+      "detectado": "catalogo",
+      "conforme": false
     },
     {
       "id": "F6-01",
@@ -852,8 +852,8 @@
     },
     "carrito": {
       "count": 12,
-      "conformes": 12,
-      "no_conformes": 0
+      "conformes": 11,
+      "no_conformes": 1
     },
     "finalizar": {
       "count": 12,
@@ -868,8 +868,8 @@
   },
   "resumen": {
     "total": 102,
-    "conformes": 102,
-    "no_conformes": 0,
-    "conformidad_global_pct": 100
+    "conformes": 101,
+    "no_conformes": 1,
+    "conformidad_global_pct": 99
   }
 }

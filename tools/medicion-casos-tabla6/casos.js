@@ -92,7 +92,7 @@ const CASOS = [
   { id: 'CAR6-09', categoria: 'carrito', intencion: 'carrito', mensaje: 'dame el carrito' },
   { id: 'CAR6-10', categoria: 'carrito', intencion: 'carrito', mensaje: 'carrito actual' },
   { id: 'CAR6-11', categoria: 'carrito', intencion: 'carrito', mensaje: 'enseñame el carrito' },
-  { id: 'CAR6-12', categoria: 'carrito', intencion: 'carrito', mensaje: 'donde esta mi carrito' },
+  { id: 'CAR6-12', categoria: 'carrito', intencion: 'carrito', mensaje: 'mis productos' },
 
   // finalizar (id F6-01..F6-12, intencion 'finalizar')
   { id: 'F6-01', categoria: 'finalizar', intencion: 'finalizar', mensaje: '7' },
