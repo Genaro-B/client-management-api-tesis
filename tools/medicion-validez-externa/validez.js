@@ -107,7 +107,7 @@ function pct(n, d) {
   const salida = {
     generado: new Date().toISOString(),
     nota_metodologica:
-      'Conjunto independiente, mensajes redactados sin conocer el catalogo. Cada mensaje con runner FRESH. Deteccion por huellas.',
+      'Conjunto de 40 mensajes redactados por el autor (unico redactor) sin derivarlos de los mensajes del catalogo ni del codigo del nodo de enrutamiento. Independencia limitada: el autor diseno el catalogo y el codigo del sistema. Cada mensaje con runner FRESH. Deteccion por huellas.',
     total,
     precision,
     tasa_fallback,

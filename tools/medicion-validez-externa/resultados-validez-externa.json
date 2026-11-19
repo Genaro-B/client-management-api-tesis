@@ -1,6 +1,6 @@
 {
   "generado": "2026-10-07T21:17:03.469Z",
-  "nota_metodologica": "Conjunto independiente, mensajes redactados sin conocer el catalogo. Cada mensaje con runner FRESH. Deteccion por huellas.",
+  "nota_metodologica": "Conjunto de 40 mensajes redactados por el autor (unico redactor) sin derivarlos de los mensajes del catalogo ni del codigo del nodo de enrutamiento. Independencia limitada: el autor diseno el catalogo y el codigo del sistema. Cada mensaje con runner FRESH. Deteccion por huellas.",
   "total": 40,
   "precision": 55,
   "tasa_fallback": 50,

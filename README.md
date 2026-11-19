@@ -246,6 +246,9 @@ El proyecto incluye flujos de automatización en n8n. Los **JSON exportados** vi
 | **Telegram → API Interaction** | `Docs/flujos/telegram-n8n-flow.json` | Flujo auxiliar: webhook POST → build headers/body → POST `/api/v1/interactions/` con idempotencia |
 
 Versiones alternativas del flujo principal (historial de iteraciones) en `Docs/flujos/Actual/`: `v2-flujo-mejorado.json` y `Sistema de Automatizacion v2 - Simple.json`.
+> El flujo evaluado en las mediciones de la tesis es **`Docs/flujos/Actual/v2-flujo-mejorado.json`**: es el que carga `tools/medicion-casos-tabla6/casos-tabla6.js` y el que declara `tools/medicion-robustez/resultados.json`. `Sistema de Automatizacion v2 - Simple.json` es una iteración anterior y NO es la versión evaluada.
+
+> No confundir bases de medición: `15/16 (93,8 %)` es la auditoría de variantes documentadas del conjunto de robustez (formulaciones sin comandos numéricos); `24/25 (96,0 %; IC 80,5–99,3 %)` son las entradas de la Tabla 6 y `101/102 (99,0 %; IC 94,7–99,8 %)` las invocaciones del catálogo. La precisión `22/40 (55 %)` del conjunto de mensajes en lenguaje libre mide un objeto distinto.
 
 ### 📤 Cómo exportar un flujo desde n8n
 
